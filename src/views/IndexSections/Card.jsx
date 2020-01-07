@@ -24,14 +24,14 @@ class Header extends React.Component {
   render() {
     return (
       <>
-        <div className="header bg-gradient pb-8 pt-5 pt-md-8">
+        <div className="header bg-gradient pb-5 pt-5 pt-md-5">
           <Container fluid>
             <div className="header-body">
               {/* Card stats */}
               <Row>
                 <Col lg="6" xl="6">
                   <Card className="card-stats mb-4 mb-xl-0">
-                  <CardImg
+                    <CardImg
                       alt="..."
                       src={require("assets/img/theme/adult-doctor-girl-healthcare.jpg")}
                       top
@@ -44,7 +44,7 @@ class Header extends React.Component {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                           Doctor
+                            Doctor
                           </CardTitle>
                           <span className="h2 font-weight-bold mb-0">
                             350,897
@@ -52,22 +52,17 @@ class Header extends React.Component {
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-success text-white rounded-circle shadow">
-                          <i class="fa fa-envelope"></i>
+                            <i class="fa fa-envelope"></i>
                           </div>
                         </Col>
                       </Row>
-                      <p className="mt-3 mb-0 text-muted text-sm">
-                        <span className="text-success mr-2">
-                          <i className="fa fa-arrow-up" /> 3.48%
-                        </span>{" "}
-                        <span className="text-nowrap">Since last month</span>
-                      </p>
+
                     </CardBody>
                   </Card>
                 </Col>
                 <Col lg="6" xl="6">
                   <Card className="card-stats mb-4 mb-xl-0">
-                  <CardImg
+                    <CardImg
                       alt="..."
                       src={require("assets/img/theme/computer-desk-laptop-stethoscope.jpg")}
                       top
@@ -80,7 +75,7 @@ class Header extends React.Component {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                           Medical Check Up
+                            Medical Check Up
                           </CardTitle>
                           <span className="h2 font-weight-bold mb-0">
                             49,65%
@@ -92,12 +87,7 @@ class Header extends React.Component {
                           </div>
                         </Col>
                       </Row>
-                      <p className="mt-3 mb-0 text-muted text-sm">
-                        <span className="text-success mr-2">
-                        <i className="fa fa-arrow-down" />  12%
-                        </span>{" "}
-                        <span className="text-nowrap">Since last month</span>
-                      </p>
+
                     </CardBody>
                   </Card>
                 </Col>
