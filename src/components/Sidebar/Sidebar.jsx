@@ -81,6 +81,7 @@ class Sidebar extends React.Component {
   // creates the links that appear in the left menu / Sidebar
   createLinks = routes => {
     return routes.map((prop, key) => {
+      if (prop.invisible) return null;
       return (
         <NavItem key={key}>
           <NavLink
@@ -131,7 +132,8 @@ class Sidebar extends React.Component {
               <img
                 alt={logo.imgAlt}
                 className="navbar-brand-img"
-                src={require("assets/img/idolmart.jpeg")}
+                src={require("assets/img/idolmart.PNG")}
+                style={{ width: '60%' }}
               />
             </NavbarBrand>
           ) : null}

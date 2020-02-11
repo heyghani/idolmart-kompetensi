@@ -16,6 +16,7 @@
 
 */
 import React from "react";
+import { Link } from "react-router-dom";
 
 // reactstrap components
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
@@ -28,7 +29,12 @@ class Header extends React.Component {
           <Container fluid>
             <div className="header-body">
               {/* Card stats */}
-
+              <Link
+                className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
+                to="/"
+              >
+                {this.props.brandText}
+              </Link>
             </div>
           </Container>
         </div>

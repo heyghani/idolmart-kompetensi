@@ -1,0 +1,119 @@
+   .buscarCaja {
+    /* position: absolute; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2f3640;
+    height: 40px;
+    border-radius: 40px;
+    padding: 10px;
+   
+   }
+   
+   .buscarCaja:hover > .buscarTxt {
+    width: 240px;
+    padding: 0 6px;
+   }
+   
+   .buscarCaja:hover > .buscarBtn {
+    background: white;
+    color: black;
+   }
+   
+   .buscarBtn {
+    color: #e84118;
+    float: right;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2f3640;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.4s;
+    color: white;
+    cursor: pointer;
+   }
+   
+   .buscarBtn > i {
+    font-size: 30px;
+   }
+   
+   .buscarTxt {
+    border: none;
+    background: none;
+    outline: none;
+    float: left;
+    padding: 0;
+    color: white;
+    font-size: 16px;
+    transition: 0.4s;
+    line-height: 40px;
+    width: 0px;
+    font-weight: bold;
+   }
+
+   .rdt_TableCol_Sortable {
+      font-weight: bold !important;
+   }
+
+   .detailImagesWrapper {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+   }
+
+   .detailImages {
+      display: block;
+      max-width: 500px;
+      max-height: 300px;
+      border-radius: 15px;
+      margin-left: 20px ;
+      align-items: center;
+   }
+
+   .fixcol, .fixcol div:first-child {
+      overflow: visible !important;
+   }
+
+   .borcor {
+      box-shadow: none ;
+      border-color: #f7fafc !important;
+   }
+
+   .fixcol > div {
+      margin-right: 1px;
+   }
+
+   .healthcareLogo {
+      background-color:lightskyblue;
+   }
+
+   .dzu-inputLabel {
+      font-size: 15px !important;
+      color: #181818 !important;
+   }
+
+   .btn-warn {
+      background-color: #FFC107;
+   }
+
+   .btn-warn:hover {
+      background-color: #FFC107;
+   }
+
+   .btn-delete {
+      background-color: #F44336;
+   }
+
+   .btn-delete:hover {
+      background-color: #F44336;
+   }
+
+   .ft {
+      font-size: 1rem !important;
+      font-weight: 400 !important;
+      color: hsl(0,0%,50%) !important;
+   }

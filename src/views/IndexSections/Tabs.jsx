@@ -46,11 +46,11 @@ class TabsSection extends React.Component {
   render() {
     return (
       <>
-        <Row className="justify-content-center">
+        <Col>
+          <Row className="justify-content-center">
 
-          <Col>
 
-            <div className="nav-wrapper">
+            <div className="col-lg-2 col-md-3 col-sm-2 col-6">
               <Nav
                 className="nav-fill flex-column flex-md-row"
                 id="tabs-icons-text"
@@ -70,6 +70,15 @@ class TabsSection extends React.Component {
                     Promotion
                   </NavLink>
                 </NavItem>
+              </Nav>
+            </div>
+            <div className="col-lg-2 col-md-3 col-sm-2 col-6">
+              <Nav
+                className="nav-fill flex-column flex-md-row"
+                id="tabs-icons-text"
+                pills
+                role="tablist"
+              >
                 <NavItem>
                   <NavLink
                     aria-selected={this.state.plainTabs === 2}
@@ -83,6 +92,15 @@ class TabsSection extends React.Component {
                     Activity
                   </NavLink>
                 </NavItem>
+              </Nav>
+            </div>
+            <div className="col-lg-2 col-md-3 col-sm-2 col-6">
+              <Nav
+                className="nav-fill flex-column flex-md-row"
+                id="tabs-icons-text"
+                pills
+                role="tablist"
+              >
                 <NavItem>
                   <NavLink
                     aria-selected={this.state.plainTabs === 3}
@@ -93,14 +111,15 @@ class TabsSection extends React.Component {
                     href="#pablo"
                     role="tab"
                   >
-                    Messages
+                    About
                   </NavLink>
                 </NavItem>
               </Nav>
             </div>
 
-          </Col>
-        </Row>
+
+          </Row>
+        </Col>
       </>
     );
   }
