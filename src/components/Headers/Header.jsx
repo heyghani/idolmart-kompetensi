@@ -19,7 +19,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 // reactstrap components
-import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
+import { Container } from "reactstrap";
 
 class Header extends React.Component {
   render() {

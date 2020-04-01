@@ -8,7 +8,6 @@ import {
 	CardBody,
 	FormGroup,
 	Form,
-	InputGroup,
 	Input,
 	Container,
 	Row,
@@ -18,10 +17,8 @@ import {
 import Header from "components/Headers/Header.jsx";
 import Progress from "components/Progress";
 import FileUploader from "react-firebase-file-uploader";
-import classnames from "classnames";
 import firebase from "firebase";
 import fire from "../../config";
-import CurrencyFormat from "react-currency-format";
 import swal from "sweetalert";
 
 if (!firebase.apps.length) {
@@ -34,14 +31,14 @@ class CreateProduct extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			nama: "",
-			harga: "",
-			category: "Promotion",
-			description: "",
+			judul: "",
+			caption: "",
+			data: "",
 			photo: "",
 			photoUrl: "",
-			progress: 0,
-			value: ""
+			user: "",
+			isUploading: false,
+			progress: 0
 		};
 	}
 
@@ -60,9 +57,10 @@ class CreateProduct extends React.Component {
 			photo: filename,
 			progress: 100
 		});
+
 		firebase
 			.storage()
-			.ref("products")
+			.ref("activities")
 			.child(filename)
 			.getDownloadURL()
 			.then(url =>
@@ -79,19 +77,18 @@ class CreateProduct extends React.Component {
 	onSubmit = e => {
 		e.preventDefault();
 		const db = fire.firestore();
-		db.collection("products").add({
-			nama: this.state.nama,
-			harga: this.state.harga,
-			category: this.state.category,
-			description: this.state.description,
+		db.collection("activities").add({
+			judul: this.state.judul,
+			body: this.state.caption,
 			photo: this.state.photo,
-			photoUrl: this.state.photoUrl,
+			postImage: this.state.photoUrl,
+			likeCount: 0,
+			commentCount: 0,
 			createdAt: new Date().toISOString()
 		});
 		this.setState({
-			nama: "",
-			harga: "",
-			category: "",
+			judul: "",
+			caption: "",
 			photo: "",
 			photoUrl: ""
 		});
@@ -101,13 +98,11 @@ class CreateProduct extends React.Component {
 			icon: "success",
 			button: "OK"
 		});
-
-		this.props.history.push("/app/produk");
+		this.props.history.push("/app/activity");
 	};
 
 	render() {
-		console.log(this.state);
-		const { nama, harga, category, description, isSubmitting } = this.state;
+		const { judul, caption, isSubmitting } = this.state;
 		return (
 			<>
 				<Header />
@@ -119,7 +114,7 @@ class CreateProduct extends React.Component {
 								<CardHeader className="bg-white border-0">
 									<Row className="align-items-center">
 										<Col>
-											<h3 className="mb-0">Tambah Produk</h3>
+											<h3 className="mb-0">Tambah Aktivitas</h3>
 										</Col>
 									</Row>
 								</CardHeader>
@@ -132,16 +127,16 @@ class CreateProduct extends React.Component {
 													<FormGroup>
 														<label
 															className="form-control-label"
-															htmlFor="input-nama"
+															htmlFor="input-judul"
 														>
-															Nama Produk
+															Judul Aktivitas
 														</label>
 														<Input
 															className="form-control-alternative"
-															value={nama}
+															value={judul}
 															onChange={event =>
 																this.setState({
-																	nama: event.target.value
+																	judul: event.target.value
 																})
 															}
 															type="text"
@@ -150,90 +145,20 @@ class CreateProduct extends React.Component {
 												</Col>
 											</Row>
 											<Row>
-												<div className="col-md-4">
-													<FormGroup>
-														<label
-															className="form-control-label"
-															htmlFor="input-harga"
-														>
-															Harga
-														</label>
-														<InputGroup
-															className={classnames("input-group-merge")}
-														>
-															{/* <InputGroupAddon addonType="prepend">
-                                                                <InputGroupText>Rp</InputGroupText>
-                                                            </InputGroupAddon> */}
-															<CurrencyFormat
-																customInput={Input}
-																value={harga}
-																onValueChange={values => {
-																	const { formattedValue } = values;
-
-																	this.setState({ harga: formattedValue });
-																}}
-																thousandSeparator={true}
-																prefix={"Rp. "}
-															/>
-															{/* <Input
-                                                                value={harga}
-                                                                onChange={event =>
-                                                                    this.setState({
-                                                                        harga: event.target.value
-                                                                    })
-                                                                }
-                                                                type="number"
-
-                                                            /> */}
-														</InputGroup>
-													</FormGroup>
-												</div>
-												<div className="col-md-4">
-													<Row>
-														<Col lg="6">
-															<FormGroup>
-																<label
-																	className="form-control-label"
-																	htmlFor="input-kategori"
-																>
-																	Kategori
-																</label>
-																<Input
-																	name="category"
-																	className="form-control-alternative"
-																	value={category}
-																	onChange={event =>
-																		this.setState({
-																			category: event.target.value
-																		})
-																	}
-																	type="select"
-																>
-																	<option value="Promotion">Promotion</option>
-																	<option value="Hot Product">
-																		Hot Product
-																	</option>
-																</Input>
-															</FormGroup>
-														</Col>
-													</Row>
-												</div>
-											</Row>
-											<Row>
 												<Col lg="6">
 													<FormGroup>
 														<label
 															className="form-control-label"
-															htmlFor="input-description"
+															htmlFor="input-caption"
 														>
-															Deskripsi
+															Caption
 														</label>
 														<Input
 															className="form-control-alternative"
-															value={description}
+															value={caption}
 															onChange={event =>
 																this.setState({
-																	description: event.target.value
+																	caption: event.target.value
 																})
 															}
 															type="textarea"
@@ -246,7 +171,7 @@ class CreateProduct extends React.Component {
 												<Col xl="12">
 													<div>
 														<label className="form-control-label">
-															Foto Produk
+															Foto Aktivitas
 														</label>
 														<br />
 														<br />
@@ -256,8 +181,8 @@ class CreateProduct extends React.Component {
 																src={this.state.photoUrl}
 																style={{
 																	padding: 15,
-																	width: 150,
-																	height: 155,
+																	width: 250,
+																	height: 300,
 																	resizeMode: "center"
 																}}
 															/>
@@ -265,7 +190,7 @@ class CreateProduct extends React.Component {
 														<FileUploader
 															accept="image/*"
 															name="photo"
-															storageRef={firebase.storage().ref("products")}
+															storageRef={firebase.storage().ref("activities")}
 															onUploadStart={this.handleUploadStart}
 															onUploadSuccess={this.handleUploadSuccess}
 														/>
@@ -288,7 +213,7 @@ class CreateProduct extends React.Component {
 														<Button
 															color="danger"
 															onClick={() =>
-																this.props.history.push("/app/produk")
+																this.props.history.push("/app/activity")
 															}
 														>
 															Batal

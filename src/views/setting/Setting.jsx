@@ -8,7 +8,6 @@ import {
 	CardBody,
 	FormGroup,
 	Form,
-	InputGroup,
 	Input,
 	Container,
 	Row,
@@ -16,32 +15,28 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import Progress from "components/Progress";
-import FileUploader from "react-firebase-file-uploader";
-import classnames from "classnames";
 import firebase from "firebase";
 import fire from "../../config";
-import CurrencyFormat from "react-currency-format";
+import Progress from "components/Progress";
+import FileUploader from "react-firebase-file-uploader";
+import "react-dropzone-uploader/dist/styles.css";
 import swal from "sweetalert";
 
 if (!firebase.apps.length) {
 	firebase.initializeApp({ fire });
 }
 
-// const imageMaxSize = 2000000 // bytes
+const imageMaxSize = 2000000; // bytes
 
 class CreateProduct extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			nama: "",
-			harga: "",
-			category: "Promotion",
-			description: "",
 			photo: "",
 			photoUrl: "",
-			progress: 0,
-			value: ""
+			description: "",
+			progress: 0
 		};
 	}
 
@@ -54,15 +49,37 @@ class CreateProduct extends React.Component {
 
 	handleProgress = progress => this.setState({ progress });
 
+	// handleOnDrop = (fileWithMeta, status, filesWithMeta) => {
+	// 	const files = filesWithMeta.map(obj => obj.file);
+
+	// 	console.log(files);
+	// 	if (files && files.length > 0) {
+	// 		const img_filter = files.filter(file => {
+	// 			// const currentFileType = file.type
+	// 			const currentFileSize = file.size;
+	// 			if (currentFileSize > imageMaxSize) {
+	// 				alert("File terlalu besar");
+	// 				return false;
+	// 			}
+	// 			return true;
+	// 		});
+	// 		const currentFile = files[0];
+
+	// 		console.log(currentFile);
+	// 		this.setState({ images_path: img_filter });
+	// 	}
+	// };
+
 	handleUploadSuccess = filename => {
 		console.log(this.state);
 		this.setState({
 			photo: filename,
 			progress: 100
 		});
+
 		firebase
 			.storage()
-			.ref("products")
+			.ref("settings")
 			.child(filename)
 			.getDownloadURL()
 			.then(url =>
@@ -79,35 +96,26 @@ class CreateProduct extends React.Component {
 	onSubmit = e => {
 		e.preventDefault();
 		const db = fire.firestore();
-		db.collection("products").add({
+		db.collection("setting").add({
 			nama: this.state.nama,
-			harga: this.state.harga,
-			category: this.state.category,
 			description: this.state.description,
 			photo: this.state.photo,
 			photoUrl: this.state.photoUrl,
-			createdAt: new Date().toISOString()
+			createdAt: new Date()
 		});
-		this.setState({
-			nama: "",
-			harga: "",
-			category: "",
-			photo: "",
-			photoUrl: ""
-		});
+		this.setState({});
 		swal({
 			title: "Berhasil!",
 			text: "Data telah ditambahkan!",
 			icon: "success",
 			button: "OK"
 		});
-
-		this.props.history.push("/app/produk");
+		this.props.history.push("/app/setting");
 	};
 
 	render() {
 		console.log(this.state);
-		const { nama, harga, category, description, isSubmitting } = this.state;
+		const { nama, description, isSubmitting } = this.state;
 		return (
 			<>
 				<Header />
@@ -119,7 +127,7 @@ class CreateProduct extends React.Component {
 								<CardHeader className="bg-white border-0">
 									<Row className="align-items-center">
 										<Col>
-											<h3 className="mb-0">Tambah Produk</h3>
+											<h3 className="mb-0">Setting</h3>
 										</Col>
 									</Row>
 								</CardHeader>
@@ -134,7 +142,7 @@ class CreateProduct extends React.Component {
 															className="form-control-label"
 															htmlFor="input-nama"
 														>
-															Nama Produk
+															Judul slider
 														</label>
 														<Input
 															className="form-control-alternative"
@@ -148,76 +156,6 @@ class CreateProduct extends React.Component {
 														/>
 													</FormGroup>
 												</Col>
-											</Row>
-											<Row>
-												<div className="col-md-4">
-													<FormGroup>
-														<label
-															className="form-control-label"
-															htmlFor="input-harga"
-														>
-															Harga
-														</label>
-														<InputGroup
-															className={classnames("input-group-merge")}
-														>
-															{/* <InputGroupAddon addonType="prepend">
-                                                                <InputGroupText>Rp</InputGroupText>
-                                                            </InputGroupAddon> */}
-															<CurrencyFormat
-																customInput={Input}
-																value={harga}
-																onValueChange={values => {
-																	const { formattedValue } = values;
-
-																	this.setState({ harga: formattedValue });
-																}}
-																thousandSeparator={true}
-																prefix={"Rp. "}
-															/>
-															{/* <Input
-                                                                value={harga}
-                                                                onChange={event =>
-                                                                    this.setState({
-                                                                        harga: event.target.value
-                                                                    })
-                                                                }
-                                                                type="number"
-
-                                                            /> */}
-														</InputGroup>
-													</FormGroup>
-												</div>
-												<div className="col-md-4">
-													<Row>
-														<Col lg="6">
-															<FormGroup>
-																<label
-																	className="form-control-label"
-																	htmlFor="input-kategori"
-																>
-																	Kategori
-																</label>
-																<Input
-																	name="category"
-																	className="form-control-alternative"
-																	value={category}
-																	onChange={event =>
-																		this.setState({
-																			category: event.target.value
-																		})
-																	}
-																	type="select"
-																>
-																	<option value="Promotion">Promotion</option>
-																	<option value="Hot Product">
-																		Hot Product
-																	</option>
-																</Input>
-															</FormGroup>
-														</Col>
-													</Row>
-												</div>
 											</Row>
 											<Row>
 												<Col lg="6">
@@ -246,7 +184,7 @@ class CreateProduct extends React.Component {
 												<Col xl="12">
 													<div>
 														<label className="form-control-label">
-															Foto Produk
+															Image Slider
 														</label>
 														<br />
 														<br />
@@ -256,8 +194,8 @@ class CreateProduct extends React.Component {
 																src={this.state.photoUrl}
 																style={{
 																	padding: 15,
-																	width: 150,
-																	height: 155,
+																	width: 250,
+																	height: 300,
 																	resizeMode: "center"
 																}}
 															/>
@@ -265,7 +203,7 @@ class CreateProduct extends React.Component {
 														<FileUploader
 															accept="image/*"
 															name="photo"
-															storageRef={firebase.storage().ref("products")}
+															storageRef={firebase.storage().ref("settings")}
 															onUploadStart={this.handleUploadStart}
 															onUploadSuccess={this.handleUploadSuccess}
 														/>
@@ -288,7 +226,7 @@ class CreateProduct extends React.Component {
 														<Button
 															color="danger"
 															onClick={() =>
-																this.props.history.push("/app/produk")
+																this.props.history.push("/app/setting")
 															}
 														>
 															Batal

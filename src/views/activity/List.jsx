@@ -1,6 +1,5 @@
 import React from "react";
 import {
-	Badge,
 	Card,
 	CardHeader,
 	DropdownMenu,
@@ -27,7 +26,7 @@ class ListProduct extends React.Component {
 	componentDidMount() {
 		const db = fire.firestore();
 
-		db.collection("products")
+		db.collection("activities")
 			.orderBy("createdAt", "desc")
 			.get()
 			.then(snapshot => {
@@ -48,19 +47,22 @@ class ListProduct extends React.Component {
 
 	handleDelete = (id, filename) => {
 		const db = fire.firestore();
-		// const ref = fire.storage().refFromURL(filename)
+		// const ref = fire.storage().refFromURL(filename);
 
-		// ref.delete().then(() => {
-		//     console.log(`${filename} deleted`)
-		// }).catch(error => {
-		//     console.log('Error!', error)
-		// })
+		// ref
+		// 	.delete()
+		// 	.then(() => {
+		// 		console.log(`${filename} deleted`);
+		// 	})
+		// 	.catch(error => {
+		// 		console.log("Error!", error);
+		// 	});
 
-		db.collection("products")
+		db.collection("activities")
 			.doc(id)
 			.delete()
 			.then(() => {
-				this.props.history.push("/app/produk");
+				this.props.history.push("/app/activity");
 				swal("Poof! Your imaginary file has been deleted!", {
 					icon: "success"
 				});
@@ -71,7 +73,7 @@ class ListProduct extends React.Component {
 	};
 
 	onClickAdd = () => {
-		this.props.history.push("/app/produk/create");
+		this.props.history.push("/app/activity/create");
 	};
 
 	onClickDelete = id => {
@@ -104,7 +106,7 @@ class ListProduct extends React.Component {
 								<CardHeader className="border-0">
 									<Row>
 										<Col xl="6">
-											<h3>Data Produk</h3>
+											<h3>Data Activity</h3>
 										</Col>
 										<Col sm={{ size: 1, offset: 5 }}>
 											<Button
@@ -122,10 +124,8 @@ class ListProduct extends React.Component {
 									<thead className="thead-light">
 										<tr>
 											<th scope="col">#</th>
-											<th scope="col">Produk</th>
-											<th scope="col">Harga</th>
-											<th scope="col">Category</th>
-											<th scope="col">Deskripsi</th>
+											<th scope="col">Judul</th>
+											<th scope="col">Caption</th>
 											<th scope="col">Gambar</th>
 											<th scope="col">Action</th>
 										</tr>
@@ -138,25 +138,19 @@ class ListProduct extends React.Component {
 														<th>{id++}</th>
 														<th scope="row">
 															<span className="mb-0 text-sm">
-																{data.data.nama}
+																{data.data.judul}
 															</span>
 														</th>
-														<td>{data.data.harga}</td>
 														<td>
-															<Badge color="" className="badge-dot mr-4">
-																{data.data.category}
-															</Badge>
-														</td>
-														<td>
-															{data.data.description.length > 50
-																? `${data.data.description.slice(0, 50)}...`
-																: data.data.description}
+															{data.data.body.length > 50
+																? `${data.data.body.slice(0, 50)}...`
+																: data.data.body}
 														</td>
 														<td>
 															<img
 																alt={data.data.photo}
 																className="img-fluid rounded-circle shadow"
-																src={data.data.photoUrl}
+																src={data.data.postImage}
 																style={{ width: 100, height: 100 }}
 															/>
 														</td>
@@ -179,7 +173,7 @@ class ListProduct extends React.Component {
 																	<DropdownItem
 																		onClick={() =>
 																			this.props.history.push(
-																				`/app/produk/edit/${data.id}`
+																				`/app/activity/edit/${data.id}`
 																			)
 																		}
 																	>
