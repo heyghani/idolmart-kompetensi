@@ -11,7 +11,7 @@ import {
 	Container,
 	Row,
 	Col,
-	Button
+	Button,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
@@ -21,7 +21,7 @@ import swal from "sweetalert";
 
 class ListProduct extends React.Component {
 	state = {
-		data: []
+		data: [],
 	};
 
 	componentDidMount() {
@@ -30,18 +30,17 @@ class ListProduct extends React.Component {
 		db.collection("products")
 			.orderBy("createdAt", "desc")
 			.get()
-			.then(snapshot => {
+			.then((snapshot) => {
 				const data = [];
-				snapshot.forEach(doc => {
+				snapshot.forEach((doc) => {
 					data.push({
 						data: doc.data(),
-						id: doc.id
+						id: doc.id,
 					});
 				});
 				this.setState({ data: data });
-				console.log(data);
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.log("Error!", error);
 			});
 	}
@@ -62,10 +61,10 @@ class ListProduct extends React.Component {
 			.then(() => {
 				this.props.history.push("/app/produk");
 				swal("Poof! Your imaginary file has been deleted!", {
-					icon: "success"
+					icon: "success",
 				});
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.log("Error!", error);
 			});
 	};
@@ -74,14 +73,14 @@ class ListProduct extends React.Component {
 		this.props.history.push("/app/produk/create");
 	};
 
-	onClickDelete = id => {
+	onClickDelete = (id) => {
 		swal({
 			title: "Apakah anda yakin?",
 			text: "tekan OK untuk menghapus file!",
 			icon: "warning",
 			buttons: true,
-			dangerMode: true
-		}).then(willDelete => {
+			dangerMode: true,
+		}).then((willDelete) => {
 			if (willDelete) {
 				this.handleDelete(id);
 			} else {
@@ -132,7 +131,7 @@ class ListProduct extends React.Component {
 									</thead>
 									<tbody>
 										{this.state.data &&
-											this.state.data.map(data => {
+											this.state.data.map((data) => {
 												return (
 													<tr key={id}>
 														<th>{id++}</th>
@@ -168,7 +167,7 @@ class ListProduct extends React.Component {
 																	role="button"
 																	size="sm"
 																	color=""
-																	onClick={e => e.preventDefault()}
+																	onClick={(e) => e.preventDefault()}
 																>
 																	<i className="fas fa-ellipsis-v" />
 																</DropdownToggle>

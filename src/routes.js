@@ -6,6 +6,8 @@ import ListActivity from "views/activity/List";
 import CreateActivity from "views/activity/Create";
 import Settings from "views/setting/Setting";
 import ListSettings from "views/setting/List";
+import CreateCategory from "views/category/Create";
+import ListCategory from "views/category/List";
 
 var routes = [
 	{
@@ -13,7 +15,7 @@ var routes = [
 		name: "Home",
 		icon: "ni ni-tv-2 text-primary",
 		component: Index,
-		layout: "/app"
+		layout: "/app",
 	},
 	{
 		path: "/produk/create",
@@ -21,7 +23,7 @@ var routes = [
 		icon: "ni ni-planet text-blue",
 		component: CreateProduct,
 		layout: "/app",
-		invisible: true
+		invisible: true,
 	},
 	{
 		path: "/produk/edit:id",
@@ -29,14 +31,29 @@ var routes = [
 		icon: "ni ni-planet text-blue",
 		component: EditProduct,
 		layout: "/app",
-		invisible: true
+		invisible: true,
 	},
 	{
 		path: "/produk",
 		name: "Produk",
 		icon: "ni ni-shop text-blue",
 		component: ListProduct,
-		layout: "/app"
+		layout: "/app",
+	},
+	{
+		path: "/category/create",
+		name: "Category",
+		icon: "ni ni-app text-blue",
+		component: CreateCategory,
+		layout: "/app",
+		invisible: true,
+	},
+	{
+		path: "/category",
+		name: "Category",
+		icon: "ni ni-app text-blue",
+		component: ListCategory,
+		layout: "/app",
 	},
 	{
 		path: "/activity/create",
@@ -44,14 +61,14 @@ var routes = [
 		icon: "ni ni-world text-blue",
 		component: CreateActivity,
 		layout: "/app",
-		invisible: true
+		invisible: true,
 	},
 	{
 		path: "/activity",
 		name: "Activity",
 		icon: "ni ni-world text-blue",
 		component: ListActivity,
-		layout: "/app"
+		layout: "/app",
 	},
 	{
 		path: "/setting/create",
@@ -59,15 +76,15 @@ var routes = [
 		icon: "ni ni-settings-gear-65 text-blue",
 		component: Settings,
 		layout: "/app",
-		invisible: true
+		invisible: true,
 	},
 	{
 		path: "/setting",
 		name: "Customize",
 		icon: "ni ni-settings-gear-65 text-blue",
 		component: ListSettings,
-		layout: "/app"
-	}
+		layout: "/app",
+	},
 ];
 
 export default routes;

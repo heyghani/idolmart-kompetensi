@@ -12,7 +12,7 @@ import {
 	Input,
 	Container,
 	Row,
-	Col
+	Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
@@ -24,11 +24,7 @@ import fire from "../../config";
 import CurrencyFormat from "react-currency-format";
 import swal from "sweetalert";
 
-if (!firebase.apps.length) {
-	firebase.initializeApp({ fire });
-}
-
-// const imageMaxSize = 2000000 // bytes
+const db = fire.firestore();
 
 class CreateProduct extends React.Component {
 	constructor(props) {
@@ -36,38 +32,49 @@ class CreateProduct extends React.Component {
 		this.state = {
 			nama: "",
 			harga: "",
-			category: "Promotion",
+			category: "",
+			selectedCategory: "",
 			description: "",
 			photo: "",
 			photoUrl: "",
 			progress: 0,
-			value: ""
+			value: "",
 		};
 	}
+
+	componentDidMount = () => {
+		db.collection("category")
+			.doc("product_category")
+			.onSnapshot((doc) => {
+				this.setState({
+					category: doc.data().category,
+					selectedCategory: doc.data().category[0],
+				});
+			});
+	};
 
 	handleUploadStart = () => {
 		this.setState({
 			isUploading: true,
-			progress: 0
+			progress: 0,
 		});
 	};
 
-	handleProgress = progress => this.setState({ progress });
+	handleProgress = (progress) => this.setState({ progress });
 
-	handleUploadSuccess = filename => {
-		console.log(this.state);
+	handleUploadSuccess = (filename) => {
 		this.setState({
 			photo: filename,
-			progress: 100
+			progress: 100,
 		});
 		firebase
 			.storage()
 			.ref("products")
 			.child(filename)
 			.getDownloadURL()
-			.then(url =>
+			.then((url) =>
 				this.setState({
-					photoUrl: url
+					photoUrl: url,
 				})
 			);
 	};
@@ -76,38 +83,58 @@ class CreateProduct extends React.Component {
 		console.log(status, meta);
 	};
 
-	onSubmit = e => {
+	onSubmit = (e) => {
 		e.preventDefault();
-		const db = fire.firestore();
-		db.collection("products").add({
-			nama: this.state.nama,
-			harga: this.state.harga,
-			category: this.state.category,
-			description: this.state.description,
-			photo: this.state.photo,
-			photoUrl: this.state.photoUrl,
-			createdAt: new Date().toISOString()
-		});
-		this.setState({
-			nama: "",
-			harga: "",
-			category: "",
-			photo: "",
-			photoUrl: ""
-		});
-		swal({
-			title: "Berhasil!",
-			text: "Data telah ditambahkan!",
-			icon: "success",
-			button: "OK"
-		});
 
-		this.props.history.push("/app/produk");
+		const {
+			nama,
+			harga,
+			selectedCategory,
+			description,
+			photo,
+			photoUrl,
+		} = this.state;
+
+		db.doc(`products/${nama}`)
+			.set({
+				nama: nama,
+				harga: harga,
+				category: selectedCategory,
+				description: description,
+				photo: photo,
+				photoUrl: photoUrl,
+				createdAt: new Date().toISOString(),
+			})
+			.then(() => {
+				this.setState({
+					nama: "",
+					harga: "",
+					category: "",
+					photo: "",
+					photoUrl: "",
+				});
+				swal({
+					title: "Berhasil!",
+					text: `${nama} Data telah ditambahkan!`,
+					icon: "success",
+					button: "OK",
+				});
+
+				this.props.history.push("/app/produk");
+			})
+			.catch((err) => console.log(err));
 	};
 
 	render() {
-		console.log(this.state);
-		const { nama, harga, category, description, isSubmitting } = this.state;
+		const {
+			nama,
+			harga,
+			category,
+			selectedCategory,
+			description,
+			isSubmitting,
+		} = this.state;
+
 		return (
 			<>
 				<Header />
@@ -139,9 +166,9 @@ class CreateProduct extends React.Component {
 														<Input
 															className="form-control-alternative"
 															value={nama}
-															onChange={event =>
+															onChange={(event) =>
 																this.setState({
-																	nama: event.target.value
+																	nama: event.target.value,
 																})
 															}
 															type="text"
@@ -167,7 +194,7 @@ class CreateProduct extends React.Component {
 															<CurrencyFormat
 																customInput={Input}
 																value={harga}
-																onValueChange={values => {
+																onValueChange={(values) => {
 																	const { formattedValue } = values;
 
 																	this.setState({ harga: formattedValue });
@@ -201,18 +228,23 @@ class CreateProduct extends React.Component {
 																<Input
 																	name="category"
 																	className="form-control-alternative"
-																	value={category}
-																	onChange={event =>
+																	value={selectedCategory}
+																	onChange={(event) =>
 																		this.setState({
-																			category: event.target.value
+																			selectedCategory: event.target.value,
 																		})
 																	}
 																	type="select"
 																>
-																	<option value="Promotion">Promotion</option>
-																	<option value="Hot Product">
-																		Hot Product
-																	</option>
+																	{Object.keys(category).map((key, index) => {
+																		let data = this.state.category[key];
+
+																		return (
+																			<option key={index} value={data.nama}>
+																				{data.nama}
+																			</option>
+																		);
+																	})}
 																</Input>
 															</FormGroup>
 														</Col>
@@ -231,9 +263,9 @@ class CreateProduct extends React.Component {
 														<Input
 															className="form-control-alternative"
 															value={description}
-															onChange={event =>
+															onChange={(event) =>
 																this.setState({
-																	description: event.target.value
+																	description: event.target.value,
 																})
 															}
 															type="textarea"
@@ -258,7 +290,7 @@ class CreateProduct extends React.Component {
 																	padding: 15,
 																	width: 150,
 																	height: 155,
-																	resizeMode: "center"
+																	resizeMode: "center",
 																}}
 															/>
 														)}

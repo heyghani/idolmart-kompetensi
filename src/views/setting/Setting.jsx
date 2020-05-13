@@ -11,7 +11,7 @@ import {
 	Input,
 	Container,
 	Row,
-	Col
+	Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
@@ -22,12 +22,6 @@ import FileUploader from "react-firebase-file-uploader";
 import "react-dropzone-uploader/dist/styles.css";
 import swal from "sweetalert";
 
-if (!firebase.apps.length) {
-	firebase.initializeApp({ fire });
-}
-
-const imageMaxSize = 2000000; // bytes
-
 class CreateProduct extends React.Component {
 	constructor(props) {
 		super(props);
@@ -36,18 +30,18 @@ class CreateProduct extends React.Component {
 			photo: "",
 			photoUrl: "",
 			description: "",
-			progress: 0
+			progress: 0,
 		};
 	}
 
 	handleUploadStart = () => {
 		this.setState({
 			isUploading: true,
-			progress: 0
+			progress: 0,
 		});
 	};
 
-	handleProgress = progress => this.setState({ progress });
+	handleProgress = (progress) => this.setState({ progress });
 
 	// handleOnDrop = (fileWithMeta, status, filesWithMeta) => {
 	// 	const files = filesWithMeta.map(obj => obj.file);
@@ -70,11 +64,11 @@ class CreateProduct extends React.Component {
 	// 	}
 	// };
 
-	handleUploadSuccess = filename => {
+	handleUploadSuccess = (filename) => {
 		console.log(this.state);
 		this.setState({
 			photo: filename,
-			progress: 100
+			progress: 100,
 		});
 
 		firebase
@@ -82,9 +76,9 @@ class CreateProduct extends React.Component {
 			.ref("settings")
 			.child(filename)
 			.getDownloadURL()
-			.then(url =>
+			.then((url) =>
 				this.setState({
-					photoUrl: url
+					photoUrl: url,
 				})
 			);
 	};
@@ -93,7 +87,7 @@ class CreateProduct extends React.Component {
 		console.log(status, meta);
 	};
 
-	onSubmit = e => {
+	onSubmit = (e) => {
 		e.preventDefault();
 		const db = fire.firestore();
 		db.collection("setting").add({
@@ -101,14 +95,14 @@ class CreateProduct extends React.Component {
 			description: this.state.description,
 			photo: this.state.photo,
 			photoUrl: this.state.photoUrl,
-			createdAt: new Date()
+			createdAt: new Date(),
 		});
 		this.setState({});
 		swal({
 			title: "Berhasil!",
 			text: "Data telah ditambahkan!",
 			icon: "success",
-			button: "OK"
+			button: "OK",
 		});
 		this.props.history.push("/app/setting");
 	};
@@ -147,9 +141,9 @@ class CreateProduct extends React.Component {
 														<Input
 															className="form-control-alternative"
 															value={nama}
-															onChange={event =>
+															onChange={(event) =>
 																this.setState({
-																	nama: event.target.value
+																	nama: event.target.value,
 																})
 															}
 															type="text"
@@ -169,9 +163,9 @@ class CreateProduct extends React.Component {
 														<Input
 															className="form-control-alternative"
 															value={description}
-															onChange={event =>
+															onChange={(event) =>
 																this.setState({
-																	description: event.target.value
+																	description: event.target.value,
 																})
 															}
 															type="textarea"
@@ -196,7 +190,7 @@ class CreateProduct extends React.Component {
 																	padding: 15,
 																	width: 250,
 																	height: 300,
-																	resizeMode: "center"
+																	resizeMode: "center",
 																}}
 															/>
 														)}

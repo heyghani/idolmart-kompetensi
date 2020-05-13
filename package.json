@@ -1,5 +1,6 @@
 {
-	"name": "health-care-frontend",
+	"name": "idolmart",
+	"homepage": "http://admin-mobile.idolaku.info/",
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
@@ -7,6 +8,7 @@
 		"axios": "^0.19.2",
 		"busboy": "^0.3.1",
 		"chart.js": "^2.8.0",
+		"chroma-js": "^2.1.0",
 		"classnames": "^2.2.6",
 		"express": "^4.17.1",
 		"firebase": "^7.9.1",
@@ -29,7 +31,7 @@
 		"react-responsive-carousel": "^3.1.51",
 		"react-router-dom": "^5.0.1",
 		"react-scripts": "3.1.1",
-		"react-select": "^3.0.8",
+		"react-select": "^3.1.0",
 		"react-slick": "^0.25.2",
 		"react-toastify": "^5.5.0",
 		"reactstrap": "^8.0.1",
