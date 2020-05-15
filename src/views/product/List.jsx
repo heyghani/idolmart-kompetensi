@@ -19,16 +19,21 @@ import Header from "components/Headers/Header.jsx";
 import fire from "../../config";
 import swal from "sweetalert";
 
+const db = fire.firestore();
+
 class ListProduct extends React.Component {
 	state = {
 		data: [],
+		status: true,
 	};
 
 	componentDidMount() {
-		const db = fire.firestore();
+		this.getdata();
+	}
 
+	getdata = () => {
 		db.collection("products")
-			.orderBy("createdAt", "desc")
+			.orderBy("status", "desc")
 			.get()
 			.then((snapshot) => {
 				const data = [];
@@ -43,18 +48,9 @@ class ListProduct extends React.Component {
 			.catch((error) => {
 				console.log("Error!", error);
 			});
-	}
+	};
 
-	handleDelete = (id, filename) => {
-		const db = fire.firestore();
-		// const ref = fire.storage().refFromURL(filename)
-
-		// ref.delete().then(() => {
-		//     console.log(`${filename} deleted`)
-		// }).catch(error => {
-		//     console.log('Error!', error)
-		// })
-
+	handleDelete = (id) => {
 		db.collection("products")
 			.doc(id)
 			.delete()
@@ -63,10 +59,44 @@ class ListProduct extends React.Component {
 				swal("Poof! Your imaginary file has been deleted!", {
 					icon: "success",
 				});
+				this.getdata();
 			})
 			.catch((error) => {
 				console.log("Error!", error);
 			});
+	};
+
+	onChangeStatus = (id) => {
+		db.collection("products")
+			.doc(id)
+			.get()
+			.then((doc) => {
+				this.setState({ status: doc.data().status });
+				console.log("Before : ", this.state.status);
+			})
+			.then(() => {
+				this.setState({ status: !this.state.status });
+				db.collection("products")
+					.doc(id)
+					.update({
+						status: this.state.status,
+					})
+					.then(() => {
+						console.log("After:", this.state.status);
+						this.props.history.push("/app/produk");
+						swal("Status updated!", {
+							icon: "success",
+						});
+						this.getdata();
+					});
+			})
+			.catch((error) => {
+				console.log("Error!", error);
+			});
+	};
+
+	onClickEdit = (data) => {
+		this.props.history.push(`/app/produk/edit/${data.id}`);
 	};
 
 	onClickAdd = () => {
@@ -124,6 +154,7 @@ class ListProduct extends React.Component {
 											<th scope="col">Produk</th>
 											<th scope="col">Harga</th>
 											<th scope="col">Category</th>
+											<th scope="col">Status</th>
 											<th scope="col">Deskripsi</th>
 											<th scope="col">Gambar</th>
 											<th scope="col">Action</th>
@@ -146,6 +177,24 @@ class ListProduct extends React.Component {
 																{data.data.category}
 															</Badge>
 														</td>
+														<th scope="row">
+															<Button
+																onClick={() => this.onChangeStatus(data.id)}
+																style={{
+																	color: "white",
+																	fontSize: 10,
+																	alignItems: "center",
+																	justifyContent: "center",
+																	height: 30,
+																	width: 100,
+																	backgroundColor: data.data.status
+																		? "#36B37E"
+																		: "#FF5630",
+																}}
+															>
+																{data.data.status ? "Active" : "Non Active"}
+															</Button>
+														</th>
 														<td>
 															{data.data.description.length > 50
 																? `${data.data.description.slice(0, 50)}...`
@@ -176,11 +225,7 @@ class ListProduct extends React.Component {
 																	right
 																>
 																	<DropdownItem
-																		onClick={() =>
-																			this.props.history.push(
-																				`/app/produk/edit/${data.id}`
-																			)
-																		}
+																		onClick={() => this.onClickEdit(data)}
 																	>
 																		<i
 																			className="fas fa-pencil-alt"

@@ -39,6 +39,7 @@ class CreateProduct extends React.Component {
 			photoUrl: "",
 			progress: 0,
 			value: "",
+			status: true,
 		};
 	}
 
@@ -93,16 +94,18 @@ class CreateProduct extends React.Component {
 			description,
 			photo,
 			photoUrl,
+			status,
 		} = this.state;
 
 		db.doc(`products/${nama}`)
 			.set({
 				nama: nama,
 				harga: harga,
-				category: selectedCategory,
+				category: selectedCategory.nama,
 				description: description,
 				photo: photo,
 				photoUrl: photoUrl,
+				status: status,
 				createdAt: new Date().toISOString(),
 			})
 			.then(() => {
@@ -112,6 +115,7 @@ class CreateProduct extends React.Component {
 					category: "",
 					photo: "",
 					photoUrl: "",
+					status: true,
 				});
 				swal({
 					title: "Berhasil!",

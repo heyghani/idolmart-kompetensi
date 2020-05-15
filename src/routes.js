@@ -7,6 +7,7 @@ import CreateActivity from "views/activity/Create";
 import Settings from "views/setting/Setting";
 import ListSettings from "views/setting/List";
 import CreateCategory from "views/category/Create";
+import EditCategory from "views/category/Edit";
 import ListCategory from "views/category/List";
 
 var routes = [
@@ -26,7 +27,7 @@ var routes = [
 		invisible: true,
 	},
 	{
-		path: "/produk/edit:id",
+		path: "/produk/edit/:id",
 		name: "Edit Product",
 		icon: "ni ni-planet text-blue",
 		component: EditProduct,
@@ -45,6 +46,14 @@ var routes = [
 		name: "Category",
 		icon: "ni ni-app text-blue",
 		component: CreateCategory,
+		layout: "/app",
+		invisible: true,
+	},
+	{
+		path: "/category/edit/:nama",
+		name: "Category",
+		icon: "ni ni-app text-blue",
+		component: EditCategory,
 		layout: "/app",
 		invisible: true,
 	},

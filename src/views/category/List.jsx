@@ -39,11 +39,11 @@ export default class ListCategory extends React.Component {
 			});
 	};
 
-	handleDelete = (id) => {
+	handleDelete = (data) => {
 		db.collection("category")
 			.doc("product_category")
 			.update({
-				category: firebase.firestore.FieldValue.arrayRemove(id),
+				category: firebase.firestore.FieldValue.arrayRemove(data),
 			})
 			.then(() => {
 				this.props.history.push("/app/category");
@@ -151,7 +151,7 @@ export default class ListCategory extends React.Component {
 																<DropdownItem
 																	onClick={() =>
 																		this.props.history.push(
-																			`/app/category/edit/${data.id}`
+																			`/app/category/edit/${data.nama}`
 																		)
 																	}
 																>
@@ -162,7 +162,7 @@ export default class ListCategory extends React.Component {
 																	Edit
 																</DropdownItem>
 																<DropdownItem
-																	onClick={() => this.onClickDelete(data.id)}
+																	onClick={() => this.onClickDelete(data)}
 																>
 																	<i
 																		className="fas fa-trash-alt"
