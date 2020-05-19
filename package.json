@@ -26,6 +26,7 @@
 		"react-firebase-file-uploader": "^2.4.3",
 		"react-google-maps": "^9.4.5",
 		"react-images-uploader": "^1.2.0-rc1",
+		"react-js-pagination": "^3.0.3",
 		"react-player": "^1.14.2",
 		"react-progress-button-for-images-uploader": "^5.1.2",
 		"react-responsive-carousel": "^3.1.51",

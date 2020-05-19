@@ -10,7 +10,7 @@ import {
 	Container,
 	Row,
 	Col,
-	Button
+	Button,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
@@ -18,56 +18,50 @@ import Header from "components/Headers/Header.jsx";
 import fire from "../../config";
 import swal from "sweetalert";
 
+const db = fire.firestore();
+
 class ListProduct extends React.Component {
 	state = {
-		data: []
+		data: [],
 	};
 
 	componentDidMount() {
-		const db = fire.firestore();
+		this.getData();
+	}
 
+	getData = () => {
 		db.collection("activities")
 			.orderBy("createdAt", "desc")
 			.get()
-			.then(snapshot => {
+			.then((snapshot) => {
 				const data = [];
-				snapshot.forEach(doc => {
+				snapshot.forEach((doc) => {
 					data.push({
 						data: doc.data(),
-						id: doc.id
+						id: doc.id,
 					});
 				});
 				this.setState({ data: data });
-				console.log(data);
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.log("Error!", error);
 			});
-	}
+	};
 
 	handleDelete = (id, filename) => {
 		const db = fire.firestore();
-		// const ref = fire.storage().refFromURL(filename);
-
-		// ref
-		// 	.delete()
-		// 	.then(() => {
-		// 		console.log(`${filename} deleted`);
-		// 	})
-		// 	.catch(error => {
-		// 		console.log("Error!", error);
-		// 	});
 
 		db.collection("activities")
 			.doc(id)
 			.delete()
 			.then(() => {
 				this.props.history.push("/app/activity");
-				swal("Poof! Your imaginary file has been deleted!", {
-					icon: "success"
+				swal("Poof! Activity has been deleted!", {
+					icon: "success",
 				});
+				this.getdata();
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.log("Error!", error);
 			});
 	};
@@ -76,14 +70,14 @@ class ListProduct extends React.Component {
 		this.props.history.push("/app/activity/create");
 	};
 
-	onClickDelete = id => {
+	onClickDelete = (id) => {
 		swal({
 			title: "Apakah anda yakin?",
-			text: "tekan OK untuk menghapus file!",
+			text: "tekan OK untuk menghapus data!",
 			icon: "warning",
 			buttons: true,
-			dangerMode: true
-		}).then(willDelete => {
+			dangerMode: true,
+		}).then((willDelete) => {
 			if (willDelete) {
 				this.handleDelete(id);
 			} else {
@@ -132,7 +126,7 @@ class ListProduct extends React.Component {
 									</thead>
 									<tbody>
 										{this.state.data &&
-											this.state.data.map(data => {
+											this.state.data.map((data) => {
 												return (
 													<tr key={id}>
 														<th>{id++}</th>
@@ -162,7 +156,7 @@ class ListProduct extends React.Component {
 																	role="button"
 																	size="sm"
 																	color=""
-																	onClick={e => e.preventDefault()}
+																	onClick={(e) => e.preventDefault()}
 																>
 																	<i className="fas fa-ellipsis-v" />
 																</DropdownToggle>

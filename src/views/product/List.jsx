@@ -15,7 +15,8 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-// import firebase from 'firebase'
+import Pagination from "components/Pagination.jsx";
+// import Pagination from "react-js-pagination";
 import fire from "../../config";
 import swal from "sweetalert";
 
@@ -24,7 +25,12 @@ const db = fire.firestore();
 class ListProduct extends React.Component {
 	state = {
 		data: [],
+		last: null,
 		status: true,
+		currentPage: 1,
+		itemsPerPage: 3,
+		totalItemCount: 1,
+		activePage: 15,
 	};
 
 	componentDidMount() {
@@ -32,10 +38,23 @@ class ListProduct extends React.Component {
 	}
 
 	getdata = () => {
+		const startAt = 2 * 3 - 3;
 		db.collection("products")
-			.orderBy("status", "desc")
+			.orderBy("status")
+			.limit(3)
 			.get()
 			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1];
+
+				// return db
+				// 	.collection("products")
+				// 	.orderBy("status")
+				// 	.startAfter(last.data().nama)
+				// 	.limit(3)
+				// 	.get()
+				// 	.then((snapshot) => {
+				// 		snapshot.forEach((doc) => console.log("next :", doc.data()));
+				// 	});
 				const data = [];
 				snapshot.forEach((doc) => {
 					data.push({
@@ -43,20 +62,20 @@ class ListProduct extends React.Component {
 						id: doc.id,
 					});
 				});
-				this.setState({ data: data });
+				this.setState({ data, last });
 			})
 			.catch((error) => {
 				console.log("Error!", error);
 			});
 	};
 
-	handleDelete = (id) => {
+	handleDelete = (data) => {
 		db.collection("products")
-			.doc(id)
+			.doc(data.id)
 			.delete()
 			.then(() => {
 				this.props.history.push("/app/produk");
-				swal("Poof! Your imaginary file has been deleted!", {
+				swal(`Poof! ${data.data.nama} has been deleted!`, {
 					icon: "success",
 				});
 				this.getdata();
@@ -163,6 +182,7 @@ class ListProduct extends React.Component {
 									<tbody>
 										{this.state.data &&
 											this.state.data.map((data) => {
+												console.log(data.data.nama);
 												return (
 													<tr key={id}>
 														<th>{id++}</th>
@@ -234,7 +254,7 @@ class ListProduct extends React.Component {
 																		Edit
 																	</DropdownItem>
 																	<DropdownItem
-																		onClick={() => this.onClickDelete(data.id)}
+																		onClick={() => this.onClickDelete(data)}
 																	>
 																		<i
 																			className="fas fa-trash-alt"
@@ -249,7 +269,17 @@ class ListProduct extends React.Component {
 												);
 											})}
 									</tbody>
+									{/* <div>
+										<Pagination
+											activePage={this.state.activePage}
+											itemsCountPerPage={10}
+											totalItemsCount={450}
+											pageRangeDisplayed={5}
+											onChange={() => this.handlePageChange()}
+										/>
+									</div> */}
 								</Table>
+								<Pagination />
 							</Card>
 						</div>
 					</Row>

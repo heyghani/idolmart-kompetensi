@@ -1,9 +1,11 @@
-import Index from "views/Index.jsx";
+import Login from "views/Index.jsx";
+import Home from "views/Home.jsx";
 import CreateProduct from "views/product/Create";
 import EditProduct from "views/product/Edit";
 import ListProduct from "views/product/List";
 import ListActivity from "views/activity/List";
 import CreateActivity from "views/activity/Create";
+import EditActivity from "views/activity/Edit";
 import Settings from "views/setting/Setting";
 import ListSettings from "views/setting/List";
 import CreateCategory from "views/category/Create";
@@ -13,9 +15,17 @@ import ListCategory from "views/category/List";
 var routes = [
 	{
 		path: "/index",
+		name: "Login",
+		icon: "ni ni-tv-2 text-primary",
+		component: Login,
+		layout: "/auth",
+		invisible: true,
+	},
+	{
+		path: "/home",
 		name: "Home",
 		icon: "ni ni-tv-2 text-primary",
-		component: Index,
+		component: Home,
 		layout: "/app",
 	},
 	{
@@ -51,7 +61,7 @@ var routes = [
 	},
 	{
 		path: "/category/edit/:nama",
-		name: "Category",
+		name: "Edit Category",
 		icon: "ni ni-app text-blue",
 		component: EditCategory,
 		layout: "/app",
@@ -69,6 +79,14 @@ var routes = [
 		name: "Tambah Activity",
 		icon: "ni ni-world text-blue",
 		component: CreateActivity,
+		layout: "/app",
+		invisible: true,
+	},
+	{
+		path: "/activity/edit/:id",
+		name: "Edit Activity",
+		icon: "ni ni-app text-blue",
+		component: EditActivity,
 		layout: "/app",
 		invisible: true,
 	},

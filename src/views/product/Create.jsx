@@ -49,7 +49,7 @@ class CreateProduct extends React.Component {
 			.onSnapshot((doc) => {
 				this.setState({
 					category: doc.data().category,
-					selectedCategory: doc.data().category[0],
+					selectedCategory: doc.data().category[0].nama,
 				});
 			});
 	};
@@ -99,9 +99,9 @@ class CreateProduct extends React.Component {
 
 		db.doc(`products/${nama}`)
 			.set({
-				nama: nama,
+				nama,
 				harga: harga,
-				category: selectedCategory.nama,
+				category: selectedCategory,
 				description: description,
 				photo: photo,
 				photoUrl: photoUrl,
@@ -138,7 +138,6 @@ class CreateProduct extends React.Component {
 			description,
 			isSubmitting,
 		} = this.state;
-
 		return (
 			<>
 				<Header />

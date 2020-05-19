@@ -8,7 +8,6 @@ import {
 	CardBody,
 	FormGroup,
 	Form,
-	InputGroup,
 	Input,
 	Container,
 	Row,
@@ -18,33 +17,30 @@ import {
 import Header from "components/Headers/Header.jsx";
 import Progress from "components/Progress";
 import FileUploader from "react-firebase-file-uploader";
-import classnames from "classnames";
 import firebase from "firebase";
 import fire from "../../config";
-import CurrencyFormat from "react-currency-format";
 import swal from "sweetalert";
-
-const db = fire.firestore();
 
 class CreateProduct extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			key: "",
 			createdAt: "",
-			status: null,
-			nama: "",
-			harga: "",
-			description: "",
-			category: "",
-			listCategory: "",
+			key: "",
+			likeCount: "",
+			commentCount: "",
+			judul: "",
+			caption: "",
+			data: "",
 			photo: "",
 			photoUrl: "",
+			user: "",
+			isUploading: false,
 			progress: 0,
 		};
 	}
 
-	componentDidMount() {
+	componentDidMount = () => {
 		const ref = firebase
 			.firestore()
 			.collection("products")
@@ -52,15 +48,13 @@ class CreateProduct extends React.Component {
 		ref.get().then((doc) => {
 			if (doc.exists) {
 				const data = doc.data();
-				this.getCategory();
 				this.setState({
 					key: doc.id,
 					createdAt: data.createdAt,
-					status: data.status,
-					nama: data.nama,
-					harga: data.harga,
-					description: data.description,
-					category: data.category,
+					judul: data.judul,
+					caption: data.caption,
+					likeCount: data.likeCount,
+					commentCount: data.commentCount,
 					photo: data.photo,
 					photoUrl: data.photoUrl,
 				});
@@ -68,16 +62,6 @@ class CreateProduct extends React.Component {
 				console.log("No such document!");
 			}
 		});
-	}
-
-	getCategory = () => {
-		db.collection("category")
-			.doc("product_category")
-			.onSnapshot((doc) => {
-				this.setState({
-					listCategory: doc.data().category,
-				});
-			});
 	};
 
 	handleUploadStart = () => {
@@ -98,7 +82,7 @@ class CreateProduct extends React.Component {
 
 		firebase
 			.storage()
-			.ref("products")
+			.ref("activities")
 			.child(filename)
 			.getDownloadURL()
 			.then((url) =>
@@ -114,49 +98,32 @@ class CreateProduct extends React.Component {
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const {
-			createdAt,
-			status,
-			nama,
-			harga,
-			description,
-			category,
-			photo,
-			photoUrl,
-		} = this.state;
-
-		const updateRef = firebase
-			.firestore()
-			.collection("products")
-			.doc(this.state.key);
-
-		updateRef
+		const db = fire.firestore();
+		db.collection("activities")
+			.doc(this.state.key)
 			.set({
-				createdAt,
-				status,
-				nama,
-				harga,
-				description,
-				category,
-				photo,
-				photoUrl,
+				judul: this.state.judul,
+				body: this.state.caption,
+				photo: this.state.photo,
+				postImage: this.state.photoUrl,
+				likeCount: this.state.likeCount,
+				commentCount: this.state.commentCount,
+				createdAt: this.state.createdAt,
 			})
 			.then(() => {
 				swal({
 					title: "Berhasil!",
-					text: "Data telah diupdate!",
+					text: "Data berhasil di update!",
 					icon: "success",
 					button: "OK",
 				});
-				this.props.history.push("/app/produk");
+				this.props.history.push("/app/activity");
 			})
-			.catch((error) => {
-				console.error("Error adding document: ", error);
-			});
+			.catch((err) => console.log(err));
 	};
 
 	render() {
-		console.log(this.state);
+		const { judul, caption, isSubmitting } = this.state;
 		return (
 			<>
 				<Header />
@@ -168,28 +135,30 @@ class CreateProduct extends React.Component {
 								<CardHeader className="bg-white border-0">
 									<Row className="align-items-center">
 										<Col>
-											<h3 className="mb-0">Edit Produk</h3>
+											<h3 className="mb-0">Tambah Aktivitas</h3>
 										</Col>
 									</Row>
 								</CardHeader>
 
 								<CardBody>
 									<Form role="form" onSubmit={this.onSubmit}>
-										<div key={this.state.key} className="pl-lg-4">
+										<div className="pl-lg-4">
 											<Row>
 												<Col lg="6">
 													<FormGroup>
 														<label
 															className="form-control-label"
-															htmlFor="input-nama"
+															htmlFor="input-judul"
 														>
-															Nama Produk
+															Judul Aktivitas
 														</label>
 														<Input
 															className="form-control-alternative"
-															value={this.state.nama}
+															value={judul}
 															onChange={(event) =>
-																this.setState({ nama: event.target.value })
+																this.setState({
+																	judul: event.target.value,
+																})
 															}
 															type="text"
 														/>
@@ -197,75 +166,33 @@ class CreateProduct extends React.Component {
 												</Col>
 											</Row>
 											<Row>
-												<div className="col-md-4">
+												<Col lg="6">
 													<FormGroup>
 														<label
 															className="form-control-label"
-															htmlFor="input-harga"
+															htmlFor="input-caption"
 														>
-															Harga
+															Caption
 														</label>
-														<InputGroup
-															className={classnames("input-group-merge")}
-														>
-															<CurrencyFormat
-																customInput={Input}
-																value={this.state.harga}
-																onValueChange={(values) => {
-																	const { formattedValue } = values;
-
-																	this.setState({ harga: formattedValue });
-																}}
-																thousandSeparator={true}
-																prefix={"Rp. "}
-															/>
-														</InputGroup>
+														<Input
+															className="form-control-alternative"
+															value={caption}
+															onChange={(event) =>
+																this.setState({
+																	caption: event.target.value,
+																})
+															}
+															type="textarea"
+														/>
 													</FormGroup>
-												</div>
-												<div className="col-md-4">
-													<Row>
-														<Col lg="6">
-															<FormGroup>
-																<label
-																	className="form-control-label"
-																	htmlFor="input-kategori"
-																>
-																	Kategori
-																</label>
-																<Input
-																	name="category"
-																	className="form-control-alternative"
-																	value={this.state.category}
-																	onChange={(event) =>
-																		this.setState({
-																			category: event.target.value,
-																		})
-																	}
-																	type="select"
-																>
-																	{Object.keys(this.state.listCategory).map(
-																		(key, index) => {
-																			let data = this.state.listCategory[key];
-
-																			return (
-																				<option key={index} value={data.nama}>
-																					{data.nama}
-																				</option>
-																			);
-																		}
-																	)}
-																</Input>
-															</FormGroup>
-														</Col>
-													</Row>
-												</div>
+												</Col>
 											</Row>
 
 											<Row>
 												<Col xl="12">
 													<div>
 														<label className="form-control-label">
-															Foto Produk
+															Foto Aktivitas
 														</label>
 														<br />
 														<br />
@@ -284,7 +211,7 @@ class CreateProduct extends React.Component {
 														<FileUploader
 															accept="image/*"
 															name="photo"
-															storageRef={firebase.storage().ref("products")}
+															storageRef={firebase.storage().ref("activities")}
 															onUploadStart={this.handleUploadStart}
 															onUploadSuccess={this.handleUploadSuccess}
 														/>
@@ -307,12 +234,16 @@ class CreateProduct extends React.Component {
 														<Button
 															color="danger"
 															onClick={() =>
-																this.props.history.push("/app/produk")
+																this.props.history.push("/app/activity")
 															}
 														>
 															Batal
 														</Button>
-														<Button color="success" type="submit">
+														<Button
+															color="success"
+															type="submit"
+															disabled={isSubmitting}
+														>
 															Save
 														</Button>
 													</FormGroup>
