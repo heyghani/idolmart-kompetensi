@@ -7,6 +7,7 @@ import {
 	UncontrolledDropdown,
 	DropdownToggle,
 	Table,
+	Input,
 	Container,
 	Row,
 	Col,
@@ -14,56 +15,149 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-// import firebase from 'firebase'
+import Pagination from "components/Pagination";
 import fire from "../../config";
 import swal from "sweetalert";
 
 const db = fire.firestore();
 
-class ListProduct extends React.Component {
+class ListActivity extends React.Component {
 	state = {
 		data: [],
+		pageNumber: 1,
+		last: null,
+		first: null,
+		limit: 10,
 	};
 
 	componentDidMount() {
-		this.getData();
+		this.getdata();
 	}
 
-	getData = () => {
-		db.collection("activities")
-			.orderBy("createdAt", "desc")
+	getdata = (limit) => {
+		if (!limit) {
+			limit = 10;
+		} else if (limit === "10") {
+			limit = 10;
+		} else if (limit === "20") {
+			limit = 20;
+		} else if (limit === "50") {
+			limit = 50;
+		}
+		const first = db.collection("activities").orderBy("judul").limit(limit);
+		first
 			.get()
 			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1].data().judul;
+
 				const data = [];
 				snapshot.forEach((doc) => {
 					data.push({
 						data: doc.data(),
 						id: doc.id,
 					});
+					this.setState({ data, last });
 				});
-				this.setState({ data: data });
 			})
 			.catch((error) => {
 				console.log("Error!", error);
 			});
 	};
 
-	handleDelete = (id, filename) => {
-		const db = fire.firestore();
+	handleChange = (event) => {
+		this.setState({ limit: event.target.value });
+		this.getdata(event.target.value);
+	};
 
+	handlePrevious = (limit) => {
+		const { first, pageNumber } = this.state;
+
+		if (!limit) {
+			limit = 10;
+		} else if (limit === "10") {
+			limit = 10;
+		} else if (limit === "20") {
+			limit = 20;
+		} else if (limit === "50") {
+			limit = 50;
+		}
+		db.collection("activities")
+			.orderBy("judul")
+			.endBefore(first)
+			.limit(limit)
+			.get()
+			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1].data().judul;
+				let first = snapshot.docs[0].data().judul;
+
+				let data = [];
+				snapshot.forEach((doc) => {
+					data.push({
+						data: doc.data(),
+						id: doc.id,
+					});
+					this.setState({ data, last, first, pageNumber: pageNumber - 1 });
+				});
+			});
+	};
+
+	handleNext = (limit) => {
+		const { last, pageNumber } = this.state;
+
+		if (!limit) {
+			limit = 10;
+		} else if (limit === "10") {
+			limit = 10;
+		} else if (limit === "20") {
+			limit = 20;
+		} else if (limit === "50") {
+			limit = 50;
+		}
+		db.collection("activities")
+			.orderBy("judul")
+			.startAfter(last)
+			.limit(limit)
+			.get()
+			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1].data().judul;
+				let first = snapshot.docs[0].data().judul;
+
+				const next = [];
+				snapshot.forEach((doc) => {
+					next.push({
+						data: doc.data(),
+						id: doc.id,
+					});
+					this.setState({
+						data: next,
+						last,
+						first,
+						pageNumber: pageNumber + 1,
+					});
+				});
+			})
+			.catch(() => {
+				alert("last page");
+			});
+	};
+
+	handleDelete = (id) => {
 		db.collection("activities")
 			.doc(id)
 			.delete()
-			.then(() => {
-				this.props.history.push("/app/activity");
+			.then(() =>
 				swal("Poof! Activity has been deleted!", {
 					icon: "success",
-				});
-				this.getdata();
-			})
+				})
+			)
+			.finally(() => window.location.reload(false))
 			.catch((error) => {
 				console.log("Error!", error);
 			});
+	};
+
+	onClickEdit = (id) => {
+		this.props.history.push(`/app/activity/edit/${id}`);
 	};
 
 	onClickAdd = () => {
@@ -87,7 +181,6 @@ class ListProduct extends React.Component {
 	};
 
 	render() {
-		let id = 1;
 		return (
 			<>
 				<Header />
@@ -128,8 +221,7 @@ class ListProduct extends React.Component {
 										{this.state.data &&
 											this.state.data.map((data) => {
 												return (
-													<tr key={id}>
-														<th>{id++}</th>
+													<tr key={data.id}>
 														<th scope="row">
 															<span className="mb-0 text-sm">
 																{data.data.judul}
@@ -194,6 +286,29 @@ class ListProduct extends React.Component {
 											})}
 									</tbody>
 								</Table>
+								<Row>
+									<Col sm={{ size: 2.5 }} style={{ marginLeft: 20 }}>
+										<Input
+											value={this.state.limit}
+											onChange={this.handleChange}
+											type="select"
+										>
+											<option value="10">10 rows</option>
+											<option value="20">20 rows</option>
+											<option value="50">50 rows</option>
+										</Input>
+									</Col>
+									<Col style={{ marginRight: 20 }}>
+										<Pagination
+											handlePrevious={() =>
+												this.handlePrevious(this.state.limit)
+											}
+											handleNext={() => this.handleNext(this.state.limit)}
+											pageNumber={this.state.pageNumber}
+											lastPage={this.state.lastPage}
+										/>
+									</Col>
+								</Row>
 							</Card>
 						</div>
 					</Row>
@@ -203,4 +318,4 @@ class ListProduct extends React.Component {
 	}
 }
 
-export default ListProduct;
+export default ListActivity;

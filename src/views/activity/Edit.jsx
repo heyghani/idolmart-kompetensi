@@ -21,6 +21,8 @@ import firebase from "firebase";
 import fire from "../../config";
 import swal from "sweetalert";
 
+const db = fire.firestore();
+
 class CreateProduct extends React.Component {
 	constructor(props) {
 		super(props);
@@ -43,7 +45,7 @@ class CreateProduct extends React.Component {
 	componentDidMount = () => {
 		const ref = firebase
 			.firestore()
-			.collection("products")
+			.collection("activities")
 			.doc(this.props.match.params.id);
 		ref.get().then((doc) => {
 			if (doc.exists) {
@@ -52,11 +54,11 @@ class CreateProduct extends React.Component {
 					key: doc.id,
 					createdAt: data.createdAt,
 					judul: data.judul,
-					caption: data.caption,
+					caption: data.body,
 					likeCount: data.likeCount,
 					commentCount: data.commentCount,
 					photo: data.photo,
-					photoUrl: data.photoUrl,
+					photoUrl: data.postImage,
 				});
 			} else {
 				console.log("No such document!");
@@ -98,7 +100,7 @@ class CreateProduct extends React.Component {
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const db = fire.firestore();
+
 		db.collection("activities")
 			.doc(this.state.key)
 			.set({
@@ -135,7 +137,7 @@ class CreateProduct extends React.Component {
 								<CardHeader className="bg-white border-0">
 									<Row className="align-items-center">
 										<Col>
-											<h3 className="mb-0">Tambah Aktivitas</h3>
+											<h3 className="mb-0">Edit Aktivitas</h3>
 										</Col>
 									</Row>
 								</CardHeader>

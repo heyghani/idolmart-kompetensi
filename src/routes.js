@@ -11,6 +11,7 @@ import ListSettings from "views/setting/List";
 import CreateCategory from "views/category/Create";
 import EditCategory from "views/category/Edit";
 import ListCategory from "views/category/List";
+import Logout from "views/Logout";
 
 var routes = [
 	{
@@ -110,6 +111,13 @@ var routes = [
 		name: "Customize",
 		icon: "ni ni-settings-gear-65 text-blue",
 		component: ListSettings,
+		layout: "/app",
+	},
+	{
+		path: "/logout",
+		name: "Logout",
+		icon: "ni ni-button-power text-blue",
+		component: Logout,
 		layout: "/app",
 	},
 ];

@@ -7,6 +7,7 @@ import {
 	DropdownItem,
 	UncontrolledDropdown,
 	DropdownToggle,
+	Input,
 	Table,
 	Container,
 	Row,
@@ -25,47 +26,121 @@ const db = fire.firestore();
 class ListProduct extends React.Component {
 	state = {
 		data: [],
+		pageNumber: 1,
 		last: null,
+		first: null,
 		status: true,
-		currentPage: 1,
-		itemsPerPage: 3,
-		totalItemCount: 1,
-		activePage: 15,
+		limit: 10,
 	};
 
 	componentDidMount() {
 		this.getdata();
 	}
 
-	getdata = () => {
-		const startAt = 2 * 3 - 3;
-		db.collection("products")
-			.orderBy("status")
-			.limit(3)
+	getdata = (limit) => {
+		if (!limit) {
+			limit = 10;
+		} else if (limit === "10") {
+			limit = 10;
+		} else if (limit === "20") {
+			limit = 20;
+		} else if (limit === "50") {
+			limit = 50;
+		}
+		const first = db.collection("products").orderBy("nama").limit(limit);
+		first
 			.get()
 			.then((snapshot) => {
-				let last = snapshot.docs[snapshot.docs.length - 1];
+				let last = snapshot.docs[snapshot.docs.length - 1].data().nama;
 
-				// return db
-				// 	.collection("products")
-				// 	.orderBy("status")
-				// 	.startAfter(last.data().nama)
-				// 	.limit(3)
-				// 	.get()
-				// 	.then((snapshot) => {
-				// 		snapshot.forEach((doc) => console.log("next :", doc.data()));
-				// 	});
 				const data = [];
 				snapshot.forEach((doc) => {
 					data.push({
 						data: doc.data(),
 						id: doc.id,
 					});
+					this.setState({ data, last });
 				});
-				this.setState({ data, last });
 			})
 			.catch((error) => {
 				console.log("Error!", error);
+			});
+	};
+
+	handleChange = (event) => {
+		this.setState({ limit: event.target.value });
+		this.getdata(event.target.value);
+	};
+
+	handlePrevious = (limit) => {
+		const { first, pageNumber } = this.state;
+
+		if (!limit) {
+			limit = 10;
+		} else if (limit === "10") {
+			limit = 10;
+		} else if (limit === "20") {
+			limit = 20;
+		} else if (limit === "50") {
+			limit = 50;
+		}
+		db.collection("products")
+			.orderBy("nama")
+			.endBefore(first)
+			.limit(limit)
+			.get()
+			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1].data().nama;
+				let first = snapshot.docs[0].data().nama;
+
+				let data = [];
+				snapshot.forEach((doc) => {
+					data.push({
+						data: doc.data(),
+						id: doc.id,
+					});
+					this.setState({ data, last, first, pageNumber: pageNumber - 1 });
+				});
+			});
+	};
+
+	handleNext = (limit) => {
+		const { last, pageNumber } = this.state;
+
+		if (!limit) {
+			limit = 10;
+		} else if (limit === "10") {
+			limit = 10;
+		} else if (limit === "20") {
+			limit = 20;
+		} else if (limit === "50") {
+			limit = 50;
+		}
+		db.collection("products")
+			.orderBy("nama")
+			.startAfter(last)
+			.limit(limit)
+			.get()
+			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1].data().nama;
+				let first = snapshot.docs[0].data().nama;
+
+				const next = [];
+				snapshot.forEach((doc) => {
+					next.push({
+						data: doc.data(),
+						id: doc.id,
+					});
+					this.setState({
+						data: next,
+						last,
+						first,
+						pageNumber: pageNumber + 1,
+					});
+				});
+			})
+			.catch(() => {
+				alert("last page");
 			});
 	};
 
@@ -90,23 +165,25 @@ class ListProduct extends React.Component {
 			.doc(id)
 			.get()
 			.then((doc) => {
-				this.setState({ status: doc.data().status });
-				console.log("Before : ", this.state.status);
+				this.setState({
+					status: doc.data().status,
+				});
 			})
 			.then(() => {
-				this.setState({ status: !this.state.status });
+				this.setState({
+					status: !this.state.status,
+					pageNumber: 1,
+				});
 				db.collection("products")
 					.doc(id)
 					.update({
 						status: this.state.status,
 					})
 					.then(() => {
-						console.log("After:", this.state.status);
-						this.props.history.push("/app/produk");
+						this.getdata();
 						swal("Status updated!", {
 							icon: "success",
 						});
-						this.getdata();
 					});
 			})
 			.catch((error) => {
@@ -139,7 +216,7 @@ class ListProduct extends React.Component {
 	};
 
 	render() {
-		let id = 1;
+		console.log(this.state.limit);
 		return (
 			<>
 				<Header />
@@ -169,7 +246,6 @@ class ListProduct extends React.Component {
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">
 										<tr>
-											<th scope="col">#</th>
 											<th scope="col">Produk</th>
 											<th scope="col">Harga</th>
 											<th scope="col">Category</th>
@@ -182,10 +258,8 @@ class ListProduct extends React.Component {
 									<tbody>
 										{this.state.data &&
 											this.state.data.map((data) => {
-												console.log(data.data.nama);
 												return (
-													<tr key={id}>
-														<th>{id++}</th>
+													<tr key={data.id}>
 														<th scope="row">
 															<span className="mb-0 text-sm">
 																{data.data.nama}
@@ -269,17 +343,30 @@ class ListProduct extends React.Component {
 												);
 											})}
 									</tbody>
-									{/* <div>
-										<Pagination
-											activePage={this.state.activePage}
-											itemsCountPerPage={10}
-											totalItemsCount={450}
-											pageRangeDisplayed={5}
-											onChange={() => this.handlePageChange()}
-										/>
-									</div> */}
 								</Table>
-								<Pagination />
+								<Row>
+									<Col sm={{ size: 2.5 }} style={{ marginLeft: 20 }}>
+										<Input
+											value={this.state.limit}
+											onChange={this.handleChange}
+											type="select"
+										>
+											<option value="10">10 rows</option>
+											<option value="20">20 rows</option>
+											<option value="50">50 rows</option>
+										</Input>
+									</Col>
+									<Col style={{ marginRight: 20 }}>
+										<Pagination
+											handlePrevious={() =>
+												this.handlePrevious(this.state.limit)
+											}
+											handleNext={() => this.handleNext(this.state.limit)}
+											pageNumber={this.state.pageNumber}
+											lastPage={this.state.lastPage}
+										/>
+									</Col>
+								</Row>
 							</Card>
 						</div>
 					</Row>
