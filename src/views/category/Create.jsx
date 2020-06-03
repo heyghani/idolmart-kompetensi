@@ -15,7 +15,6 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import firebase from "firebase";
 import fire from "../../config";
 import swal from "sweetalert";
 import Select from "react-select";
@@ -93,33 +92,26 @@ export default class CreateCategory extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			id: null,
 			nama: "",
-			color: "",
+			select: colourOptions[0],
 		};
 	}
 
-	componentDidMount = () => {
-		db.collection("category")
-			.doc("product_category")
-			.onSnapshot((doc) => {
-				this.setState({ id: doc.data().category.length });
-			});
-	};
+	componentDidMount() {
+		console.log(this.state.select);
+	}
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const { nama, id, color } = this.state;
-		const categoryRef = db.collection("category").doc("product_category");
+		const { nama, select } = this.state;
+		const categoryRef = db.collection("category").doc();
 
 		categoryRef
-			.update({
-				category: firebase.firestore.FieldValue.arrayUnion({
-					id: id + 1,
-					nama,
-					color,
-				}),
+			.set({
+				nama,
+				select,
 			})
+
 			.then(() => {
 				swal({
 					title: "Berhasil!",
@@ -190,7 +182,7 @@ export default class CreateCategory extends React.Component {
 															options={colourOptions}
 															styles={colourStyles}
 															onChange={(select) => {
-																this.setState({ color: select.color });
+																this.setState({ select });
 															}}
 														/>
 													</FormGroup>

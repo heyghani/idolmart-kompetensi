@@ -61,7 +61,7 @@ var routes = [
 		invisible: true,
 	},
 	{
-		path: "/category/edit/:nama",
+		path: "/category/edit/:id",
 		name: "Edit Category",
 		icon: "ni ni-app text-blue",
 		component: EditCategory,

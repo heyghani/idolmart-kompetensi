@@ -45,11 +45,19 @@ class CreateProduct extends React.Component {
 
 	componentDidMount = () => {
 		db.collection("category")
-			.doc("product_category")
-			.onSnapshot((doc) => {
-				this.setState({
-					category: doc.data().category,
-					selectedCategory: doc.data().category[0].nama,
+			.orderBy("nama")
+			.startAfter("All")
+			.get()
+			.then((snapshot) => {
+				let first = snapshot.docs[0].data().nama;
+				let data = [];
+				snapshot.forEach((doc) => {
+					data.push(doc.data().nama);
+					console.log(this.state.selectedCategory);
+					this.setState({
+						category: data,
+						selectedCategory: first,
+					});
 				});
 			});
 	};
@@ -97,9 +105,11 @@ class CreateProduct extends React.Component {
 			status,
 		} = this.state;
 
-		db.doc(`products/${nama}`)
+		db.collection("products")
+			.doc()
 			.set({
 				nama,
+				index: nama.toUpperCase(),
 				harga: harga,
 				category: selectedCategory,
 				description: description,
@@ -138,6 +148,7 @@ class CreateProduct extends React.Component {
 			description,
 			isSubmitting,
 		} = this.state;
+		console.log("category : " + category, "selected : " + selectedCategory);
 		return (
 			<>
 				<Header />
@@ -243,8 +254,8 @@ class CreateProduct extends React.Component {
 																		let data = this.state.category[key];
 
 																		return (
-																			<option key={index} value={data.nama}>
-																				{data.nama}
+																			<option key={index} value={data}>
+																				{data}
 																			</option>
 																		);
 																	})}

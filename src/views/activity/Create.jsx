@@ -11,7 +11,7 @@ import {
 	Input,
 	Container,
 	Row,
-	Col
+	Col,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
@@ -38,24 +38,24 @@ class CreateProduct extends React.Component {
 			photoUrl: "",
 			user: "",
 			isUploading: false,
-			progress: 0
+			progress: 0,
 		};
 	}
 
 	handleUploadStart = () => {
 		this.setState({
 			isUploading: true,
-			progress: 0
+			progress: 0,
 		});
 	};
 
-	handleProgress = progress => this.setState({ progress });
+	handleProgress = (progress) => this.setState({ progress });
 
-	handleUploadSuccess = filename => {
+	handleUploadSuccess = (filename) => {
 		console.log(this.state);
 		this.setState({
 			photo: filename,
-			progress: 100
+			progress: 100,
 		});
 
 		firebase
@@ -63,9 +63,9 @@ class CreateProduct extends React.Component {
 			.ref("activities")
 			.child(filename)
 			.getDownloadURL()
-			.then(url =>
+			.then((url) =>
 				this.setState({
-					photoUrl: url
+					photoUrl: url,
 				})
 			);
 	};
@@ -74,29 +74,30 @@ class CreateProduct extends React.Component {
 		console.log(status, meta);
 	};
 
-	onSubmit = e => {
+	onSubmit = (e) => {
 		e.preventDefault();
 		const db = fire.firestore();
 		db.collection("activities").add({
 			judul: this.state.judul,
+			index: this.state.judul.toUpperCase(),
 			body: this.state.caption,
 			photo: this.state.photo,
 			postImage: this.state.photoUrl,
 			likeCount: 0,
 			commentCount: 0,
-			createdAt: new Date().toISOString()
+			createdAt: new Date().toISOString(),
 		});
 		this.setState({
 			judul: "",
 			caption: "",
 			photo: "",
-			photoUrl: ""
+			photoUrl: "",
 		});
 		swal({
 			title: "Berhasil!",
 			text: "Data telah ditambahkan!",
 			icon: "success",
-			button: "OK"
+			button: "OK",
 		});
 		this.props.history.push("/app/activity");
 	};
@@ -134,9 +135,9 @@ class CreateProduct extends React.Component {
 														<Input
 															className="form-control-alternative"
 															value={judul}
-															onChange={event =>
+															onChange={(event) =>
 																this.setState({
-																	judul: event.target.value
+																	judul: event.target.value,
 																})
 															}
 															type="text"
@@ -156,9 +157,9 @@ class CreateProduct extends React.Component {
 														<Input
 															className="form-control-alternative"
 															value={caption}
-															onChange={event =>
+															onChange={(event) =>
 																this.setState({
-																	caption: event.target.value
+																	caption: event.target.value,
 																})
 															}
 															type="textarea"
@@ -183,7 +184,7 @@ class CreateProduct extends React.Component {
 																	padding: 15,
 																	width: 250,
 																	height: 300,
-																	resizeMode: "center"
+																	resizeMode: "center",
 																}}
 															/>
 														)}

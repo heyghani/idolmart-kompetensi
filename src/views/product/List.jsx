@@ -17,7 +17,7 @@ import {
 // core components
 import Header from "components/Headers/Header.jsx";
 import Pagination from "components/Pagination.jsx";
-// import Pagination from "react-js-pagination";
+import SearchField from "react-search-field";
 import fire from "../../config";
 import swal from "sweetalert";
 
@@ -31,11 +31,34 @@ class ListProduct extends React.Component {
 		first: null,
 		status: true,
 		limit: 10,
+		search: "",
+		error: "",
 	};
 
 	componentDidMount() {
 		this.getdata();
 	}
+
+	getAllData = () => {
+		const first = db.collection("products").orderBy("nama").limit(10);
+		first
+			.get()
+			.then((snapshot) => {
+				let last = snapshot.docs[snapshot.docs.length - 1].data().nama;
+
+				const data = [];
+				snapshot.forEach((doc) => {
+					data.push({
+						data: doc.data(),
+						id: doc.id,
+					});
+					this.setState({ data, last });
+				});
+			})
+			.catch((error) => {
+				console.log("Error!", error);
+			});
+	};
 
 	getdata = (limit) => {
 		if (!limit) {
@@ -160,6 +183,56 @@ class ListProduct extends React.Component {
 			});
 	};
 
+	handleSearch = (search) => {
+		const index = search.toUpperCase();
+		this.setState({ error: "" });
+		db.collection("products")
+			.orderBy("index")
+			.startAt(index)
+			.endAt(index + "\uf8ff")
+			.get()
+			.then((snapshot) => {
+				if (!snapshot.empty) {
+					const data = [];
+					snapshot.forEach((doc) => {
+						data.push({
+							id: doc.id,
+							data: doc.data(),
+						});
+						this.setState({ data, index });
+					});
+				} else {
+					this.setState({ error: "Item not found" });
+				}
+			});
+	};
+
+	onEnter = (search) => {
+		if (search === "") {
+			window.location.reload(false);
+		}
+
+		db.collection("products")
+			.where("nama", "==", search + "\uf8ff")
+			.orderBy("nama")
+			.get()
+			.then((snapshot) => {
+				if (!snapshot.empty) {
+					let data = [];
+					snapshot.forEach((doc) => {
+						data.push({
+							id: doc.id,
+							data: doc.data(),
+						});
+						this.setState({ data });
+						console.log(data);
+					});
+				} else {
+					this.setState({ error: "Item not found" });
+				}
+			});
+	};
+
 	onChangeStatus = (id) => {
 		db.collection("products")
 			.doc(id)
@@ -216,7 +289,6 @@ class ListProduct extends React.Component {
 	};
 
 	render() {
-		console.log(this.state.limit);
 		return (
 			<>
 				<Header />
@@ -242,6 +314,21 @@ class ListProduct extends React.Component {
 										</Col>
 									</Row>
 								</CardHeader>
+								<Row>
+									<Col xl="3" style={{ margin: 10, bottom: 10 }}>
+										<SearchField
+											placeholder="Search item"
+											onEnter={(search) => {
+												this.onEnter(search);
+											}}
+											onSearchClick={(search) => {
+												this.onEnter(search);
+											}}
+											onChange={(search) => this.handleSearch(search)}
+										/>
+										<p>{this.state.error}</p>
+									</Col>
+								</Row>
 
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">

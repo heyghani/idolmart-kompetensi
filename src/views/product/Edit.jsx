@@ -72,10 +72,14 @@ class CreateProduct extends React.Component {
 
 	getCategory = () => {
 		db.collection("category")
-			.doc("product_category")
-			.onSnapshot((doc) => {
-				this.setState({
-					listCategory: doc.data().category,
+			.get()
+			.then((snapshot) => {
+				let data = [];
+				snapshot.forEach((doc) => {
+					data.push(doc.data().nama);
+					this.setState({
+						listCategory: data,
+					});
 				});
 			});
 	};
@@ -248,8 +252,8 @@ class CreateProduct extends React.Component {
 																			let data = this.state.listCategory[key];
 
 																			return (
-																				<option key={index} value={data.nama}>
-																					{data.nama}
+																				<option key={index} value={data}>
+																					{data}
 																				</option>
 																			);
 																		}

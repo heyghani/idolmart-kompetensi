@@ -14,7 +14,6 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import firebase from "firebase";
 import fire from "../../config";
 import swal from "sweetalert";
 
@@ -32,22 +31,26 @@ export default class ListCategory extends React.Component {
 
 	getData = () => {
 		db.collection("category")
-			.doc("product_category")
-			.onSnapshot((doc) => {
-				const data = doc.data().category;
-				this.setState({ data });
+			.get()
+			.then((snapshot) => {
+				let data = [];
+				snapshot.forEach((doc) => {
+					data.push({
+						id: doc.id,
+						data: doc.data(),
+					});
+					this.setState({ data });
+				});
 			});
 	};
 
-	handleDelete = (data) => {
+	handleDelete = (id) => {
 		db.collection("category")
-			.doc("product_category")
-			.update({
-				category: firebase.firestore.FieldValue.arrayRemove(data),
-			})
+			.doc(id)
+			.delete()
 			.then(() => {
 				this.props.history.push("/app/category");
-				swal("Poof! Your imaginary file has been deleted!", {
+				swal("Poof! Category has been deleted!", {
 					icon: "success",
 				});
 				this.getData();
@@ -117,18 +120,21 @@ export default class ListCategory extends React.Component {
 									<tbody>
 										{Object.keys(this.state.data).map((key, index) => {
 											let data = this.state.data[key];
+
 											return (
 												<tr key={id}>
 													<th>{id++}</th>
 													<th scope="row">
-														<span className="mb-0 text-sm">{data.nama}</span>
+														<span className="mb-0 text-sm">
+															{data.data.nama}
+														</span>
 													</th>
 													<th scope="row">
 														<Button
 															style={{
 																height: 30,
 																width: 70,
-																backgroundColor: data.color,
+																backgroundColor: data.data.select.color,
 															}}
 														></Button>
 													</th>
@@ -151,7 +157,7 @@ export default class ListCategory extends React.Component {
 																<DropdownItem
 																	onClick={() =>
 																		this.props.history.push(
-																			`/app/category/edit/${data.nama}`
+																			`/app/category/edit/${data.id}`
 																		)
 																	}
 																>
@@ -162,7 +168,7 @@ export default class ListCategory extends React.Component {
 																	Edit
 																</DropdownItem>
 																<DropdownItem
-																	onClick={() => this.onClickDelete(data)}
+																	onClick={() => this.onClickDelete(data.id)}
 																>
 																	<i
 																		className="fas fa-trash-alt"

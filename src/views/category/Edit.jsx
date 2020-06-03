@@ -15,7 +15,6 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import firebase from "firebase";
 import fire from "../../config";
 import swal from "sweetalert";
 import Select from "react-select";
@@ -95,32 +94,41 @@ export default class CreateCategory extends React.Component {
 		this.state = {
 			id: null,
 			nama: "",
-			color: "",
+			select: "",
+			option: {},
 		};
 	}
 
-	componentDidMount = () => {
-		db.collection("category")
-			.doc(`product_category/${this.props.match.params.nama}`)
-			.onSnapshot((doc) => {
+	componentDidMount() {
+		const ref = db.collection("category").doc(this.props.match.params.id);
+		ref.get().then((doc) => {
+			if (doc.exists) {
+				const option = {
+					value: doc.data().select.value,
+					label: doc.data().select.label,
+					color: doc.data().select.color,
+				};
 				this.setState({
 					nama: doc.data().nama,
+					option: option,
 				});
-			});
-	};
+			} else {
+				console.log("No such document!");
+			}
+		});
+	}
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const { nama, id, color } = this.state;
-		const categoryRef = db.collection("category").doc("product_category");
+		const { nama, select } = this.state;
+		const categoryRef = db
+			.collection("category")
+			.doc(this.props.match.params.id);
 
 		categoryRef
 			.update({
-				category: firebase.firestore.FieldValue.arrayUnion({
-					id: id + 1,
-					nama,
-					color,
-				}),
+				nama,
+				select,
 			})
 			.then(() => {
 				swal({
@@ -192,7 +200,7 @@ export default class CreateCategory extends React.Component {
 															options={colourOptions}
 															styles={colourStyles}
 															onChange={(select) => {
-																this.setState({ color: select.color });
+																this.setState({ select });
 															}}
 														/>
 													</FormGroup>

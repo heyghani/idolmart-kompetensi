@@ -16,6 +16,7 @@ import {
 // core components
 import Header from "components/Headers/Header.jsx";
 import Pagination from "components/Pagination";
+import SearchField from "react-search-field";
 import fire from "../../config";
 import swal from "sweetalert";
 
@@ -28,6 +29,8 @@ class ListActivity extends React.Component {
 		last: null,
 		first: null,
 		limit: 10,
+		search: "",
+		error: "",
 	};
 
 	componentDidMount() {
@@ -156,6 +159,57 @@ class ListActivity extends React.Component {
 			});
 	};
 
+	handleSearch = (search) => {
+		const index = search.toUpperCase();
+		console.log(index);
+		this.setState({ error: "" });
+		db.collection("activities")
+			.orderBy("index")
+			.startAt(index)
+			.endAt(index + "\uf8ff")
+			.get()
+			.then((snapshot) => {
+				if (!snapshot.empty) {
+					const data = [];
+					snapshot.forEach((doc) => {
+						data.push({
+							id: doc.id,
+							data: doc.data(),
+						});
+						this.setState({ data, index });
+					});
+				} else {
+					this.setState({ error: "Item not found" });
+				}
+			});
+	};
+
+	onEnter = (search) => {
+		if (search === "") {
+			window.location.reload(false);
+		}
+
+		db.collection("activities")
+			.where("nama", "==", search + "\uf8ff")
+			.orderBy("nama")
+			.get()
+			.then((snapshot) => {
+				if (!snapshot.empty) {
+					let data = [];
+					snapshot.forEach((doc) => {
+						data.push({
+							id: doc.id,
+							data: doc.data(),
+						});
+						this.setState({ data });
+						console.log(data);
+					});
+				} else {
+					this.setState({ error: "Item not found" });
+				}
+			});
+	};
+
 	onClickEdit = (id) => {
 		this.props.history.push(`/app/activity/edit/${id}`);
 	};
@@ -207,10 +261,25 @@ class ListActivity extends React.Component {
 									</Row>
 								</CardHeader>
 
+								<Row>
+									<Col xl="3" style={{ margin: 10, bottom: 10 }}>
+										<SearchField
+											placeholder="Search item"
+											onEnter={(search) => {
+												this.onEnter(search);
+											}}
+											onSearchClick={(search) => {
+												this.onEnter(search);
+											}}
+											onChange={(search) => this.handleSearch(search)}
+										/>
+										<p>{this.state.error}</p>
+									</Col>
+								</Row>
+
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">
 										<tr>
-											<th scope="col">#</th>
 											<th scope="col">Judul</th>
 											<th scope="col">Caption</th>
 											<th scope="col">Gambar</th>
