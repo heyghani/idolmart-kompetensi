@@ -31,7 +31,6 @@ class ListProduct extends React.Component {
 		first: null,
 		status: true,
 		limit: 10,
-		search: "",
 		error: "",
 	};
 
@@ -186,6 +185,7 @@ class ListProduct extends React.Component {
 	handleSearch = (search) => {
 		const index = search.toUpperCase();
 		this.setState({ error: "" });
+		console.log(this.state.error);
 		db.collection("products")
 			.orderBy("index")
 			.startAt(index)
@@ -199,12 +199,13 @@ class ListProduct extends React.Component {
 							id: doc.id,
 							data: doc.data(),
 						});
-						this.setState({ data, index });
+						this.setState({ data });
 					});
 				} else {
 					this.setState({ error: "Item not found" });
 				}
-			});
+			})
+			.catch(() => this.setState({ error: "Item not found" }));
 	};
 
 	onEnter = (search) => {

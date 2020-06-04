@@ -19,10 +19,26 @@ if (!firebase.apps.length) {
 	firebase.initializeApp({ fire });
 }
 
+const session = localStorage.getItem("UserLogin");
+if (session) {
+	hist.push("/app/home");
+} else {
+	hist.push("/");
+}
+
+const PrivateRoute = ({ component: Component, ...rest }) => (
+	<Route
+		{...rest}
+		render={(props) =>
+			session ? <Component {...props} /> : <Redirect to={{ pathname: "/" }} />
+		}
+	/>
+);
+
 ReactDOM.render(
 	<Router history={hist}>
 		<Switch>
-			<Route path="/app" render={(props) => <AdminLayout {...props} />} />
+			<PrivateRoute path="/app" component={AdminLayout} />
 			<Route path="/auth" render={(props) => <AuthLayout {...props} />} />
 			<Redirect from="/" to="/auth/index" />
 		</Switch>

@@ -26,15 +26,6 @@ class Login extends Component {
 		error: "",
 	};
 
-	componentDidMount = () => {
-		const session = localStorage.UserLogin;
-		if (session) {
-			this.props.history.push("/app/home");
-		} else {
-			this.props.history.push("/auth/index");
-		}
-	};
-
 	toggleModal = (state) => {
 		this.setState({
 			[state]: !this.state[state],
@@ -70,7 +61,8 @@ class Login extends Component {
 						return this.props.history.push("/app/home");
 					}
 				}
-			});
+			})
+			.catch((error) => console.log(error));
 	};
 
 	onSignin = (e) => {
@@ -89,8 +81,8 @@ class Login extends Component {
 				if (doc.exists) {
 					if (password === credential.password) {
 						let credential = { username, password };
-						this.props.history.push("/app/home");
 						localStorage.setItem("UserLogin", credential);
+						window.location.reload();
 					} else {
 						this.setState({ error: "Username atau password salah" });
 					}

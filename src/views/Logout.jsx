@@ -9,7 +9,7 @@ class Logout extends Component {
 
 	isCancel = () => {
 		this.setState({ defaultModal: false });
-		this.props.history.push("/app/home");
+		this.props.history.goBack();
 	};
 
 	onSubmit = () => {
