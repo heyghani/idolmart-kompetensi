@@ -23,14 +23,18 @@ const session = localStorage.getItem("UserLogin");
 if (session) {
 	hist.push("/app/home");
 } else {
-	hist.push("/");
+	hist.push("/auth/index");
 }
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
 	<Route
 		{...rest}
 		render={(props) =>
-			session ? <Component {...props} /> : <Redirect to={{ pathname: "/" }} />
+			session ? (
+				<Component {...props} />
+			) : (
+				<Redirect to={{ pathname: "/auth/index" }} />
+			)
 		}
 	/>
 );

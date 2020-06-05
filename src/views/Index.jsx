@@ -33,36 +33,56 @@ class Login extends Component {
 	};
 
 	handleSignup = () => {
-		this.setState({ defaultModal: false, signupModal: true });
+		this.setState({
+			defaultModal: false,
+			signupModal: true,
+			error: "",
+			username: "",
+			password: "",
+		});
 	};
 
 	handleSignin = () => {
-		this.setState({ defaultModal: true, signupModal: false });
+		this.setState({
+			defaultModal: true,
+			signupModal: false,
+			error: "",
+			username: "",
+			password: "",
+		});
 	};
 
 	onSignup = (e) => {
 		e.preventDefault();
 		const { username, password, confirmPassword } = this.state;
+		this.setState({ error: "" });
 
-		db.collection("admin")
-			.doc(username)
-			.get()
-			.then((doc) => {
-				if (doc.exists) {
-					this.setState({ error: "Username telah digunakan" });
-				} else {
-					if (password !== confirmPassword) {
-						this.setState({ error: "Password tidak cocok" });
+		if (username === "" || password === "") {
+			this.setState({ error: "Username atau password kosong" });
+			return null;
+		} else {
+			db.collection("admin")
+				.doc(username)
+				.get()
+				.then((doc) => {
+					if (doc.exists) {
+						this.setState({ error: "Username telah digunakan" });
 					} else {
-						db.collection("admin").doc(username).set({
-							username,
-							password,
-						});
-						return this.props.history.push("/app/home");
+						if (password !== confirmPassword) {
+							this.setState({ error: "Password tidak cocok" });
+						} else {
+							db.collection("admin").doc(username).set({
+								username,
+								password,
+							});
+							let credential = { username, password };
+							localStorage.setItem("UserLogin", credential);
+							window.location.reload();
+						}
 					}
-				}
-			})
-			.catch((error) => console.log(error));
+				})
+				.catch((error) => console.log(error));
+		}
 	};
 
 	onSignin = (e) => {
@@ -70,25 +90,30 @@ class Login extends Component {
 		const { username, password } = this.state;
 		this.setState({ error: "" });
 
-		db.collection("admin")
-			.doc(username)
-			.get()
-			.then((doc) => {
-				let credential = {
-					username: doc.data().username,
-					password: doc.data().password,
-				};
-				if (doc.exists) {
-					if (password === credential.password) {
-						let credential = { username, password };
-						localStorage.setItem("UserLogin", credential);
-						window.location.reload();
-					} else {
-						this.setState({ error: "Username atau password salah" });
+		if (username === "" || password === "") {
+			this.setState({ error: "Username atau password kosong" });
+			return null;
+		} else {
+			db.collection("admin")
+				.doc(username)
+				.get()
+				.then((doc) => {
+					let credential = {
+						username: doc.data().username,
+						password: doc.data().password,
+					};
+					if (doc.exists) {
+						if (password === credential.password) {
+							let credential = { username, password };
+							localStorage.setItem("UserLogin", credential);
+							window.location.reload();
+						} else {
+							this.setState({ error: "Username atau password salah" });
+						}
 					}
-				}
-			})
-			.catch(() => this.setState({ error: "Username tidak ditemukan" }));
+				})
+				.catch(() => this.setState({ error: "Username tidak ditemukan" }));
+		}
 	};
 
 	render() {
