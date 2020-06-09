@@ -104,7 +104,6 @@ class Login extends Component {
 					};
 					if (doc.exists) {
 						if (password === credential.password) {
-							let credential = { username, password };
 							localStorage.setItem("UserLogin", credential);
 							window.location.reload();
 						} else {

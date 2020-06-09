@@ -4,6 +4,7 @@ import {
 	CardHeader,
 	DropdownMenu,
 	DropdownItem,
+	FormGroup,
 	UncontrolledDropdown,
 	DropdownToggle,
 	Table,
@@ -14,18 +15,31 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-// import firebase from 'firebase'
+import EdiText from "react-editext";
 import fire from "../../config";
 import swal from "sweetalert";
+
+const db = fire.firestore();
 
 class ListSetting extends React.Component {
 	state = {
 		data: [],
+		phone: "",
 	};
 
 	componentDidMount() {
-		const db = fire.firestore();
+		this.getData();
+		this.getCs();
+	}
 
+	getCs = () => {
+		db.collection("admin")
+			.doc("cs")
+			.get()
+			.then((doc) => this.setState({ phone: doc.data().phone }));
+	};
+
+	getData = () => {
 		db.collection("setting")
 			.orderBy("createdAt", "desc")
 			.get()
@@ -43,18 +57,16 @@ class ListSetting extends React.Component {
 			.catch((error) => {
 				console.log("Error!", error);
 			});
-	}
+	};
 
-	handleDelete = (id, filename) => {
-		const db = fire.firestore();
-		// const ref = fire.storage().refFromURL(filename)
+	handleCs = (val) => {
+		db.collection("admin")
+			.doc("cs")
+			.update({ phone: val })
+			.then(() => this.setState({ phone: val }));
+	};
 
-		// ref.delete().then(() => {
-		//     console.log(`${filename} deleted`)
-		// }).catch(error => {
-		//     console.log('Error!', error)
-		// })
-
+	handleDelete = (id) => {
 		db.collection("settings")
 			.doc(id)
 			.delete()
@@ -89,11 +101,6 @@ class ListSetting extends React.Component {
 		});
 	};
 
-	handleOnChange = (event) => {
-		const image = event.target.files[0];
-		console.log(image);
-	};
-
 	render() {
 		let id = 1;
 		return (
@@ -121,6 +128,24 @@ class ListSetting extends React.Component {
 										</Col>
 									</Row>
 								</CardHeader>
+
+								<Row>
+									<Col
+										xl="3"
+										style={{ margin: 10, bottom: 10, marginLeft: 25 }}
+									>
+										<label className="form-control-label" htmlFor="input-nama">
+											Customer Service
+										</label>
+										<EdiText
+											type="text"
+											value={this.state.phone}
+											onSave={this.handleCs}
+											editOnViewClick={true}
+											showButtonsOnHover={true}
+										/>
+									</Col>
+								</Row>
 
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">

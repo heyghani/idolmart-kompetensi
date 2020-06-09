@@ -22,25 +22,25 @@ import { Link } from "react-router-dom";
 import { Container } from "reactstrap";
 
 class Header extends React.Component {
-  render() {
-    return (
-      <>
-        <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
-          <Container fluid>
-            <div className="header-body">
-              {/* Card stats */}
-              <Link
-                className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
-                to="/"
-              >
-                {this.props.brandText}
-              </Link>
-            </div>
-          </Container>
-        </div>
-      </>
-    );
-  }
+	render() {
+		return (
+			<>
+				<div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
+					<Container fluid>
+						<div className="header-body">
+							{/* Card stats */}
+							<Link
+								className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
+								to="/"
+							>
+								{this.props.brandText}
+							</Link>
+						</div>
+					</Container>
+				</div>
+			</>
+		);
+	}
 }
 
 export default Header;

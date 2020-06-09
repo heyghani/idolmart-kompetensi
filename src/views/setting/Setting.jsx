@@ -43,27 +43,6 @@ class CreateProduct extends React.Component {
 
 	handleProgress = (progress) => this.setState({ progress });
 
-	// handleOnDrop = (fileWithMeta, status, filesWithMeta) => {
-	// 	const files = filesWithMeta.map(obj => obj.file);
-
-	// 	console.log(files);
-	// 	if (files && files.length > 0) {
-	// 		const img_filter = files.filter(file => {
-	// 			// const currentFileType = file.type
-	// 			const currentFileSize = file.size;
-	// 			if (currentFileSize > imageMaxSize) {
-	// 				alert("File terlalu besar");
-	// 				return false;
-	// 			}
-	// 			return true;
-	// 		});
-	// 		const currentFile = files[0];
-
-	// 		console.log(currentFile);
-	// 		this.setState({ images_path: img_filter });
-	// 	}
-	// };
-
 	handleUploadSuccess = (filename) => {
 		console.log(this.state);
 		this.setState({
