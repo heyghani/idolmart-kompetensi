@@ -14,9 +14,10 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import EdiText from "react-editext";
 import fire from "../../config";
 import swal from "sweetalert";
+import { Player } from "video-react";
+import "video-react/dist/video-react.css"; // import css
 
 const db = fire.firestore();
 
@@ -39,8 +40,7 @@ class ListSetting extends React.Component {
 	};
 
 	getData = () => {
-		db.collection("setting")
-			.orderBy("createdAt", "desc")
+		db.collection("video")
 			.get()
 			.then((snapshot) => {
 				const data = [];
@@ -51,18 +51,10 @@ class ListSetting extends React.Component {
 					});
 				});
 				this.setState({ data: data });
-				console.log(data);
 			})
 			.catch((error) => {
 				console.log("Error!", error);
 			});
-	};
-
-	handleCs = (val) => {
-		db.collection("admin")
-			.doc("cs")
-			.update({ phone: val })
-			.then(() => this.setState({ phone: val }));
 	};
 
 	handleDelete = (id) => {
@@ -70,7 +62,7 @@ class ListSetting extends React.Component {
 			.doc(id)
 			.delete()
 			.then(() => {
-				this.props.history.push("/app/setting");
+				this.props.history.push("/app/video");
 				swal("Poof! Your imaginary file has been deleted!", {
 					icon: "success",
 				});
@@ -78,10 +70,6 @@ class ListSetting extends React.Component {
 			.catch((error) => {
 				console.log("Error!", error);
 			});
-	};
-
-	onClickAdd = () => {
-		this.props.history.push("/app/setting/create");
 	};
 
 	onClickDelete = (id) => {
@@ -101,7 +89,6 @@ class ListSetting extends React.Component {
 	};
 
 	render() {
-		let id = 1;
 		return (
 			<>
 				<Header />
@@ -114,45 +101,17 @@ class ListSetting extends React.Component {
 								<CardHeader className="border-0">
 									<Row>
 										<Col xl="6">
-											<h3>Data setting</h3>
-										</Col>
-										<Col sm={{ size: 1, offset: 5 }}>
-											<Button
-												className="float-left"
-												color="primary"
-												onClick={this.onClickAdd}
-											>
-												<i className="fas fa-plus" />
-											</Button>
+											<h3>Data Video</h3>
 										</Col>
 									</Row>
 								</CardHeader>
 
-								<Row>
-									<Col
-										xl="3"
-										style={{ margin: 10, bottom: 10, marginLeft: 25 }}
-									>
-										<label className="form-control-label" htmlFor="input-nama">
-											Customer Service
-										</label>
-										<EdiText
-											type="text"
-											value={this.state.phone}
-											onSave={this.handleCs}
-											editOnViewClick={true}
-											showButtonsOnHover={true}
-										/>
-									</Col>
-								</Row>
-
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">
 										<tr>
-											<th scope="col">#</th>
 											<th scope="col">Judul</th>
 											<th scope="col">Deskripsi</th>
-											<th scope="col">Gambar</th>
+											<th scope="col">Video</th>
 											<th scope="col">Action</th>
 										</tr>
 									</thead>
@@ -160,8 +119,7 @@ class ListSetting extends React.Component {
 										{this.state.data &&
 											this.state.data.map((data) => {
 												return (
-													<tr key={id}>
-														<th>{id++}</th>
+													<tr key={data.id}>
 														<th scope="row">
 															<span className="mb-0 text-sm">
 																{data.data.nama}
@@ -169,11 +127,11 @@ class ListSetting extends React.Component {
 														</th>
 														<th>{data.data.description}</th>
 														<td>
-															<img
-																alt={data.data.photo}
-																className="img-fluid rounded-circle shadow"
+															<Player
+																fluid={false}
+																width={320}
+																height={240}
 																src={data.data.photoUrl}
-																style={{ width: 100, height: 100 }}
 															/>
 														</td>
 														<td className="text-center">
@@ -195,7 +153,7 @@ class ListSetting extends React.Component {
 																	<DropdownItem
 																		onClick={() =>
 																			this.props.history.push(
-																				`/app/setting/edit/${data.id}`
+																				`/app/video/edit/${data.id}`
 																			)
 																		}
 																	>
@@ -205,7 +163,7 @@ class ListSetting extends React.Component {
 																		/>
 																		Edit
 																	</DropdownItem>
-																	<DropdownItem
+																	{/* <DropdownItem
 																		onClick={() => this.onClickDelete(data.id)}
 																	>
 																		<i
@@ -213,7 +171,7 @@ class ListSetting extends React.Component {
 																			style={{ color: "red" }}
 																		/>
 																		Delete
-																	</DropdownItem>
+																	</DropdownItem> */}
 																</DropdownMenu>
 															</UncontrolledDropdown>
 														</td>

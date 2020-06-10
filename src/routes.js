@@ -12,6 +12,8 @@ import CreateCategory from "views/category/Create";
 import EditCategory from "views/category/Edit";
 import ListCategory from "views/category/List";
 import Logout from "views/Logout";
+import Video from "views/video/Video";
+import EditVideo from "views/video/Edit";
 
 var routes = [
 	{
@@ -108,9 +110,24 @@ var routes = [
 	},
 	{
 		path: "/setting",
-		name: "Customize",
-		icon: "ni ni-settings-gear-65 text-blue",
+		name: "Slider",
+		icon: "ni ni-image text-blue",
 		component: ListSettings,
+		layout: "/app",
+	},
+	{
+		path: "/video/edit/:id",
+		name: "Edit Video",
+		icon: "ni ni-tablet-button text-blue",
+		component: EditVideo,
+		layout: "/app",
+		invisible: true,
+	},
+	{
+		path: "/video",
+		name: "Video",
+		icon: "ni ni-tablet-button text-blue",
+		component: Video,
 		layout: "/app",
 	},
 	{
