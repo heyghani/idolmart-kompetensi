@@ -100,7 +100,7 @@ class Video extends React.Component {
 
 		const updateRef = firebase
 			.firestore()
-			.collection("products")
+			.collection("video")
 			.doc(this.state.key);
 
 		updateRef
