@@ -14,13 +14,12 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import EdiText from "react-editext";
 import fire from "../../config";
 import swal from "sweetalert";
 
 const db = fire.firestore();
 
-class ListSetting extends React.Component {
+class Listslider extends React.Component {
 	state = {
 		data: [],
 		phone: "",
@@ -28,18 +27,10 @@ class ListSetting extends React.Component {
 
 	componentDidMount() {
 		this.getData();
-		this.getCs();
 	}
 
-	getCs = () => {
-		db.collection("admin")
-			.doc("cs")
-			.get()
-			.then((doc) => this.setState({ phone: doc.data().phone }));
-	};
-
 	getData = () => {
-		db.collection("setting")
+		db.collection("slider")
 			.orderBy("createdAt", "desc")
 			.get()
 			.then((snapshot) => {
@@ -58,19 +49,12 @@ class ListSetting extends React.Component {
 			});
 	};
 
-	handleCs = (val) => {
-		db.collection("admin")
-			.doc("cs")
-			.update({ phone: val })
-			.then(() => this.setState({ phone: val }));
-	};
-
 	handleDelete = (id) => {
-		db.collection("settings")
+		db.collection("slider")
 			.doc(id)
 			.delete()
 			.then(() => {
-				this.props.history.push("/app/setting");
+				this.props.history.push("/app/slider");
 				swal("Poof! Your imaginary file has been deleted!", {
 					icon: "success",
 				});
@@ -81,7 +65,7 @@ class ListSetting extends React.Component {
 	};
 
 	onClickAdd = () => {
-		this.props.history.push("/app/setting/create");
+		this.props.history.push("/app/slider/create");
 	};
 
 	onClickDelete = (id) => {
@@ -114,7 +98,7 @@ class ListSetting extends React.Component {
 								<CardHeader className="border-0">
 									<Row>
 										<Col xl="6">
-											<h3>Data setting</h3>
+											<h3>Data Slider</h3>
 										</Col>
 										<Col sm={{ size: 1, offset: 5 }}>
 											<Button
@@ -127,24 +111,6 @@ class ListSetting extends React.Component {
 										</Col>
 									</Row>
 								</CardHeader>
-
-								<Row>
-									<Col
-										xl="3"
-										style={{ margin: 10, bottom: 10, marginLeft: 25 }}
-									>
-										<label className="form-control-label" htmlFor="input-nama">
-											Customer Service
-										</label>
-										<EdiText
-											type="text"
-											value={this.state.phone}
-											onSave={this.handleCs}
-											editOnViewClick={true}
-											showButtonsOnHover={true}
-										/>
-									</Col>
-								</Row>
 
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">
@@ -195,7 +161,7 @@ class ListSetting extends React.Component {
 																	<DropdownItem
 																		onClick={() =>
 																			this.props.history.push(
-																				`/app/setting/edit/${data.id}`
+																				`/app/slider/edit/${data.id}`
 																			)
 																		}
 																	>
@@ -231,4 +197,4 @@ class ListSetting extends React.Component {
 	}
 }
 
-export default ListSetting;
+export default Listslider;

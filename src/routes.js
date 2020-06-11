@@ -6,8 +6,9 @@ import ListProduct from "views/product/List";
 import ListActivity from "views/activity/List";
 import CreateActivity from "views/activity/Create";
 import EditActivity from "views/activity/Edit";
-import Settings from "views/setting/Setting";
-import ListSettings from "views/setting/List";
+import CreateSlider from "views/slider/Create";
+import ListSlider from "views/slider/List";
+import EditSlider from "views/slider/Edit";
 import CreateCategory from "views/category/Create";
 import EditCategory from "views/category/Edit";
 import ListCategory from "views/category/List";
@@ -101,18 +102,26 @@ var routes = [
 		layout: "/app",
 	},
 	{
-		path: "/setting/create",
+		path: "/slider/create",
 		name: "Customize",
 		icon: "ni ni-settings-gear-65 text-blue",
-		component: Settings,
+		component: CreateSlider,
 		layout: "/app",
 		invisible: true,
 	},
 	{
-		path: "/setting",
+		path: "/slider/edit/:id",
+		name: "Customize",
+		icon: "ni ni-settings-gear-65 text-blue",
+		component: EditSlider,
+		layout: "/app",
+		invisible: true,
+	},
+	{
+		path: "/slider",
 		name: "Slider",
 		icon: "ni ni-image text-blue",
-		component: ListSettings,
+		component: ListSlider,
 		layout: "/app",
 	},
 	{

@@ -16,7 +16,6 @@ import {
 // core components
 import Header from "components/Headers/Header.jsx";
 import firebase from "firebase";
-import fire from "../../config";
 import Progress from "components/Progress";
 import FileUploader from "react-firebase-file-uploader";
 import "react-dropzone-uploader/dist/styles.css";
@@ -26,12 +25,39 @@ class CreateProduct extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			key: "",
+			createdAt: "",
 			nama: "",
 			photo: "",
 			photoUrl: "",
 			description: "",
 			progress: 0,
 		};
+	}
+
+	componentDidMount() {
+		const ref = firebase
+			.firestore()
+			.collection("slider")
+			.doc(this.props.match.params.id);
+		ref.get().then((doc) => {
+			if (doc.exists) {
+				const data = doc.data();
+				this.setState({
+					key: doc.id,
+					createdAt: data.createdAt,
+
+					nama: data.nama,
+
+					description: data.description,
+
+					photo: data.photo,
+					photoUrl: data.photoUrl,
+				});
+			} else {
+				console.log("No such document!");
+			}
+		});
 	}
 
 	handleUploadStart = () => {
@@ -52,7 +78,7 @@ class CreateProduct extends React.Component {
 
 		firebase
 			.storage()
-			.ref("settings")
+			.ref("sliders")
 			.child(filename)
 			.getDownloadURL()
 			.then((url) =>
@@ -68,21 +94,36 @@ class CreateProduct extends React.Component {
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const db = fire.firestore();
-		db.collection("setting").add({
-			nama: this.state.nama,
-			description: this.state.description,
-			photo: this.state.photo,
-			photoUrl: this.state.photoUrl,
-			createdAt: new Date(),
-		});
-		swal({
-			title: "Berhasil!",
-			text: "Data telah ditambahkan!",
-			icon: "success",
-			button: "OK",
-		});
-		this.props.history.push("/app/setting");
+		const { createdAt, nama, description, photo, photoUrl } = this.state;
+
+		const updateRef = firebase
+			.firestore()
+			.collection("slider")
+			.doc(this.state.key);
+
+		updateRef
+			.set({
+				createdAt,
+
+				nama,
+
+				description,
+
+				photo,
+				photoUrl,
+			})
+			.then(() => {
+				swal({
+					title: "Berhasil!",
+					text: "Data telah diupdate!",
+					icon: "success",
+					button: "OK",
+				});
+				this.props.history.push("/app/slider");
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
 	};
 
 	render() {
@@ -99,7 +140,7 @@ class CreateProduct extends React.Component {
 								<CardHeader className="bg-white border-0">
 									<Row className="align-items-center">
 										<Col>
-											<h3 className="mb-0">Setting</h3>
+											<h3 className="mb-0">Data Slider</h3>
 										</Col>
 									</Row>
 								</CardHeader>
@@ -175,7 +216,7 @@ class CreateProduct extends React.Component {
 														<FileUploader
 															accept="image/*"
 															name="photo"
-															storageRef={firebase.storage().ref("settings")}
+															storageRef={firebase.storage().ref("sliders")}
 															onUploadStart={this.handleUploadStart}
 															onUploadSuccess={this.handleUploadSuccess}
 														/>
@@ -198,7 +239,7 @@ class CreateProduct extends React.Component {
 														<Button
 															color="danger"
 															onClick={() =>
-																this.props.history.push("/app/setting")
+																this.props.history.push("/app/slider")
 															}
 														>
 															Batal

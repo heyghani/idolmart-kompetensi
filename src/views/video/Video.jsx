@@ -10,7 +10,6 @@ import {
 	Container,
 	Row,
 	Col,
-	Button,
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";

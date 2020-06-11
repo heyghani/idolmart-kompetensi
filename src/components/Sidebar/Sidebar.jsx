@@ -45,18 +45,30 @@ import {
 	NavItem,
 	NavLink,
 	Nav,
-	Progress,
 	Table,
 	Container,
 	Row,
 	Col,
+	Modal,
 } from "reactstrap";
 
+import firebase from "firebase";
+import Progress from "components/Progress";
+import FileUploader from "react-firebase-file-uploader";
+import "react-dropzone-uploader/dist/styles.css";
+
 var ps;
+
+const db = firebase.firestore();
 
 class Sidebar extends React.Component {
 	state = {
 		collapseOpen: false,
+		modal: false,
+		title: "",
+		logo: "",
+		logoUrl: "",
+		progress: 0,
 	};
 	constructor(props) {
 		super(props);
@@ -97,6 +109,77 @@ class Sidebar extends React.Component {
 			);
 		});
 	};
+
+	componentDidMount = () => {
+		db.collection("logo")
+			.doc("VP8hruD8nXJJsIsvhX8i")
+			.get()
+			.then((doc) => {
+				this.setState({
+					title: doc.data().title,
+					logo: doc.data().logo,
+					logoUrl: doc.data().logoUrl,
+				});
+			});
+	};
+
+	isCancel = () => {
+		this.setState({ modal: false });
+	};
+	handleUploadStart = () => {
+		this.setState({
+			isUploading: true,
+			progress: 0,
+		});
+	};
+
+	handleProgress = (progress) => this.setState({ progress });
+
+	handleUploadSuccess = (filename) => {
+		console.log(this.state);
+		this.setState({
+			logo: filename,
+			progress: 100,
+		});
+
+		firebase
+			.storage()
+			.ref("logo")
+			.child(filename)
+			.getDownloadURL()
+			.then((url) =>
+				this.setState({
+					logoUrl: url,
+				})
+			);
+	};
+
+	handleChangeStatus = ({ meta }, status) => {
+		console.log(status, meta);
+	};
+
+	onSubmit = (e) => {
+		e.preventDefault();
+
+		db.collection("logo")
+			.doc("VP8hruD8nXJJsIsvhX8i")
+			.set({
+				title: this.state.title,
+				logo: this.state.logo,
+				logoUrl: this.state.logoUrl,
+				updatedAt: new Date(),
+			})
+			.then(() => this.setState({ modal: false }))
+			.then(() =>
+				swal({
+					title: "Berhasil!",
+					text: "Data Berhasil di Update!",
+					icon: "success",
+					button: "OK",
+				})
+			)
+			.catch((error) => alert(error));
+	};
 	render() {
 		const { bgColor, routes, logo } = this.props;
 		let navbarBrandProps;
@@ -127,57 +210,113 @@ class Sidebar extends React.Component {
 						<span className="navbar-toggler-icon" />
 					</button>
 					{/* Brand */}
-					{logo ? (
-						<NavbarBrand className="pt-0" {...navbarBrandProps}>
-							<img
-								alt={logo.imgAlt}
-								className="navbar-brand-img"
-								src={require("assets/img/idolmart.PNG")}
-								style={{ width: "60%" }}
-							/>
-						</NavbarBrand>
-					) : null}
-					{/* User */}
-					<Nav className="align-items-center d-md-none">
-						<UncontrolledDropdown nav>
-							<DropdownToggle nav>
-								<Media className="align-items-center">
-									<span className="avatar avatar-sm rounded-circle">
-										<img
-											alt="..."
-											src={require("assets/img/theme/team-1-800x800.jpg")}
-										/>
-									</span>
-								</Media>
-							</DropdownToggle>
-							<DropdownMenu className="dropdown-menu-arrow" right>
-								<DropdownItem className="noti-title" header tag="div">
-									<h6 className="text-overflow m-0">Welcome!</h6>
-								</DropdownItem>
-								<DropdownItem to="/admin/user-profile" tag={Link}>
-									<i className="ni ni-single-02" />
-									<span>My profile</span>
-								</DropdownItem>
-								<DropdownItem to="/admin/user-profile" tag={Link}>
-									<i className="ni ni-settings-gear-65" />
-									<span>Settings</span>
-								</DropdownItem>
-								<DropdownItem to="/admin/user-profile" tag={Link}>
-									<i className="ni ni-calendar-grid-58" />
-									<span>Activity</span>
-								</DropdownItem>
-								<DropdownItem to="/admin/user-profile" tag={Link}>
-									<i className="ni ni-support-16" />
-									<span>Support</span>
-								</DropdownItem>
-								<DropdownItem divider />
-								<DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
-									<i className="ni ni-user-run" />
-									<span>Logout</span>
-								</DropdownItem>
-							</DropdownMenu>
-						</UncontrolledDropdown>
-					</Nav>
+					<NavbarBrand className="pt-0">
+						<img
+							alt={this.state.logo}
+							className="navbar-brand-img"
+							src={this.state.logoUrl}
+							style={{ width: "60%" }}
+							onClick={() => this.setState({ modal: true })}
+						/>
+					</NavbarBrand>
+
+					<Modal
+						className="modal-dialog-centered"
+						size="lg"
+						isOpen={this.state.modal}
+					>
+						<div className="modal-body p-0">
+							<Card className="bg-secondary shadow border-0">
+								<CardHeader className="bg-transparent pb-2">
+									<div className="text-muted text-center mt-2 ">
+										<h1 className="text-black">Edit Data Header</h1>
+									</div>
+								</CardHeader>
+								<CardBody className="px-lg-5 py-lg-5">
+									<Form role="form" onSubmit={this.onSubmit}>
+										<div className="pl-lg-4">
+											<Row>
+												<Col lg="6">
+													<FormGroup>
+														<label
+															className="form-control-label"
+															htmlFor="input-nama"
+														>
+															Title
+														</label>
+														<Input
+															className="form-control-alternative"
+															value={this.state.title}
+															onChange={(event) =>
+																this.setState({
+																	title: event.target.value,
+																})
+															}
+															type="text"
+														/>
+													</FormGroup>
+												</Col>
+											</Row>
+
+											<Row>
+												<Col lg="12">
+													<div>
+														<label className="form-control-label">Logo</label>
+														<br />
+														<br />
+														{this.state.logo && (
+															<img
+																alt={this.state.logo}
+																src={this.state.logoUrl}
+																style={{
+																	padding: 10,
+																	width: 150,
+																	height: 150,
+																	resizeMode: "center",
+																}}
+															/>
+														)}
+														<FileUploader
+															accept="image/*"
+															name="photo"
+															storageRef={firebase.storage().ref("logo")}
+															onUploadStart={this.handleUploadStart}
+															onUploadSuccess={this.handleUploadSuccess}
+														/>
+														<Progress
+															percentage={
+																this.state.isUploading &&
+																this.state.progress + "%"
+															}
+															value={
+																this.state.isUploading && this.state.progress
+															}
+														/>
+													</div>
+												</Col>
+											</Row>
+											<p></p>
+											<Row>
+												<Col lg="6" className="text-center">
+													<FormGroup>
+														<Button
+															color="danger"
+															onClick={() => this.isCancel()}
+														>
+															Batal
+														</Button>
+														<Button color="success" type="submit">
+															Save
+														</Button>
+													</FormGroup>
+												</Col>
+											</Row>
+										</div>
+									</Form>
+								</CardBody>
+							</Card>
+						</div>
+					</Modal>
 					{/* Collapse */}
 					<Collapse navbar isOpen={this.state.collapseOpen}>
 						{/* Collapse header */}
@@ -190,11 +329,13 @@ class Sidebar extends React.Component {
 												<img
 													alt={logo.imgAlt}
 													src={require("assets/img/idolmart.jpeg")}
+													onClick={() => console.log("Clicked")}
 												/>
 											</Link>
 										) : (
 											<a href={logo.outterLink}>
 												<img
+													onClick={() => console.log("Clicked")}
 													alt={logo.imgAlt}
 													src={require("assets/img/idolmart.jpeg")}
 												/>
