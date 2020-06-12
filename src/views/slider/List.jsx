@@ -16,17 +16,19 @@ import {
 import Header from "components/Headers/Header.jsx";
 import fire from "../../config";
 import swal from "sweetalert";
+import EdiText from "react-editext";
 
 const db = fire.firestore();
 
 class Listslider extends React.Component {
 	state = {
 		data: [],
-		phone: "",
+		limit: 0,
 	};
 
 	componentDidMount() {
 		this.getData();
+		this.getLimit();
 	}
 
 	getData = () => {
@@ -47,6 +49,21 @@ class Listslider extends React.Component {
 			.catch((error) => {
 				console.log("Error!", error);
 			});
+	};
+
+	getLimit = () => {
+		db.collection("slider")
+			.doc("limit")
+			.get()
+			.then((doc) => this.setState({ limit: doc.data().limit }));
+	};
+
+	handleLimit = (val) => {
+		let limit = parseInt(val);
+		db.collection("slider")
+			.doc("limit")
+			.update({ limit: limit })
+			.then(() => this.setState({ limit }));
 	};
 
 	handleDelete = (id) => {
@@ -111,6 +128,18 @@ class Listslider extends React.Component {
 										</Col>
 									</Row>
 								</CardHeader>
+								<Row>
+									<Col md="6" style={{ marginLeft: 22 }}>
+										<label>Jumlah slider : </label>
+										<EdiText
+											type="number"
+											value={this.state.limit}
+											onSave={this.handleLimit}
+											editOnViewClick={true}
+											showButtonsOnHover={true}
+										/>
+									</Col>
+								</Row>
 
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">

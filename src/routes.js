@@ -15,6 +15,7 @@ import ListCategory from "views/category/List";
 import Logout from "views/Logout";
 import Video from "views/video/Video";
 import EditVideo from "views/video/Edit";
+import Layout from "views/Layout";
 
 var routes = [
 	{
@@ -103,7 +104,7 @@ var routes = [
 	},
 	{
 		path: "/slider/create",
-		name: "Customize",
+		name: "Create Slider",
 		icon: "ni ni-settings-gear-65 text-blue",
 		component: CreateSlider,
 		layout: "/app",
@@ -111,7 +112,7 @@ var routes = [
 	},
 	{
 		path: "/slider/edit/:id",
-		name: "Customize",
+		name: "Edit Slider",
 		icon: "ni ni-settings-gear-65 text-blue",
 		component: EditSlider,
 		layout: "/app",
@@ -139,6 +140,14 @@ var routes = [
 		component: Video,
 		layout: "/app",
 	},
+	{
+		path: "/layout",
+		name: "Layouts",
+		icon: "ni ni-palette text-blue",
+		component: Layout,
+		layout: "/app",
+	},
+
 	{
 		path: "/logout",
 		name: "Logout",
