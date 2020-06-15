@@ -129,7 +129,6 @@ class Video extends React.Component {
 	};
 
 	render() {
-		console.log(this.state.photoUrl);
 		const { nama, description, isSubmitting } = this.state;
 		return (
 			<>
