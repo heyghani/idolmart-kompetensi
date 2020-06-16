@@ -111,7 +111,6 @@ export default class ListCategory extends React.Component {
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">
 										<tr>
-											<th scope="col">#</th>
 											<th scope="col">Category</th>
 											<th scope="col">Color</th>
 											<th scope="col">Action</th>
@@ -122,8 +121,7 @@ export default class ListCategory extends React.Component {
 											let data = this.state.data[key];
 
 											return (
-												<tr key={id}>
-													<th>{id++}</th>
+												<tr key={data.id}>
 													<th scope="row">
 														<span className="mb-0 text-sm">
 															{data.data.nama}

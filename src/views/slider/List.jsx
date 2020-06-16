@@ -102,7 +102,6 @@ class Listslider extends React.Component {
 	};
 
 	render() {
-		let id = 1;
 		return (
 			<>
 				<Header />
@@ -144,7 +143,6 @@ class Listslider extends React.Component {
 								<Table className="align-items-center table-flush" responsive>
 									<thead className="thead-light">
 										<tr>
-											<th scope="col">#</th>
 											<th scope="col">Judul</th>
 											<th scope="col">Deskripsi</th>
 											<th scope="col">Gambar</th>
@@ -155,8 +153,7 @@ class Listslider extends React.Component {
 										{this.state.data &&
 											this.state.data.map((data) => {
 												return (
-													<tr key={id}>
-														<th>{id++}</th>
+													<tr key={data.id}>
 														<th scope="row">
 															<span className="mb-0 text-sm">
 																{data.data.nama}
