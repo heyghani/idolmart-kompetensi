@@ -81,7 +81,6 @@ export default class ListCategory extends React.Component {
 	};
 
 	render() {
-		let id = 1;
 		return (
 			<>
 				<Header />
