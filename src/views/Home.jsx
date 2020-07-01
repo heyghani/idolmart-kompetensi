@@ -44,7 +44,9 @@ class Index extends React.Component {
 		logoUrl: "",
 		phone: "",
 		form: [],
-		category: [],
+		categories: [],
+		bobot: "",
+		skor: "",
 	};
 
 	componentWillMount() {
@@ -53,7 +55,9 @@ class Index extends React.Component {
 	}
 
 	getForm = () => {
-		fetch("http://localhost:5000/api/form")
+		fetch(`http://localhost:5000/api/form`, {
+			method: "GET",
+		})
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ form: json.response });
@@ -64,14 +68,13 @@ class Index extends React.Component {
 		fetch("http://localhost:5000/api/category")
 			.then((res) => res.json())
 			.then((json) => {
-				this.setState({ category: json.response });
+				this.setState({ categories: json.response });
 			});
 	};
 
 	onSubmit = () => {};
 
 	render() {
-		console.log(this.state.form, this.state.category);
 		return (
 			<>
 				<Header />
@@ -105,23 +108,84 @@ class Index extends React.Component {
 								</CardHeader>
 								<CardBody>
 									<Row>
-										<Col md={5} xs={6}>
-											<h2>Kompentesi</h2>
-											{this.state.category.map((data) => {
-												return <p>{data.nama}</p>;
+										<Col md={7} xs={4}>
+											<Typography
+												color="textPrimary"
+												variant="h6"
+												align="justify"
+											>
+												Kompetensi
+											</Typography>
+											{this.state.categories.map((data) => {
+												return (
+													<Typography
+														key={data.id}
+														color="textSecondary"
+														variant="subtitle1"
+														align="justify"
+													>
+														{data.nama}
+													</Typography>
+												);
+											})}
+										</Col>
+										<Col md={3} xs={6}>
+											<Typography
+												color="textPrimary"
+												variant="h6"
+												align="center"
+											>
+												Bobot
+											</Typography>
+											{this.state.categories.map((data) => {
+												return (
+													<Typography
+														key={data.id}
+														color="textSecondary"
+														variant="subtitle1"
+														align="center"
+													>
+														{data.bobot}
+													</Typography>
+												);
 											})}
 										</Col>
 										<Col>
-											<h2>Bobot</h2>
-											{this.state.category.map((data) => {
-												return <p>{data.bobot}</p>;
+											<Typography
+												color="textPrimary"
+												variant="h6"
+												align="center"
+											>
+												Skor
+											</Typography>
+											{this.state.categories.map((data) => {
+												return (
+													<Typography
+														key={data.id}
+														color="textSecondary"
+														variant="subtitle1"
+														align="center"
+													>
+														{data.bobot}
+													</Typography>
+												);
 											})}
 										</Col>
-										<Col className="align-item-center">
-											<h2>Skor</h2>
-											<p>{(this.state.nilai * 12) / 100}</p>
-											<p>{(this.state.nilai * 12) / 100}</p>
+									</Row>
+									<Divider />
+									<Row>
+										<Col md={7} xs={4}>
+											{" "}
+											<Typography
+												color="textPrimary"
+												variant="h6"
+												align="justify"
+											>
+												Jumlah
+											</Typography>{" "}
 										</Col>
+										<Col md={3} xs={6} />
+										<Col></Col>
 									</Row>
 								</CardBody>
 							</Card>
@@ -131,35 +195,42 @@ class Index extends React.Component {
 								<CardHeader className="bg-transparent">
 									<Row className="align-items-center">
 										<div className="col">
-											<h2 className="text-uppercase text-muted ls-1 mb-1">
+											<Typography
+												color="textPrimary"
+												variant="h5"
+												align="center"
+											>
 												Form Penilaian Sikap/Kompentesi
-											</h2>
+											</Typography>
 										</div>
 									</Row>
 								</CardHeader>
 								<CardBody>
-									{this.state.category.map((category) => {
+									{this.state.categories.map((category, i) => {
+										const id = category.code_category;
 										return (
-											<Fragment>
+											<Fragment key={i}>
 												<Button
 													color="default"
 													size="large"
-													// id={`${category.code_category}`}
+													id={id}
 													style={{ width: "100%", margin: 10 }}
+													// onClick={() => this.getForm(id)}
 												>
 													{category.nama}
 												</Button>
 												<UncontrolledCollapse
-													// toggler={`#${category.code_category}`}
+													toggler={`#${id}`}
 													style={{ padding: 15 }}
 												>
 													<Grid container spacing={3}>
 														<Row>
-															<Col>
+															<Col md={4} xs={6}>
 																<h2>Standard Nilai</h2>
-																{this.state.form.map((data) => {
+																{this.state.form.map((data, i) => {
 																	return (
 																		<Typography
+																			key={i}
 																			color="textSecondary"
 																			variant="h4"
 																			style={{ marginBottom: 20 }}
@@ -171,23 +242,27 @@ class Index extends React.Component {
 																	);
 																})}
 															</Col>
-															<Col>
+															<Col md={8} xs={6}>
 																<h2>Kamus Penilaian</h2>
-																{this.state.form.map((data) => {
+																{this.state.form.map((data, i) => {
 																	return (
 																		<Typography
+																			key={i}
 																			color="textSecondary"
 																			variant="body2"
 																		>
 																			{data.nama === category.nama
 																				? data.kamus
 																				: null}
-																			<Divider />
+																			{data.nama === category.nama && (
+																				<Divider />
+																			)}
 																		</Typography>
 																	);
 																})}
 															</Col>
 														</Row>
+
 														<Divider style={{ borderWidth: 3 }} />
 														<Grid item md={6} xs={12}>
 															<TextField
@@ -219,6 +294,7 @@ class Index extends React.Component {
 														</Grid>
 													</Grid>
 												</UncontrolledCollapse>
+												{i !== this.state.categories.length - 1 && <Divider />}
 											</Fragment>
 										);
 									})}
