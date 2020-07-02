@@ -39,23 +39,46 @@ import Header from "components/Headers/Header.jsx";
 
 class Index extends React.Component {
 	state = {
-		nilai: "",
+		nilai: [],
 		logo: "",
 		logoUrl: "",
-		phone: "",
+		nik: "",
+		nama: "",
+		divisi: "",
+		jabatan: "",
+		kode_jabatan: "",
 		form: [],
 		categories: [],
-		bobot: "",
-		skor: "",
+		rekap: [],
+		skor: [],
 	};
 
-	componentWillMount() {
-		this.getCategory();
-		this.getForm();
-	}
+	componentWillMount = () => {
+		this.getUser();
+	};
+
+	getUser = () => {
+		fetch(`http://localhost:5000/api/user/${this.props.match.params.id}`, {
+			method: "GET",
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({
+					nik: json.response[0].nik,
+					nama: json.response[0].nama,
+					divisi: json.response[0].divisi,
+					jabatan: json.response[0].jabatan,
+					kode_jabatan: json.response[0].kode_jabatan,
+				});
+			})
+			.finally(() => {
+				this.getForm();
+				this.getCategory();
+			});
+	};
 
 	getForm = () => {
-		fetch(`http://localhost:5000/api/form`, {
+		fetch(`http://localhost:5000/api/form/${this.state.kode_jabatan}`, {
 			method: "GET",
 		})
 			.then((res) => res.json())
@@ -65,16 +88,53 @@ class Index extends React.Component {
 	};
 
 	getCategory = () => {
-		fetch("http://localhost:5000/api/category")
+		fetch(`http://localhost:5000/api/category/${this.state.kode_jabatan}`)
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ categories: json.response });
 			});
 	};
 
-	onSubmit = () => {};
+	handleChange = (index, bobot) => (event) => {
+		const { nilai, skor } = this.state;
+		const newNilai = nilai.slice(0);
+		const newSkor = skor.slice(0);
+		newNilai[index] = event.target.value;
+		newSkor[index] = (event.target.value * bobot) / 100;
+		this.setState({
+			nilai: newNilai,
+			skor: newSkor,
+		});
+	};
+
+	reduce = (total, num) => {
+		return total + num;
+	};
+
+	onSubmit = (e) => {
+		e.preventDefault();
+		const { nik, nilai, skor, categories } = this.state;
+		const body = [];
+		for (var i = 0; i < categories.length; i++) {
+			body.push([nik, categories[i].code_category, nilai[i], skor[i]]);
+		}
+		fetch("http://localhost:5000/api/form", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				values: body,
+			}),
+		});
+		this.setState({
+			rekap: skor,
+			jumlah: skor.reduceRight(this.reduce),
+		});
+	};
 
 	render() {
+		const { nik, nama, divisi, jabatan } = this.state;
 		return (
 			<>
 				<Header />
@@ -85,24 +145,11 @@ class Index extends React.Component {
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row>
-										<Col className="align-items-center">
-											<div className="col">
-												<h5 className="mb-0">PT.Idola Cahaya Semesta</h5>
-												<img
-													alt="logo"
-													src={require("../assets/img/idolmart.PNG")}
-													style={{ width: 100, height: 60 }}
-												/>
-											</div>
-										</Col>
-
-										<Col className="align-items-center">
-											<div className="col">
-												<h5 className="mt-0">Nama : Ghani </h5>
-												<h5 className="mt-0">NIK : 202394 </h5>
-												<h5 className="mt-0">Jabatan : Staff </h5>
-												<h5 className="mt-0">Toko/Dept : IT </h5>
-											</div>
+										<Col>
+											<h5 className="mt-0">Nama : {nama} </h5>
+											<h5 className="mt-0">NIK : {nik} </h5>
+											<h5 className="mt-0">Jabatan : {jabatan} </h5>
+											<h5 className="mt-0">Toko/Dept : {divisi} </h5>
 										</Col>
 									</Row>
 								</CardHeader>
@@ -158,15 +205,15 @@ class Index extends React.Component {
 											>
 												Skor
 											</Typography>
-											{this.state.categories.map((data) => {
+											{this.state.rekap.map((data, index) => {
 												return (
 													<Typography
-														key={data.id}
+														key={index}
 														color="textSecondary"
 														variant="subtitle1"
 														align="center"
 													>
-														{data.bobot}
+														{data}
 													</Typography>
 												);
 											})}
@@ -185,7 +232,15 @@ class Index extends React.Component {
 											</Typography>{" "}
 										</Col>
 										<Col md={3} xs={6} />
-										<Col></Col>
+										<Col>
+											<Typography
+												color="textPrimary"
+												variant="subtitle1"
+												align="center"
+											>
+												{this.state.jumlah}
+											</Typography>{" "}
+										</Col>
 									</Row>
 								</CardBody>
 							</Card>
@@ -269,12 +324,9 @@ class Index extends React.Component {
 																fullWidth
 																label="Point Nilai"
 																margin="dense"
-																name="pointNilai"
-																onChange={(event) =>
-																	this.setState({ nilai: event.target.value })
-																}
+																name="PointNilai"
+																onChange={this.handleChange(i, category.bobot)}
 																required
-																value={this.state.nilai}
 																variant="outlined"
 																type="number"
 																helperText="Isilah Kolom Nilai dengan angka 0 s/d 100 sesuai kategori penilaian."
@@ -287,7 +339,9 @@ class Index extends React.Component {
 																margin="dense"
 																name="pointNilai"
 																required
-																value={(this.state.nilai * 12) / 100}
+																value={
+																	(this.state.nilai[i] * category.bobot) / 100
+																}
 																disabled
 																variant="outlined"
 															/>
@@ -305,6 +359,7 @@ class Index extends React.Component {
 									size="large"
 									id="tj"
 									style={{ width: "50%", margin: 10 }}
+									onClick={this.onSubmit}
 								>
 									Save
 								</Button>

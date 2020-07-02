@@ -19,30 +19,30 @@ if (!firebase.apps.length) {
 	firebase.initializeApp({ fire });
 }
 
-const session = localStorage.getItem("UserLogin");
-if (session) {
-	hist.push("/app/home");
-} else {
-	hist.push("/auth/index");
-}
+// const session = localStorage.getItem("UserLogin");
+// if (session) {
+// 	hist.push("/app/home");
+// } else {
+// 	hist.push("/auth/index");
+// }
 
-const PrivateRoute = ({ component: Component, ...rest }) => (
-	<Route
-		{...rest}
-		render={(props) =>
-			session ? (
-				<Component {...props} />
-			) : (
-				<Redirect to={{ pathname: "/auth/index" }} />
-			)
-		}
-	/>
-);
+// const PrivateRoute = ({ component: Component, ...rest }) => (
+// 	<Route
+// 		{...rest}
+// 		render={(props) =>
+// 			session ? (
+// 				<Component {...props} />
+// 			) : (
+// 				<Redirect to={{ pathname: "/auth/index" }} />
+// 			)
+// 		}
+// 	/>
+// );
 
 ReactDOM.render(
 	<Router history={hist}>
 		<Switch>
-			<PrivateRoute path="/app" component={AdminLayout} />
+			<Route path="/app" component={AdminLayout} />
 			<Route path="/auth" render={(props) => <AuthLayout {...props} />} />
 			<Redirect from="/" to="/auth/index" />
 		</Switch>

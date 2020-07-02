@@ -87,32 +87,33 @@ class Login extends Component {
 
 	onSignin = (e) => {
 		e.preventDefault();
-		const { username, password } = this.state;
-		this.setState({ error: "" });
+		this.props.history.push(`/app/home/${this.state.username}`);
+		// const { username, password } = this.state;
+		// this.setState({ error: "" });
 
-		if (username === "" || password === "") {
-			this.setState({ error: "Username atau password kosong" });
-			return null;
-		} else {
-			db.collection("admin")
-				.doc(username)
-				.get()
-				.then((doc) => {
-					let credential = {
-						username: doc.data().username,
-						password: doc.data().password,
-					};
-					if (doc.exists) {
-						if (password === credential.password) {
-							localStorage.setItem("UserLogin", credential);
-							window.location.reload();
-						} else {
-							this.setState({ error: "Username atau password salah" });
-						}
-					}
-				})
-				.catch(() => this.setState({ error: "Username tidak ditemukan" }));
-		}
+		// if (username === "" || password === "") {
+		// 	this.setState({ error: "Username atau password kosong" });
+		// 	return null;
+		// } else {
+		// 	db.collection("admin")
+		// 		.doc(username)
+		// 		.get()
+		// 		.then((doc) => {
+		// 			let credential = {
+		// 				username: doc.data().username,
+		// 				password: doc.data().password,
+		// 			};
+		// 			if (doc.exists) {
+		// 				if (password === credential.password) {
+		// 					localStorage.setItem("UserLogin", credential);
+		// 					window.location.reload();
+		// 				} else {
+		// 					this.setState({ error: "Username atau password salah" });
+		// 				}
+		// 			}
+		// 		})
+		// 		.catch(() => this.setState({ error: "Username tidak ditemukan" }));
+		// }
 	};
 
 	render() {
@@ -154,7 +155,7 @@ class Login extends Component {
 												</InputGroupText>
 											</InputGroupAddon>
 											<Input
-												placeholder="Username"
+												placeholder="NIK"
 												type="text"
 												value={username}
 												onChange={(event) =>
