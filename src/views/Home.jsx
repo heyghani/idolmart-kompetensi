@@ -35,11 +35,15 @@ import {
 	Typography,
 } from "@material-ui/core";
 
+import DayPickerInput from "react-day-picker/DayPickerInput";
+import "react-day-picker/lib/style.css";
+
 import Header from "components/Headers/Header.jsx";
 
 class Index extends React.Component {
 	state = {
 		nilai: [],
+		date: new Date().toISOString(),
 		logo: "",
 		logoUrl: "",
 		nik: "",
@@ -113,11 +117,13 @@ class Index extends React.Component {
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const { nik, nilai, skor, categories } = this.state;
+		const { nik, nilai, skor, categories, date } = this.state;
+
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
-			body.push([nik, categories[i].code_category, nilai[i], skor[i]]);
+			body.push([nik, categories[i].code_category, nilai[i], skor[i], date]);
 		}
+		console.log(body);
 		fetch("http://localhost:5000/api/form", {
 			method: "POST",
 			headers: {
@@ -134,7 +140,8 @@ class Index extends React.Component {
 	};
 
 	render() {
-		const { nik, nama, divisi, jabatan } = this.state;
+		const { nik, nama, divisi, jabatan, date } = this.state;
+
 		return (
 			<>
 				<Header />
@@ -150,6 +157,14 @@ class Index extends React.Component {
 											<h5 className="mt-0">NIK : {nik} </h5>
 											<h5 className="mt-0">Jabatan : {jabatan} </h5>
 											<h5 className="mt-0">Toko/Dept : {divisi} </h5>
+										</Col>
+										<Col>
+											<h5 className="mt-0">Periode</h5>
+
+											<DayPickerInput
+												selectedDay={this.state.date}
+												onDayChange={(date) => this.setState({ date })}
+											/>
 										</Col>
 									</Row>
 								</CardHeader>
