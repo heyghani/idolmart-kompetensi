@@ -33,6 +33,7 @@ import {
 	Button,
 	TextField,
 	Typography,
+	MenuItem,
 } from "@material-ui/core";
 import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
@@ -40,6 +41,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import swal from "sweetalert";
 
 import Header from "components/Headers/Header.jsx";
+import { set } from "date-fns/esm";
 
 class Index extends React.Component {
 	state = {
@@ -50,16 +52,20 @@ class Index extends React.Component {
 		logoUrl: "",
 		nik: "",
 		nama: "",
+		jumlah: "",
 		divisi: "",
+		kode_divisi: "",
 		jabatan: "",
 		kode_jabatan: "",
-		nilai_atasan: 0,
-		skor_atasan: 0,
-		jumlah_atasan: 0,
-		rekap_atasan: 0,
+		nilai_atasan: [],
+		skor_atasan: [],
+		jumlah_atasan: "",
+		rekap_atasan: "",
 		form: [],
 		categories: [],
 		skor: [],
+		anggota: [],
+		selectedAnggota: "",
 	};
 
 	componentWillMount = () => {
@@ -79,11 +85,13 @@ class Index extends React.Component {
 					divisi: json.response[0].divisi,
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
+					kode_divisi: json.response[0].kode_divisi,
 				});
 			})
 			.finally(() => {
 				this.getForm();
 				this.getCategory();
+				this.getDivisi();
 			});
 	};
 
@@ -102,6 +110,45 @@ class Index extends React.Component {
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ categories: json.response });
+			});
+	};
+
+	getDivisi = () => {
+		fetch(`http://localhost:5000/api/divisi/${this.state.kode_divisi}`)
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({ anggota: json.response });
+			});
+	};
+
+	getSkor = () => {
+		const { selectedAnggota, date } = this.state;
+		fetch(`http://localhost:5000/api/skor/${selectedAnggota}`)
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({ skor: json.response });
+			});
+	};
+
+	getNilai = () => {
+		const { selectedAnggota, date } = this.state;
+		fetch(`http://localhost:5000/api/nilai/${selectedAnggota}`)
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({ nilai: json.response });
+			})
+			.then(() => console.log(this.state.nilai));
+	};
+
+	getRekap = () => {
+		const { selectedAnggota, date } = this.state;
+		fetch(`http://localhost:5000/api/rekap/${selectedAnggota}`)
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({
+					jumlah: json.response[0].jumlah,
+					rekap: json.response[0].rekap,
+				});
 			});
 	};
 
@@ -131,21 +178,35 @@ class Index extends React.Component {
 		return total + num;
 	};
 
+	onSelect = (event) => {
+		this.setState({ selectedAnggota: event.target.value });
+		fetch(`http://localhost:5000/api/user/${event.target.value}`, {
+			method: "GET",
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({
+					nik: json.response[0].nik,
+					nama: json.response[0].nama,
+					divisi: json.response[0].divisi,
+					jabatan: json.response[0].jabatan,
+					kode_jabatan: json.response[0].kode_jabatan,
+					kode_divisi: json.response[0].kode_divisi,
+				});
+			})
+			.finally(() => {
+				this.getForm();
+				this.getCategory();
+				this.getDivisi();
+				this.getSkor();
+				this.getNilai();
+				this.getRekap();
+			});
+	};
+
 	onSubmit = (e) => {
 		e.preventDefault();
-		const {
-			nik,
-			nilai,
-			skor,
-			categories,
-			date,
-			jumlah,
-			rekap,
-			nilai_atasan,
-			skor_atasan,
-			jumlah_atasan,
-			rekap_atasan,
-		} = this.state;
+		const { nik, nilai, skor, categories, date, jumlah, rekap } = this.state;
 
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
@@ -156,11 +217,7 @@ class Index extends React.Component {
 				skor[i],
 				jumlah,
 				rekap,
-				nilai_atasan,
-				skor_atasan,
-				jumlah_atasan,
-				rekap_atasan,
-				date.toString().slice(0, 8),
+				date,
 			]);
 		}
 
@@ -183,16 +240,27 @@ class Index extends React.Component {
 	};
 
 	render() {
-		const { nik, nama, divisi, jabatan, date, rekap } = this.state;
-		console.log(date.toString().slice(4, 7), date.toString().slice(11, 15));
-
+		const {
+			nik,
+			nama,
+			divisi,
+			jabatan,
+			date,
+			nilai,
+			nilai_atasan,
+			skor,
+			jumlah,
+			rekap,
+			selectedAnggota,
+			anggota,
+		} = this.state;
 		return (
 			<>
 				<Header />
 				{/* Page content */}
 				<Container className="mt--7" fluid>
 					<Row>
-						<Col xl="5">
+						<Col xl="6">
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row>
@@ -215,12 +283,26 @@ class Index extends React.Component {
 													onChange={(date) => this.setState({ date })}
 												/>
 											</MuiPickersUtilsProvider>
+											<TextField
+												id="anggota-divisi"
+												select
+												label="Pilih Anggota Divisi"
+												value={selectedAnggota}
+												onChange={this.onSelect}
+												style={{ width: "100%" }}
+											>
+												{anggota.map((anggota) => (
+													<MenuItem key={anggota.nik} value={anggota.nik}>
+														{anggota.nik} - {anggota.name}
+													</MenuItem>
+												))}
+											</TextField>
 										</Col>
 									</Row>
 								</CardHeader>
 								<CardBody>
 									<Row>
-										<Col md={7} xs={4}>
+										<Col md={6}>
 											<Typography
 												color="textPrimary"
 												variant="h6"
@@ -241,7 +323,7 @@ class Index extends React.Component {
 												);
 											})}
 										</Col>
-										<Col md={3} xs={6}>
+										<Col>
 											<Typography
 												color="textPrimary"
 												variant="h6"
@@ -268,19 +350,38 @@ class Index extends React.Component {
 												variant="h6"
 												align="center"
 											>
-												Skor
+												Nilai
 											</Typography>
-											{this.state.categories.map((category, i) => {
+											{this.state.nilai.map((value, index) => {
 												return (
 													<Typography
-														key={i}
+														key={index}
 														color="textSecondary"
 														variant="subtitle1"
 														align="center"
 													>
-														{this.state.nilai[i]
-															? (this.state.nilai[i] * category.bobot) / 100
-															: 0}
+														{this.state.nilai ? value.nilai : 0}
+													</Typography>
+												);
+											})}
+										</Col>
+										<Col>
+											<Typography
+												color="textPrimary"
+												variant="h6"
+												align="center"
+											>
+												Skor
+											</Typography>
+											{this.state.skor.map((value, index) => {
+												return (
+													<Typography
+														key={index}
+														color="textSecondary"
+														variant="subtitle1"
+														align="center"
+													>
+														{this.state.skor ? value.skor : 0}
 													</Typography>
 												);
 											})}
@@ -336,7 +437,7 @@ class Index extends React.Component {
 								</CardBody>
 							</Card>
 						</Col>
-						<Col className="mb-5 mb-xl-0" xl="7">
+						<Col className="mb-5 mb-xl-0" xl="6">
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row className="align-items-center">
@@ -394,14 +495,29 @@ class Index extends React.Component {
 														</Row>
 
 														<Divider style={{ borderWidth: 3 }} />
-														<Grid item md={6} xs={12}>
+
+														<Grid item md={12} xs={12}>
 															<TextField
 																fullWidth
 																label="Point Nilai"
 																margin="dense"
 																name="PointNilai"
-																onChange={this.handleChange(i, category.bobot)}
+																value={nilai[i]}
 																required
+																variant="outlined"
+																type="number"
+																disabled
+															/>
+														</Grid>
+
+														<Grid item md={6} xs={12}>
+															<TextField
+																fullWidth
+																label="Point Atasan"
+																margin="dense"
+																name="PointAtasan"
+																value={nilai_atasan}
+																onChange={this.handleChange(i, category.bobot)}
 																variant="outlined"
 																type="number"
 																helperText="Isilah Kolom Nilai dengan angka 0 s/d 100 sesuai kategori penilaian."
@@ -412,12 +528,11 @@ class Index extends React.Component {
 																fullWidth
 																label="Skor"
 																margin="dense"
-																name="pointNilai"
+																name="pointAtasan"
 																required
 																value={
-																	this.state.nilai[i]
-																		? (this.state.nilai[i] * category.bobot) /
-																		  100
+																	nilai_atasan[i]
+																		? (nilai_atasan[i] * category.bobot) / 100
 																		: 0
 																}
 																disabled

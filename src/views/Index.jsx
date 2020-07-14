@@ -87,7 +87,8 @@ class Login extends Component {
 
 	onSignin = (e) => {
 		e.preventDefault();
-		this.props.history.push(`/app/home/${this.state.username}`);
+		localStorage.setItem("nik", this.state.username);
+		this.props.history.push(`/app/home`);
 		// const { username, password } = this.state;
 		// this.setState({ error: "" });
 
@@ -130,7 +131,7 @@ class Login extends Component {
 						<Card className="bg-secondary shadow border-0">
 							<CardHeader className="bg-transparent pb-2">
 								<div className="text-muted text-center mt-2 ">
-									<h1 className="text-black">Welcome Admin!</h1>
+									<h1 className="text-black">Welcome!</h1>
 								</div>
 								<div className="text-center">
 									<img
@@ -141,7 +142,7 @@ class Login extends Component {
 								</div>
 								<div className="text-center text-muted mt-2">
 									<small>
-										<b>Dashboard Idolmart Mobile</b>
+										<b>Dashboard Kompetensi Karyawan</b>
 									</small>
 								</div>
 							</CardHeader>
