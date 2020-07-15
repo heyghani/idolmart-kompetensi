@@ -148,6 +148,8 @@ class Index extends React.Component {
 		} = this.state;
 
 		const body = [];
+		const month = date.toString().slice(4, 7);
+		const year = date.toString().slice(11, 15);
 		for (var i = 0; i < categories.length; i++) {
 			body.push([
 				nik,
@@ -160,7 +162,7 @@ class Index extends React.Component {
 				skor_atasan,
 				jumlah_atasan,
 				rekap_atasan,
-				date.toString().slice(0, 8),
+				month + " " + year,
 			]);
 		}
 
@@ -184,7 +186,6 @@ class Index extends React.Component {
 
 	render() {
 		const { nik, nama, divisi, jabatan, date, rekap } = this.state;
-		console.log(date.toString().slice(4, 7), date.toString().slice(11, 15));
 
 		return (
 			<>
@@ -192,7 +193,7 @@ class Index extends React.Component {
 				{/* Page content */}
 				<Container className="mt--7" fluid>
 					<Row>
-						<Col xl="5">
+						<Col xl="6">
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row>
@@ -220,7 +221,7 @@ class Index extends React.Component {
 								</CardHeader>
 								<CardBody>
 									<Row>
-										<Col md={7} xs={4}>
+										<Col md={6}>
 											<Typography
 												color="textPrimary"
 												variant="h6"
@@ -241,7 +242,7 @@ class Index extends React.Component {
 												);
 											})}
 										</Col>
-										<Col md={3} xs={6}>
+										<Col>
 											<Typography
 												color="textPrimary"
 												variant="h6"
@@ -288,7 +289,7 @@ class Index extends React.Component {
 									</Row>
 									<Divider />
 									<Row>
-										<Col md={7} xs={4}>
+										<Col md={6}>
 											{" "}
 											<Typography
 												color="textPrimary"
@@ -298,7 +299,7 @@ class Index extends React.Component {
 												Jumlah
 											</Typography>{" "}
 										</Col>
-										<Col md={3} xs={6} />
+										<Col />
 										<Col>
 											<Typography
 												color="textPrimary"
@@ -310,7 +311,7 @@ class Index extends React.Component {
 										</Col>
 									</Row>
 									<Row>
-										<Col md={7} xs={4}>
+										<Col md={6}>
 											{" "}
 											<Typography
 												color="textPrimary"
@@ -321,7 +322,7 @@ class Index extends React.Component {
 												Nilai Sikap (40%)
 											</Typography>{" "}
 										</Col>
-										<Col md={3} xs={6} />
+										<Col />
 										<Col>
 											<Typography
 												color="textPrimary"
@@ -336,7 +337,7 @@ class Index extends React.Component {
 								</CardBody>
 							</Card>
 						</Col>
-						<Col className="mb-5 mb-xl-0" xl="7">
+						<Col className="mb-5 mb-xl-0" xl="6">
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row className="align-items-center">

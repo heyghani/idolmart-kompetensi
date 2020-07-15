@@ -60,7 +60,7 @@ class Index extends React.Component {
 		nilai_atasan: [],
 		skor_atasan: [],
 		jumlah_atasan: "",
-		rekap_atasan: "",
+		rekap_atasan: null,
 		form: [],
 		categories: [],
 		skor: [],
@@ -68,7 +68,7 @@ class Index extends React.Component {
 		selectedAnggota: "",
 	};
 
-	componentWillMount = () => {
+	componentDidMount = () => {
 		this.getUser();
 	};
 
@@ -123,55 +123,98 @@ class Index extends React.Component {
 
 	getSkor = () => {
 		const { selectedAnggota, date } = this.state;
-		fetch(`http://localhost:5000/api/skor/${selectedAnggota}`)
+		const month = date.toString().slice(4, 7);
+		const year = date.toString().slice(11, 15);
+		fetch(`http://localhost:5000/api/skor`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				nik: selectedAnggota,
+				date: month + " " + year,
+			}),
+		})
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ skor: json.response });
-			});
+			})
+			.catch((err) => console.log(err));
 	};
 
 	getNilai = () => {
 		const { selectedAnggota, date } = this.state;
-		fetch(`http://localhost:5000/api/nilai/${selectedAnggota}`)
+		const month = date.toString().slice(4, 7);
+		const year = date.toString().slice(11, 15);
+		fetch(`http://localhost:5000/api/nilai`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				nik: selectedAnggota,
+				date: month + " " + year,
+			}),
+		})
 			.then((res) => res.json())
 			.then((json) => {
-				this.setState({ nilai: json.response });
+				const nilai = json.response.map((doc) => doc.nilai);
+				this.setState({ nilai });
 			})
-			.then(() => console.log(this.state.nilai));
+			.catch((err) => console.log(err));
 	};
 
 	getRekap = () => {
 		const { selectedAnggota, date } = this.state;
-		fetch(`http://localhost:5000/api/rekap/${selectedAnggota}`)
+		const month = date.toString().slice(4, 7);
+		const year = date.toString().slice(11, 15);
+		fetch(`http://localhost:5000/api/rekap`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				nik: selectedAnggota,
+				date: month + " " + year,
+			}),
+		})
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({
 					jumlah: json.response[0].jumlah,
 					rekap: json.response[0].rekap,
 				});
+			})
+			.catch(() => {
+				swal({
+					title: "Data tidak ditemukan!",
+					text: "Data pada bulan ini kosong",
+					icon: "warning",
+					button: "OK",
+				}).then(() => window.location.reload());
 			});
 	};
 
 	handleChange = (index, bobot) => (event) => {
-		const { nilai, skor } = this.state;
-		const newNilai = nilai.slice(0);
-		const newSkor = skor.slice(0);
+		const { nilai_atasan, skor_atasan } = this.state;
+		const newNilai = nilai_atasan.slice(0);
+		const newSkor = skor_atasan.slice(0);
 		const reducer = (accumulator, currentValue) => accumulator + currentValue;
 		newNilai[index] = event.target.value;
 		newSkor[index] = (event.target.value * bobot) / 100;
 		this.setState({
-			nilai: newNilai,
-			skor: newSkor,
-			jumlah: skor.reduce(reducer, 0).toFixed(2),
+			nilai_atasan: newNilai,
+			skor_atasan: newSkor,
+			jumlah_atasan: skor_atasan.reduce(reducer, 0).toFixed(2),
 		});
 		this.handleNilai();
 	};
 
 	handleNilai = () => {
-		const { jumlah } = this.state;
-		const rumus = (jumlah * 40) / 100;
-		const rekap = rumus.toFixed(2);
-		this.setState({ rekap });
+		const { jumlah_atasan } = this.state;
+		const rumus = (jumlah_atasan * 40) / 100;
+		const rekap_atasan = rumus.toFixed(2);
+		this.setState({ rekap_atasan });
 	};
 
 	reduce = (total, num) => {
@@ -206,35 +249,66 @@ class Index extends React.Component {
 
 	onSubmit = (e) => {
 		e.preventDefault();
-		const { nik, nilai, skor, categories, date, jumlah, rekap } = this.state;
+		const {
+			selectedAnggota,
+			nilai,
+			skor,
+			jumlah,
+			rekap,
+			nilai_atasan,
+			skor_atasan,
+			categories,
+			date,
+			jumlah_atasan,
+			rekap_atasan,
+		} = this.state;
+		const month = date.toString().slice(4, 7);
+		const year = date.toString().slice(11, 15);
 
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
 			body.push([
-				nik,
+				selectedAnggota,
 				categories[i].code_category,
-				nilai[i],
-				skor[i],
+				nilai[i].nilai,
+				skor[i].skor,
 				jumlah,
 				rekap,
-				date,
+				nilai_atasan[i],
+				skor_atasan[i],
+				jumlah_atasan,
+				rekap_atasan,
+				month + " " + year,
 			]);
 		}
 
-		fetch("http://localhost:5000/api/form", {
-			method: "POST",
+		fetch("http://localhost:5000/api/delete", {
+			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				values: body,
+				nik: selectedAnggota,
+				date: month + " " + year,
 			}),
 		}).then(() => {
-			swal({
-				title: "Berhasil!",
-				text: "Data telah ditambahkan!",
-				icon: "success",
-				button: "OK",
+			fetch("http://localhost:5000/api/update", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					values: body,
+					nik: selectedAnggota,
+					date: month + " " + year,
+				}),
+			}).then(() => {
+				swal({
+					title: "Berhasil!",
+					text: "Data telah ditambahkan!",
+					icon: "success",
+					button: "OK",
+				});
 			});
 		});
 	};
@@ -260,7 +334,7 @@ class Index extends React.Component {
 				{/* Page content */}
 				<Container className="mt--7" fluid>
 					<Row>
-						<Col xl="6">
+						<Col>
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row>
@@ -281,6 +355,7 @@ class Index extends React.Component {
 													maxDate={new Date("2030-01-01")}
 													value={date}
 													onChange={(date) => this.setState({ date })}
+													style={{ marginLeft: 10 }}
 												/>
 											</MuiPickersUtilsProvider>
 											<TextField
@@ -289,7 +364,7 @@ class Index extends React.Component {
 												label="Pilih Anggota Divisi"
 												value={selectedAnggota}
 												onChange={this.onSelect}
-												style={{ width: "100%" }}
+												style={{ width: 190, marginLeft: 10 }}
 											>
 												{anggota.map((anggota) => (
 													<MenuItem key={anggota.nik} value={anggota.nik}>
@@ -302,7 +377,7 @@ class Index extends React.Component {
 								</CardHeader>
 								<CardBody>
 									<Row>
-										<Col md={6}>
+										<Col md={4}>
 											<Typography
 												color="textPrimary"
 												variant="h6"
@@ -326,7 +401,7 @@ class Index extends React.Component {
 										<Col>
 											<Typography
 												color="textPrimary"
-												variant="h6"
+												variant="body1"
 												align="center"
 											>
 												Bobot
@@ -344,31 +419,33 @@ class Index extends React.Component {
 												);
 											})}
 										</Col>
+
 										<Col>
 											<Typography
 												color="textPrimary"
-												variant="h6"
+												variant="body1"
 												align="center"
 											>
 												Nilai
 											</Typography>
-											{this.state.nilai.map((value, index) => {
+											{nilai.map((data, i) => {
 												return (
 													<Typography
-														key={index}
+														key={i}
 														color="textSecondary"
 														variant="subtitle1"
 														align="center"
 													>
-														{this.state.nilai ? value.nilai : 0}
+														{data}
 													</Typography>
 												);
 											})}
 										</Col>
+
 										<Col>
 											<Typography
 												color="textPrimary"
-												variant="h6"
+												variant="body1"
 												align="center"
 											>
 												Skor
@@ -386,10 +463,52 @@ class Index extends React.Component {
 												);
 											})}
 										</Col>
+										<Col>
+											<Typography
+												color="textPrimary"
+												variant="body1"
+												align="center"
+											>
+												Nilai Atasan
+											</Typography>
+											{this.state.skor.map((value, index) => {
+												return (
+													<Typography
+														key={index}
+														color="textSecondary"
+														variant="subtitle1"
+														align="center"
+													>
+														{this.state.skor ? value.skor : 0}
+													</Typography>
+												);
+											})}
+										</Col>
+										<Col>
+											<Typography
+												color="textPrimary"
+												variant="body2"
+												align="center"
+											>
+												Skor Atasan
+											</Typography>
+											{this.state.skor.map((value, index) => {
+												return (
+													<Typography
+														key={index}
+														color="textSecondary"
+														variant="subtitle1"
+														align="center"
+													>
+														{this.state.skor ? value.skor : 0}
+													</Typography>
+												);
+											})}
+										</Col>
 									</Row>
 									<Divider />
 									<Row>
-										<Col md={7} xs={4}>
+										<Col md={6}>
 											{" "}
 											<Typography
 												color="textPrimary"
@@ -399,7 +518,8 @@ class Index extends React.Component {
 												Jumlah
 											</Typography>{" "}
 										</Col>
-										<Col md={3} xs={6} />
+										<Col />
+										<Col />
 										<Col>
 											<Typography
 												color="textPrimary"
@@ -411,7 +531,7 @@ class Index extends React.Component {
 										</Col>
 									</Row>
 									<Row>
-										<Col md={7} xs={4}>
+										<Col md={6} xs={4}>
 											{" "}
 											<Typography
 												color="textPrimary"
@@ -422,7 +542,8 @@ class Index extends React.Component {
 												Nilai Sikap (40%)
 											</Typography>{" "}
 										</Col>
-										<Col md={3} xs={6} />
+										<Col />
+										<Col />
 										<Col>
 											<Typography
 												color="textPrimary"
@@ -437,7 +558,9 @@ class Index extends React.Component {
 								</CardBody>
 							</Card>
 						</Col>
-						<Col className="mb-5 mb-xl-0" xl="6">
+					</Row>
+					<Row className="mt-5">
+						<Col className="mb-5 mb-xl-0">
 							<Card className="shadow">
 								<CardHeader className="bg-transparent">
 									<Row className="align-items-center">
@@ -516,7 +639,6 @@ class Index extends React.Component {
 																label="Point Atasan"
 																margin="dense"
 																name="PointAtasan"
-																value={nilai_atasan}
 																onChange={this.handleChange(i, category.bobot)}
 																variant="outlined"
 																type="number"
