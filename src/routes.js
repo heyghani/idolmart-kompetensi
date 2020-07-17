@@ -1,6 +1,6 @@
 import Login from "views/Index.jsx";
 import Home from "views/Home.jsx";
-import NilaiAtasan from "views/NilaiAtasan.jsx";
+import NilaiAtasan from "views/NilaiAtasan";
 import Logout from "views/Logout";
 
 var routes = [

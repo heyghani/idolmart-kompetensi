@@ -26,6 +26,7 @@ import {
 	Row,
 	Col,
 	UncontrolledCollapse,
+	Table,
 } from "reactstrap";
 import {
 	Divider,
@@ -34,6 +35,7 @@ import {
 	TextField,
 	Typography,
 	MenuItem,
+	TextareaAutosize,
 } from "@material-ui/core";
 import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
@@ -41,15 +43,12 @@ import DateFnsUtils from "@date-io/date-fns";
 import swal from "sweetalert";
 
 import Header from "components/Headers/Header.jsx";
-import { set } from "date-fns/esm";
 
 class Index extends React.Component {
 	state = {
 		rekap: null,
 		nilai: [],
-		date: new Date(),
-		logo: "",
-		logoUrl: "",
+		periode: "",
 		nik: "",
 		nama: "",
 		jumlah: "",
@@ -57,6 +56,8 @@ class Index extends React.Component {
 		kode_divisi: "",
 		jabatan: "",
 		kode_jabatan: "",
+		description: [],
+		description_atasan: [],
 		nilai_atasan: [],
 		skor_atasan: [],
 		jumlah_atasan: "",
@@ -65,7 +66,9 @@ class Index extends React.Component {
 		categories: [],
 		skor: [],
 		anggota: [],
+		karyawan: [],
 		selectedAnggota: "",
+		showTable: false,
 	};
 
 	componentDidMount = () => {
@@ -86,6 +89,7 @@ class Index extends React.Component {
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
 					kode_divisi: json.response[0].kode_divisi,
+					showTable: false,
 				});
 			})
 			.finally(() => {
@@ -121,10 +125,38 @@ class Index extends React.Component {
 			});
 	};
 
+	getAnggota = () => {
+		const { selectedAnggota, periode } = this.state;
+		fetch(`http://localhost:5000/api/anggota`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				nik: selectedAnggota,
+				periode,
+			}),
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({
+					karyawan: json.response,
+					jumlah_atasan: json.response[0].jumlah_atasan,
+					rekap_atasan: json.response[0].rekap_atasan,
+				});
+			})
+			.catch(() => {
+				swal({
+					title: "Data tidak ditemukan!",
+					text: "Data pada bulan ini kosong",
+					icon: "warning",
+					button: "OK",
+				}).then(() => window.location.reload());
+			});
+	};
+
 	getSkor = () => {
-		const { selectedAnggota, date } = this.state;
-		const month = date.toString().slice(4, 7);
-		const year = date.toString().slice(11, 15);
+		const { selectedAnggota, periode } = this.state;
 		fetch(`http://localhost:5000/api/skor`, {
 			method: "POST",
 			headers: {
@@ -132,20 +164,26 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				nik: selectedAnggota,
-				date: month + " " + year,
+				periode,
 			}),
 		})
 			.then((res) => res.json())
 			.then((json) => {
-				this.setState({ skor: json.response });
+				const skor = json.response.map((doc) => doc.skor);
+				this.setState({ skor });
 			})
-			.catch((err) => console.log(err));
+			.catch(() => {
+				swal({
+					title: "Data tidak ditemukan!",
+					text: "Data pada bulan ini kosong",
+					icon: "warning",
+					button: "OK",
+				}).then(() => window.location.reload());
+			});
 	};
 
 	getNilai = () => {
-		const { selectedAnggota, date } = this.state;
-		const month = date.toString().slice(4, 7);
-		const year = date.toString().slice(11, 15);
+		const { selectedAnggota, periode } = this.state;
 		fetch(`http://localhost:5000/api/nilai`, {
 			method: "POST",
 			headers: {
@@ -153,21 +191,28 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				nik: selectedAnggota,
-				date: month + " " + year,
+				periode,
 			}),
 		})
 			.then((res) => res.json())
 			.then((json) => {
 				const nilai = json.response.map((doc) => doc.nilai);
-				this.setState({ nilai });
+				const nilai_atasan = json.response.map((doc) => doc.nilai_atasan);
+				const description = json.response.map((doc) => doc.keterangan);
+				this.setState({ nilai, nilai_atasan, description });
 			})
-			.catch((err) => console.log(err));
+			.catch(() => {
+				swal({
+					title: "Data tidak ditemukan!",
+					text: "Data pada bulan ini kosong",
+					icon: "warning",
+					button: "OK",
+				}).then(() => window.location.reload());
+			});
 	};
 
 	getRekap = () => {
-		const { selectedAnggota, date } = this.state;
-		const month = date.toString().slice(4, 7);
-		const year = date.toString().slice(11, 15);
+		const { selectedAnggota, periode } = this.state;
 		fetch(`http://localhost:5000/api/rekap`, {
 			method: "POST",
 			headers: {
@@ -175,7 +220,7 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				nik: selectedAnggota,
-				date: month + " " + year,
+				periode,
 			}),
 		})
 			.then((res) => res.json())
@@ -193,6 +238,15 @@ class Index extends React.Component {
 					button: "OK",
 				}).then(() => window.location.reload());
 			});
+	};
+
+	handleDesc = (index) => (event) => {
+		const { description_atasan } = this.state;
+		const newDesc = description_atasan.slice(0);
+		newDesc[index] = event.target.value;
+		this.setState({
+			description_atasan: newDesc,
+		});
 	};
 
 	handleChange = (index, bobot) => (event) => {
@@ -221,7 +275,11 @@ class Index extends React.Component {
 		return total + num;
 	};
 
-	onSelect = (event) => {
+	onSelectPeriode = (event) => {
+		this.setState({ periode: event.target.value });
+	};
+
+	onSelectDivisi = (event) => {
 		this.setState({ selectedAnggota: event.target.value });
 		fetch(`http://localhost:5000/api/user/${event.target.value}`, {
 			method: "GET",
@@ -235,6 +293,7 @@ class Index extends React.Component {
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
 					kode_divisi: json.response[0].kode_divisi,
+					showTable: true,
 				});
 			})
 			.finally(() => {
@@ -244,6 +303,7 @@ class Index extends React.Component {
 				this.getSkor();
 				this.getNilai();
 				this.getRekap();
+				this.getAnggota();
 			});
 	};
 
@@ -255,33 +315,35 @@ class Index extends React.Component {
 			skor,
 			jumlah,
 			rekap,
+			description,
+			description_atasan,
 			nilai_atasan,
 			skor_atasan,
 			categories,
-			date,
+			periode,
 			jumlah_atasan,
 			rekap_atasan,
 		} = this.state;
-		const month = date.toString().slice(4, 7);
-		const year = date.toString().slice(11, 15);
 
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
 			body.push([
 				selectedAnggota,
 				categories[i].code_category,
-				nilai[i].nilai,
-				skor[i].skor,
+				categories[i].bobot,
+				nilai[i],
+				skor[i],
 				jumlah,
 				rekap,
+				description[i],
+				description_atasan[i],
 				nilai_atasan[i],
 				skor_atasan[i],
 				jumlah_atasan,
 				rekap_atasan,
-				month + " " + year,
+				periode,
 			]);
 		}
-
 		fetch("http://localhost:5000/api/delete", {
 			method: "DELETE",
 			headers: {
@@ -289,7 +351,7 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				nik: selectedAnggota,
-				date: month + " " + year,
+				periode,
 			}),
 		}).then(() => {
 			fetch("http://localhost:5000/api/update", {
@@ -300,7 +362,7 @@ class Index extends React.Component {
 				body: JSON.stringify({
 					values: body,
 					nik: selectedAnggota,
-					date: month + " " + year,
+					periode,
 				}),
 			}).then(() => {
 				swal({
@@ -308,7 +370,7 @@ class Index extends React.Component {
 					text: "Data telah ditambahkan!",
 					icon: "success",
 					button: "OK",
-				});
+				}).then(() => this.getAnggota());
 			});
 		});
 	};
@@ -319,15 +381,23 @@ class Index extends React.Component {
 			nama,
 			divisi,
 			jabatan,
-			date,
+			periode,
+			description,
 			nilai,
 			nilai_atasan,
-			skor,
 			jumlah,
+			jumlah_atasan,
 			rekap,
+			rekap_atasan,
 			selectedAnggota,
 			anggota,
+			karyawan,
 		} = this.state;
+		const option = [
+			{ value: "periode1", label: "Periode 1 Jan-Apr" },
+			{ value: "periode2", label: "Periode 2 May-Aug" },
+			{ value: "periode3", label: "Periode 3 Sep-Des" },
+		];
 		return (
 			<>
 				<Header />
@@ -345,25 +415,26 @@ class Index extends React.Component {
 											<h5 className="mt-0">Toko/Dept : {divisi} </h5>
 										</Col>
 										<Col>
-											<MuiPickersUtilsProvider utils={DateFnsUtils}>
-												<DatePicker
-													autoOk
-													animateYearScrolling
-													views={["year", "month"]}
-													label="Periode"
-													minDate={new Date("2020-07-01")}
-													maxDate={new Date("2030-01-01")}
-													value={date}
-													onChange={(date) => this.setState({ date })}
-													style={{ marginLeft: 10 }}
-												/>
-											</MuiPickersUtilsProvider>
+											<TextField
+												id="periode"
+												select
+												label="Pilih Periode"
+												value={periode}
+												onChange={this.onSelectPeriode}
+												style={{ width: 190, marginLeft: 10 }}
+											>
+												{option.map((option) => (
+													<MenuItem key={option.value} value={option.value}>
+														{option.label}
+													</MenuItem>
+												))}
+											</TextField>
 											<TextField
 												id="anggota-divisi"
 												select
 												label="Pilih Anggota Divisi"
 												value={selectedAnggota}
-												onChange={this.onSelect}
+												onChange={this.onSelectDivisi}
 												style={{ width: 190, marginLeft: 10 }}
 											>
 												{anggota.map((anggota) => (
@@ -376,185 +447,129 @@ class Index extends React.Component {
 									</Row>
 								</CardHeader>
 								<CardBody>
-									<Row>
-										<Col md={4}>
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="justify"
+									{this.state.showTable ? (
+										<Fragment>
+											<Table
+												className="align-items-center table-flush"
+												responsive
 											>
-												Kompetensi
-											</Typography>
-											{this.state.categories.map((data) => {
-												return (
+												<thead className="thead-light">
+													<tr>
+														<th scope="col">Kompentesi</th>
+														<th scope="col">Bobot</th>
+														<th scope="col">Nilai</th>
+														<th scope="col">Skor</th>
+														<th scope="col">Nilai Atasan</th>
+														<th scope="col">Skor Atasan</th>
+													</tr>
+												</thead>
+												<tbody>
+													{karyawan.map((karyawan, index) => {
+														return (
+															<tr key={index}>
+																<th scope="row">
+																	<span className="mb-0 text-sm">
+																		{karyawan.kompetensi}
+																	</span>
+																</th>
+																<th scope="row">
+																	<h5>{karyawan.bobot}</h5>
+																</th>
+																<th scope="row">
+																	<h5>{karyawan.nilai}</h5>
+																</th>
+																<th scope="row">
+																	<h5>{karyawan.skor}</h5>
+																</th>
+																<th scope="row">
+																	<h5>{karyawan.nilai_atasan}</h5>
+																</th>
+																<th scope="row">
+																	<h5>{karyawan.skor_atasan}</h5>
+																</th>
+															</tr>
+														);
+													})}
+												</tbody>
+											</Table>
+											<Divider />
+											<Row>
+												<Col md={4} xs={4}>
+													{" "}
 													<Typography
-														key={data.id}
+														color="textPrimary"
+														variant="h6"
+														align="left"
+													>
+														Jumlah
+													</Typography>{" "}
+												</Col>
+												<Col />
+												<Col>
+													<Typography
 														color="textPrimary"
 														variant="subtitle1"
-														align="justify"
-													>
-														{data.nama}
-													</Typography>
-												);
-											})}
-										</Col>
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="body1"
-												align="center"
-											>
-												Bobot
-											</Typography>
-											{this.state.categories.map((data) => {
-												return (
-													<Typography
-														key={data.id}
-														color="textSecondary"
-														variant="subtitle1"
 														align="center"
 													>
-														{data.bobot}
-													</Typography>
-												);
-											})}
-										</Col>
-
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="body1"
-												align="center"
-											>
-												Nilai
-											</Typography>
-											{nilai.map((data, i) => {
-												return (
+														{jumlah}
+													</Typography>{" "}
+												</Col>
+												<Col />
+												<Col>
 													<Typography
-														key={i}
-														color="textSecondary"
+														color="textPrimary"
+														variant="subtitle1"
+														align="left"
+													>
+														{jumlah_atasan}
+													</Typography>{" "}
+												</Col>
+											</Row>
+											<Row>
+												<Col md={4} xs={4}>
+													{" "}
+													<Typography
+														color="textPrimary"
+														variant="h6"
+														align="left"
+														style={{ marginTop: 20 }}
+													>
+														Nilai Sikap (40%)
+													</Typography>{" "}
+												</Col>
+												<Col />
+												<Col>
+													<Typography
+														color="textPrimary"
 														variant="subtitle1"
 														align="center"
+														style={{ marginTop: 20 }}
 													>
-														{data}
-													</Typography>
-												);
-											})}
-										</Col>
-
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="body1"
-												align="center"
-											>
-												Skor
-											</Typography>
-											{this.state.skor.map((value, index) => {
-												return (
+														{rekap}
+													</Typography>{" "}
+												</Col>
+												<Col />
+												<Col>
 													<Typography
-														key={index}
-														color="textSecondary"
+														color="textPrimary"
 														variant="subtitle1"
-														align="center"
+														align="left"
+														style={{ marginTop: 20 }}
 													>
-														{this.state.skor ? value.skor : 0}
-													</Typography>
-												);
-											})}
-										</Col>
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="body1"
-												align="center"
-											>
-												Nilai Atasan
-											</Typography>
-											{this.state.skor.map((value, index) => {
-												return (
-													<Typography
-														key={index}
-														color="textSecondary"
-														variant="subtitle1"
-														align="center"
-													>
-														{this.state.skor ? value.skor : 0}
-													</Typography>
-												);
-											})}
-										</Col>
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="body2"
-												align="center"
-											>
-												Skor Atasan
-											</Typography>
-											{this.state.skor.map((value, index) => {
-												return (
-													<Typography
-														key={index}
-														color="textSecondary"
-														variant="subtitle1"
-														align="center"
-													>
-														{this.state.skor ? value.skor : 0}
-													</Typography>
-												);
-											})}
-										</Col>
-									</Row>
-									<Divider />
-									<Row>
-										<Col md={6}>
-											{" "}
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="justify"
-											>
-												Jumlah
-											</Typography>{" "}
-										</Col>
-										<Col />
-										<Col />
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="subtitle1"
-												align="center"
-											>
-												{this.state.jumlah}
-											</Typography>{" "}
-										</Col>
-									</Row>
-									<Row>
-										<Col md={6} xs={4}>
-											{" "}
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="justify"
-												style={{ marginTop: 20 }}
-											>
-												Nilai Sikap (40%)
-											</Typography>{" "}
-										</Col>
-										<Col />
-										<Col />
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="subtitle1"
-												align="center"
-												style={{ marginTop: 20 }}
-											>
-												{rekap}
-											</Typography>{" "}
-										</Col>
-									</Row>
+														{rekap_atasan}
+													</Typography>{" "}
+												</Col>
+											</Row>
+										</Fragment>
+									) : (
+										<Typography
+											color="textSecondary"
+											variant="h5"
+											align="center"
+										>
+											Silahkan Pilih Anggota
+										</Typography>
+									)}
 								</CardBody>
 							</Card>
 						</Col>
@@ -626,9 +641,20 @@ class Index extends React.Component {
 																margin="dense"
 																name="PointNilai"
 																value={nilai[i]}
-																required
-																variant="outlined"
 																type="number"
+																style={{ width: "25%" }}
+																InputProps={{
+																	readOnly: true,
+																}}
+															/>
+														</Grid>
+														<Grid item md={12} xs={12}>
+															<TextareaAutosize
+																rowsMax={3}
+																aria-label="maximum height"
+																placeholder="Keterangan Nilai"
+																defaultValue={description[i]}
+																style={{ width: "100%" }}
 																disabled
 															/>
 														</Grid>
@@ -639,10 +665,12 @@ class Index extends React.Component {
 																label="Point Atasan"
 																margin="dense"
 																name="PointAtasan"
+																value={
+																	nilai_atasan[i] === 0 ? "" : nilai_atasan[i]
+																}
 																onChange={this.handleChange(i, category.bobot)}
 																variant="outlined"
 																type="number"
-																helperText="Isilah Kolom Nilai dengan angka 0 s/d 100 sesuai kategori penilaian."
 															/>
 														</Grid>
 														<Grid item md={6} xs={12}>
@@ -657,8 +685,18 @@ class Index extends React.Component {
 																		? (nilai_atasan[i] * category.bobot) / 100
 																		: 0
 																}
-																disabled
-																variant="outlined"
+																InputProps={{
+																	readOnly: true,
+																}}
+															/>
+														</Grid>
+														<Grid item md={12} xs={12}>
+															<TextareaAutosize
+																rowsMax={3}
+																aria-label="maximum height"
+																placeholder="Keterangan Nilai Atasan"
+																onChange={this.handleDesc(i)}
+																style={{ width: "100%" }}
 															/>
 														</Grid>
 													</Grid>

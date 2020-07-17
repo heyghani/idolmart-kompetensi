@@ -187,14 +187,14 @@ class Login extends Component {
 										<Button className="my-4" color="primary" type="submit">
 											Sign in
 										</Button>
-										<Button
+										{/* <Button
 											className="my-4"
 											color="default"
 											type="button"
 											onClick={() => this.handleSignup()}
 										>
 											Sign up
-										</Button>
+										</Button> */}
 									</div>
 								</Form>
 							</CardBody>
