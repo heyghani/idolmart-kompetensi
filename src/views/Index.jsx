@@ -56,7 +56,7 @@ class Login extends Component {
 	};
 
 	render() {
-		const { username, password, confirmPassword, error } = this.state;
+		const { username, password, error } = this.state;
 		return (
 			<Fragment>
 				<Modal

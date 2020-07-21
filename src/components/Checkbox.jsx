@@ -19,7 +19,6 @@ Checkboxes.propTypes = {
 	value: PropTypes.string,
 	checked: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
-	value: PropTypes.string,
 	color: PropTypes.string,
 };
 
