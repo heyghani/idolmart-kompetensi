@@ -1,6 +1,7 @@
 import Login from "views/Index.jsx";
 import Home from "views/Home.jsx";
 import NilaiAtasan from "views/NilaiAtasan";
+import Roles from "views/Roles";
 import Logout from "views/Logout";
 
 var routes = [
@@ -27,6 +28,13 @@ var routes = [
 		layout: "/app",
 	},
 
+	{
+		path: "/roles",
+		name: "Roles",
+		icon: "ni ni-bullet-list-67 text-blue",
+		component: Roles,
+		layout: "/app",
+	},
 	{
 		path: "/logout",
 		name: "Logout",

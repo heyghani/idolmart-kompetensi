@@ -13,7 +13,7 @@ class Logout extends Component {
 	};
 
 	onSubmit = () => {
-		localStorage.removeItem("UserLogin");
+		localStorage.removeItem("nik");
 		this.props.history.push("/auth/index");
 	};
 

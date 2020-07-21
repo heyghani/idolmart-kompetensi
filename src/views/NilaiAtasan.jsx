@@ -37,8 +37,6 @@ import {
 	MenuItem,
 	TextareaAutosize,
 } from "@material-ui/core";
-import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
-import DateFnsUtils from "@date-io/date-fns";
 
 import swal from "sweetalert";
 

@@ -3,8 +3,6 @@ import ReactDOM from "react-dom";
 import { createBrowserHistory } from "history";
 import * as serviceWorker from "./serviceWorker";
 import { Router, Route, Switch, Redirect } from "react-router-dom";
-import firebase from "firebase";
-import fire from "config";
 
 import "assets/vendor/nucleo/css/nucleo.css";
 import "assets/vendor/@fortawesome/fontawesome-free/css/all.min.css";
@@ -14,10 +12,6 @@ import AdminLayout from "layouts/Admin.jsx";
 import AuthLayout from "layouts/Auth.jsx";
 
 const hist = createBrowserHistory();
-
-if (!firebase.apps.length) {
-	firebase.initializeApp({ fire });
-}
 
 // const session = localStorage.getItem("UserLogin");
 // if (session) {

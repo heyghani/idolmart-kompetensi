@@ -36,8 +36,8 @@ import {
 	MenuItem,
 	TextareaAutosize,
 } from "@material-ui/core";
-import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
-import DateFnsUtils from "@date-io/date-fns";
+// import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
+// import DateFnsUtils from "@date-io/date-fns";
 
 import swal from "sweetalert";
 
@@ -207,7 +207,7 @@ class Index extends React.Component {
 	};
 
 	onSelect = (event) => {
-		const { nik, periode, isExist } = this.state;
+		const { nik } = this.state;
 		this.setState({
 			periode: event.target.value,
 			nilai: [],
@@ -289,18 +289,28 @@ class Index extends React.Component {
 				text: "Data telah ditambahkan!",
 				icon: "success",
 				button: "OK",
-			});
+			}).then(() => window.scrollTo(0, 0));
 		});
 	};
 
 	render() {
-		const { nik, nama, divisi, jabatan, periode, rekap, nilai } = this.state;
+		const {
+			nik,
+			nama,
+			form,
+			divisi,
+			jabatan,
+			periode,
+			jumlah,
+			rekap,
+			nilai,
+			categories,
+		} = this.state;
 		const option = [
 			{ value: "periode1", label: "Periode 1 Jan-Apr" },
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
-		console.log(nilai);
 		return (
 			<>
 				<Header />
@@ -357,7 +367,7 @@ class Index extends React.Component {
 											>
 												Kompetensi
 											</Typography>
-											{this.state.categories.map((data) => {
+											{categories.map((data) => {
 												return (
 													<Typography
 														key={data.id}
@@ -378,7 +388,7 @@ class Index extends React.Component {
 											>
 												Bobot
 											</Typography>
-											{this.state.categories.map((data) => {
+											{categories.map((data) => {
 												return (
 													<Typography
 														key={data.id}
@@ -420,7 +430,7 @@ class Index extends React.Component {
 											>
 												Skor
 											</Typography>
-											{this.state.categories.map((category, i) => {
+											{categories.map((category, i) => {
 												return (
 													<Typography
 														key={i}
@@ -428,9 +438,7 @@ class Index extends React.Component {
 														variant="subtitle1"
 														align="center"
 													>
-														{this.state.nilai[i]
-															? (this.state.nilai[i] * category.bobot) / 100
-															: 0}
+														{nilai[i] ? (nilai[i] * category.bobot) / 100 : 0}
 													</Typography>
 												);
 											})}
@@ -456,7 +464,7 @@ class Index extends React.Component {
 												variant="subtitle1"
 												align="center"
 											>
-												{this.state.jumlah}
+												{jumlah}
 											</Typography>{" "}
 										</Col>
 									</Row>
@@ -504,7 +512,7 @@ class Index extends React.Component {
 									</Row>
 								</CardHeader>
 								<CardBody>
-									{this.state.categories.map((category, i) => {
+									{categories.map((category, i) => {
 										const id = category.code_category;
 										return (
 											<Fragment key={i}>
@@ -524,7 +532,7 @@ class Index extends React.Component {
 														<Row>
 															<Col>
 																<h2>Kamus Penilaian</h2>
-																{this.state.form.map((data, i) => {
+																{form.map((data, i) => {
 																	return (
 																		<Typography
 																			key={i}
@@ -586,7 +594,7 @@ class Index extends React.Component {
 														</Grid>
 													</Grid>
 												</UncontrolledCollapse>
-												{i !== this.state.categories.length - 1 && <Divider />}
+												{i !== categories.length - 1 && <Divider />}
 											</Fragment>
 										);
 									})}
