@@ -2,6 +2,7 @@ import Login from "views/Index.jsx";
 import Home from "views/Home.jsx";
 import NilaiAtasan from "views/NilaiAtasan";
 import Roles from "views/Roles";
+import Bobot from "views/RekapBobot";
 import Logout from "views/Logout";
 
 var routes = [
@@ -26,14 +27,24 @@ var routes = [
 		icon: "ni ni-archive-2 text-blue",
 		component: NilaiAtasan,
 		layout: "/app",
+		class: true,
 	},
 
 	{
+		path: "/bobot",
+		name: "Rekap Bobot",
+		icon: "ni ni-diamond text-blue",
+		component: Bobot,
+		layout: "/app",
+		permission: "admin",
+	},
+	{
 		path: "/roles",
-		name: "Roles",
+		name: "Setting",
 		icon: "ni ni-bullet-list-67 text-blue",
 		component: Roles,
 		layout: "/app",
+		permission: "admin",
 	},
 	{
 		path: "/logout",

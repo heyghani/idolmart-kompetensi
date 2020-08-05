@@ -51,8 +51,21 @@ class Login extends Component {
 
 	onSignin = (e) => {
 		e.preventDefault();
-		localStorage.setItem("nik", this.state.username);
-		this.props.history.push(`/app/home`);
+		fetch("http://localhost:5000/api/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				nik: this.state.username,
+			}),
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				localStorage.setItem("user", JSON.stringify(json.response));
+			})
+			.finally(() => this.props.history.push("/app/home"))
+			.catch((err) => alert(err));
 	};
 
 	render() {

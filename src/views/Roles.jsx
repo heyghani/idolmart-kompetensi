@@ -15,45 +15,83 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { Fragment } from "react";
+import React from "react";
 
 // reactstrap components
-import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
+import {
+	Card,
+	CardHeader,
+	CardBody,
+	Container,
+	Row,
+	Col,
+	Modal,
+	Button,
+	Form,
+	Input,
+} from "reactstrap";
 import {
 	Divider,
-	Grid,
-	Button,
 	TextField,
 	Typography,
 	MenuItem,
-	TextareaAutosize,
+	FormControl,
+	FormLabel,
 	FormGroup,
 	FormControlLabel,
+	Table,
+	TableContainer,
+	TableHead,
+	TableBody,
+	TableRow,
+	TableCell,
+	Paper,
 } from "@material-ui/core";
 
 import swal from "sweetalert";
 
 import Header from "components/Headers/Header.jsx";
-import Checkbox from "components/Checkbox";
+// import Checkbox from "components/Checkbox";
 
 class Index extends React.Component {
 	state = {
+		table: [],
+		nama_jabatan: "",
 		jabatan: "",
 		jabatans: [],
 		selectedjabatan: [],
 		kamus: [],
 		standard: [],
 		bobot: "",
-		kode_jabatan: "",
 		kompetensi: "",
-		checkedItems: new Map(),
 		categories: [],
-		code_category: "",
+		modal: false,
+		title: "",
+		kode_kompetensi: "",
 	};
 
-	componentWillMount = () => {
+	componentDidMount = () => {
 		this.getJabatan();
 		this.getKompetensi();
+		this.getTable();
+	};
+
+	toggleModal = () => {
+		this.setState({
+			modal: !this.state.modal,
+			title: "",
+		});
+	};
+
+	getTable = () => {
+		fetch("http://localhost:5000/api/table", {
+			method: "GET",
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({ table: json.response });
+			})
+			.catch((err) => console.log(err));
 	};
 
 	getKompetensi = () => {
@@ -78,30 +116,30 @@ class Index extends React.Component {
 			.catch((err) => console.log(err));
 	};
 
-	handleChange = (i) => (event) => {
-		const { selectedjabatan, kode_jabatan, checkedItems } = this.state;
-		const body = [];
-
-		const item = event.target.name;
-		const isChecked = event.target.checked;
-		const value = event.target.value;
-
-		body.push(item);
-		console.log(body);
-		this.setState((prevState) => ({
-			checkedItems: prevState.checkedItems.set(item, isChecked),
-			kode_jabatan: value,
-		}));
+	handleChange = () => {
+		const nama = [];
+		const selected = [];
+		const checked = document.getElementsByTagName("input");
+		for (var i = 0; i < checked.length; i++) {
+			if (checked[i].checked) {
+				selected.push(checked[i].value);
+				nama.push(checked[i].name);
+			}
+			this.setState({
+				selectedjabatan: selected.join(","),
+				jabatan: nama.join(","),
+			});
+		}
 	};
 
-	handleKamus = (i) => (event) => {
-		const { kamus } = this.state;
-		const newDesc = kamus.slice(0);
-		newDesc[i] = event.target.value;
-		this.setState({
-			kamus: newDesc,
-		});
-	};
+	// handleKamus = (i) => (event) => {
+	// 	const { kamus } = this.state;
+	// 	const newDesc = kamus.slice(0);
+	// 	newDesc[i] = event.target.value;
+	// 	this.setState({
+	// 		kamus: newDesc,
+	// 	});
+	// };
 
 	handleBobot = (event) => {
 		this.setState({
@@ -109,44 +147,128 @@ class Index extends React.Component {
 		});
 	};
 
-	handleStandard = (i) => (event) => {
-		const { standard } = this.state;
-		const newDesc = standard.slice(0);
-		newDesc[i] = event.target.value;
-		this.setState({
-			standard: newDesc,
+	// handleStandard = (i) => (event) => {
+	// 	const { standard } = this.state;
+	// 	const newDesc = standard.slice(0);
+	// 	newDesc[i] = event.target.value;
+	// 	this.setState({
+	// 		standard: newDesc,
+	// 	});
+	// };
+
+	handleDelete = (data) => {
+		const kode_kompetensi = data.kode_kompetensi;
+		swal({
+			title: "Apakah anda yakin?",
+			text: "tekan OK untuk menghapus data!",
+			icon: "warning",
+			buttons: true,
+			dangerMode: true,
+		}).then((willDelete) => {
+			if (willDelete) {
+				fetch("http://localhost:5000/api/kompetensi", {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						kode_kompetensi,
+					}),
+				}).then(() => {
+					swal({
+						title: "Berhasil!",
+						text: "Data deleted successfully",
+						icon: "success",
+						button: "OK",
+					}).then(() => window.location.reload());
+				});
+			} else {
+				swal("Data berhasil diamankan");
+			}
 		});
 	};
 
 	onSelectKompetensi = (event) => {
 		this.setState({
-			code_category: event.target.id,
 			kompetensi: event.target.value,
 		});
 	};
 
+	onAddKompetensi = () => {
+		const { title, kode_kompetensi } = this.state;
+
+		const { level_jabatan, nama_jabatan } = "";
+
+		fetch("http://localhost:5000/api/addkompetensi", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				kode_kompetensi,
+				nama: title,
+				level_jabatan,
+				nama_jabatan,
+			}),
+		});
+	};
+
 	onSubmitKompetensi = () => {
-		const { code_category, kompetensi, kode_jabatan } = this.state;
+		const { kompetensi, bobot, selectedjabatan, jabatan } = this.state;
+
+		if (kompetensi === "" || jabatan === "" || bobot === "") {
+			swal({
+				title: "Gagal!",
+				text: "Data tidak boleh kosong",
+				icon: "warning",
+				button: "OK",
+			});
+		} else {
+			fetch("http://localhost:5000/api/kompetensi", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					kode_kompetensi: kompetensi.slice(0, 3),
+					bobot,
+					level_jabatan: selectedjabatan,
+					jabatan,
+				}),
+			})
+				.then((res) => res.json())
+				.then((json) => {
+					const message = json.response;
+					if (json.error) {
+						swal({
+							title: "Gagal!",
+							text: message,
+							icon: "warning",
+							button: "OK",
+						}).then(() => window.location.reload());
+					} else {
+						swal({
+							title: "Berhasil!",
+							text: message,
+							icon: "success",
+							button: "OK",
+						}).then(() => window.location.reload());
+					}
+				})
+				.catch((err) => console.log(err));
+		}
 	};
 
 	render() {
 		const {
-			kode_jabatan,
+			jabatan,
 			jabatans,
 			kompetensi,
 			categories,
-			checkedItems,
-			kamus,
 			bobot,
-			standard,
+			table,
 		} = this.state;
-		const option = [
-			{ standard: "Standard Nilai", kamus: "Kamus Kompetensi" },
-			{ standard: "Standard Nilai", kamus: "Kamus Kompetensi" },
-			{ standard: "Standard Nilai", kamus: "Kamus Kompetensi" },
-			{ standard: "Standard Nilai", kamus: "Kamus Kompetensi" },
-			{ standard: "Standard Nilai", kamus: "Kamus Kompetensi" },
-		];
+
 		return (
 			<>
 				<Header />
@@ -171,92 +293,224 @@ class Index extends React.Component {
 								<CardBody>
 									<Row>
 										<Col>
+											<Button
+												className="float-left"
+												color="primary"
+												onClick={this.toggleModal}
+												style={{ marginBottom: 10 }}
+											>
+												<i className="fas fa-plus" />
+											</Button>
+											<Modal
+												className="modal-dialog-centered"
+												size="lg"
+												isOpen={this.state.modal}
+											>
+												<div className="modal-body p-0">
+													<Card className="bg-secondary shadow border-0">
+														<CardHeader className="bg-transparent pb-2">
+															<div className="text-muted text-center mt-2 ">
+																<h1 className="text-black">
+																	Tambah Kompetensi
+																</h1>
+															</div>
+														</CardHeader>
+														<CardBody className="px-lg-5 py-lg-5">
+															<Form role="form" onSubmit={this.onAddKompetensi}>
+																<div className="pl-lg-4">
+																	<Row>
+																		<Col lg="6">
+																			<FormGroup>
+																				<label
+																					className="form-control-label"
+																					htmlFor="input-nama"
+																				>
+																					Nama Kompetensi
+																				</label>
+																				<Input
+																					className="form-control-alternative"
+																					value={this.state.title}
+																					onChange={(event) =>
+																						this.setState({
+																							title: event.target.value,
+																						})
+																					}
+																					type="text"
+																				/>
+																			</FormGroup>
+																		</Col>
+																		<Col lg="6">
+																			<FormGroup>
+																				<label
+																					className="form-control-label"
+																					htmlFor="input-nama"
+																				>
+																					Kode Kompetensi
+																				</label>
+																				<Input
+																					className="form-control-alternative"
+																					value={this.state.kode_kompetensi}
+																					onChange={(event) =>
+																						this.setState({
+																							kode_kompetensi:
+																								event.target.value,
+																						})
+																					}
+																					type="text"
+																				/>
+																			</FormGroup>
+																		</Col>
+																	</Row>
+																	<Row className="mt-5">
+																		<Col className="text-center">
+																			<FormGroup>
+																				<Button
+																					color="danger"
+																					onClick={this.toggleModal}
+																				>
+																					Batal
+																				</Button>
+																			</FormGroup>
+																		</Col>
+																		<Col className="text-center">
+																			<FormGroup>
+																				<Button color="success" type="submit">
+																					Save
+																				</Button>
+																			</FormGroup>
+																		</Col>
+																	</Row>
+																</div>
+															</Form>
+														</CardBody>
+													</Card>
+												</div>
+											</Modal>
+
+											<TableContainer component={Paper}>
+												<Table size="small" aria-label="a dense table">
+													<TableHead>
+														<TableRow>
+															<TableCell>
+																<b>Kompetensi</b>
+															</TableCell>
+															<TableCell>
+																<b>Jabatan</b>
+															</TableCell>
+															<TableCell>
+																<b>Action</b>
+															</TableCell>
+														</TableRow>
+													</TableHead>
+													<TableBody>
+														{table.map((data, i) => (
+															<TableRow key={i}>
+																<TableCell component="th" scope="row">
+																	{" "}
+																	{data.nama}{" "}
+																</TableCell>
+																<TableCell component="th" scope="row">
+																	{" "}
+																	{data.nama_jabatan}{" "}
+																</TableCell>
+																<TableCell component="th" scope="row">
+																	<Button
+																		style={{
+																			backgroundColor: "CRIMSON",
+																			color: "white",
+																		}}
+																		onClick={() => this.handleDelete(data)}
+																	>
+																		<i className="fas fa-trash" />
+																	</Button>
+																</TableCell>
+															</TableRow>
+														))}
+														{jabatan || kompetensi ? (
+															<TableRow>
+																<TableCell>
+																	<TextField
+																		value={kompetensi.slice(3)}
+																		label="Kompetensi"
+																		InputProps={{
+																			readOnly: true,
+																		}}
+																	/>
+																</TableCell>
+																<TableCell>
+																	<TextField
+																		value={jabatan}
+																		label="Jabatan"
+																		InputProps={{
+																			readOnly: true,
+																		}}
+																	/>
+																</TableCell>
+															</TableRow>
+														) : null}
+													</TableBody>
+												</Table>
+											</TableContainer>
+										</Col>
+									</Row>
+									<Row className="mt-5">
+										<Col className="ml-2" md={4} xs={4}>
+											<FormControl component="fieldset">
+												<FormLabel component="legend">Pilih Jabatan</FormLabel>
+												<FormGroup>
+													{jabatans.map((data) => {
+														return (
+															<FormControlLabel
+																control={
+																	<input
+																		id={data.data.jabatan_id}
+																		type="checkbox"
+																		value={data.data.level_jabatan}
+																		name={data.data.nama}
+																		style={{ margin: 5 }}
+																		onChange={() => this.handleChange()}
+																		required
+																	/>
+																}
+																label={data.data.nama}
+															/>
+														);
+													})}
+												</FormGroup>
+											</FormControl>
+										</Col>
+										<Col md={4} xs={4}>
 											<TextField
 												id="kompetensi"
 												select
 												label="Pilih Kompetensi"
 												value={kompetensi}
-												onChange={this.onSelectKompetensi}
-												style={{ width: 190, marginLeft: 10 }}
+												onChange={(event) => this.onSelectKompetensi(event)}
+												style={{ width: 150, marginLeft: 10 }}
+												required
 											>
 												{categories.map((data) => (
 													<MenuItem
+														onClick={(event) => console.log(event.target)}
 														key={data.id}
-														id={data.code_category}
-														value={data.nama}
+														id={data.kode_kompetensi}
+														value={data.kode_kompetensi + data.nama}
 													>
 														{data.nama}
 													</MenuItem>
 												))}
 											</TextField>
 										</Col>
-									</Row>
-									<Row className="mt-5">
 										<Col>
-											<FormGroup row>
-												{jabatans.map((data, i) => {
-													return (
-														<FormControlLabel
-															control={
-																<Checkbox
-																	checked={checkedItems.get(data.nama)}
-																	onChange={this.handleChange(i)}
-																	name={data.nama}
-																	color="primary"
-																	value={data.kode_jabatan}
-																/>
-															}
-															label={data.nama}
-														/>
-													);
-												})}
-											</FormGroup>
-										</Col>
-									</Row>
-									<Row className="mt-5">
-										<Col md={3} xs={3}>
 											<FormGroup>
 												<TextField
 													value={bobot}
 													onChange={this.handleBobot}
-													variant="outlined"
 													label="Bobot"
+													variant="outlined"
+													style={{ width: 100 }}
+													required
 												/>
-											</FormGroup>
-										</Col>
-										<Col md={3} xs={3}>
-											<FormGroup>
-												{option.map((data, i) => {
-													return (
-														<TextField
-															value={standard[i]}
-															onChange={this.handleStandard(i)}
-															variant="outlined"
-															label={data.standard}
-															style={{ marginBottom: 10 }}
-														/>
-													);
-												})}
-											</FormGroup>
-										</Col>
-										<Col>
-											<FormGroup>
-												{option.map((data, i) => {
-													return (
-														<TextareaAutosize
-															rowsMax={3}
-															value={kamus[i]}
-															aria-label="maximum height"
-															placeholder={data.kamus}
-															onChange={this.handleKamus(i)}
-															style={{
-																width: "100%",
-																height: 55,
-																marginBottom: 10,
-															}}
-														/>
-													);
-												})}
 											</FormGroup>
 										</Col>
 									</Row>
@@ -271,7 +525,7 @@ class Index extends React.Component {
 										backgroundColor: "LIGHTSEAGREEN",
 										color: "white",
 									}}
-									onClick={this.onSubmit}
+									onClick={this.onSubmitKompetensi}
 								>
 									Submit
 								</Button>

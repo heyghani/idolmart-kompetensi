@@ -54,6 +54,8 @@ class Index extends React.Component {
 		kode_divisi: "",
 		jabatan: "",
 		kode_jabatan: "",
+		level_jabatan: "",
+		kelas: null,
 		description: [],
 		description_atasan: [],
 		nilai_atasan: [],
@@ -74,7 +76,8 @@ class Index extends React.Component {
 	};
 
 	getUser = () => {
-		const nik = localStorage.getItem("nik");
+		const user = JSON.parse(localStorage.getItem("user"));
+		const nik = user[0].nik;
 		fetch(`http://localhost:5000/api/user/${nik}`, {
 			method: "GET",
 		})
@@ -87,6 +90,8 @@ class Index extends React.Component {
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
 					kode_divisi: json.response[0].kode_divisi,
+					level_jabatan: json.response[0].level_jabatan,
+					kelas: json.response[0].kelas,
 					showTable: false,
 				});
 			})
@@ -98,7 +103,7 @@ class Index extends React.Component {
 	};
 
 	getForm = () => {
-		fetch(`http://localhost:5000/api/form/${this.state.kode_jabatan}`, {
+		fetch(`http://localhost:5000/api/form/${this.state.level_jabatan}`, {
 			method: "GET",
 		})
 			.then((res) => res.json())
@@ -108,7 +113,7 @@ class Index extends React.Component {
 	};
 
 	getCategory = () => {
-		fetch(`http://localhost:5000/api/category/${this.state.kode_jabatan}`)
+		fetch(`http://localhost:5000/api/category/${this.state.level_jabatan}`)
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ categories: json.response });
@@ -116,7 +121,16 @@ class Index extends React.Component {
 	};
 
 	getDivisi = () => {
-		fetch(`http://localhost:5000/api/divisi/${this.state.kode_divisi}`)
+		fetch(`http://localhost:5000/api/divisi`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				divisi: this.state.kode_divisi,
+				kelas: this.state.kelas,
+			}),
+		})
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ anggota: json.response });
@@ -291,6 +305,7 @@ class Index extends React.Component {
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
 					kode_divisi: json.response[0].kode_divisi,
+					level_jabatan: json.response[0].level_jabatan,
 					showTable: true,
 				});
 			})
@@ -396,6 +411,7 @@ class Index extends React.Component {
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
+
 		return (
 			<>
 				<Header />
@@ -590,7 +606,7 @@ class Index extends React.Component {
 								</CardHeader>
 								<CardBody>
 									{this.state.categories.map((category, i) => {
-										const id = category.code_category;
+										const id = category.kode_kompetensi;
 										return (
 											<Fragment key={i}>
 												<Button

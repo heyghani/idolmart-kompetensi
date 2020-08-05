@@ -55,6 +55,7 @@ class Index extends React.Component {
 		divisi: "",
 		jabatan: "",
 		kode_jabatan: "",
+		level_jabatan: "",
 		nilai_atasan: 0,
 		skor_atasan: 0,
 		jumlah_atasan: 0,
@@ -71,7 +72,9 @@ class Index extends React.Component {
 	};
 
 	getUser = () => {
-		const nik = localStorage.getItem("nik");
+		const user = JSON.parse(localStorage.getItem("user"));
+		const nik = user[0].nik;
+
 		fetch(`http://localhost:5000/api/user/${nik}`, {
 			method: "GET",
 		})
@@ -83,6 +86,7 @@ class Index extends React.Component {
 					divisi: json.response[0].divisi,
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
+					level_jabatan: json.response[0].level_jabatan,
 				});
 			})
 			.finally(() => {
@@ -130,7 +134,7 @@ class Index extends React.Component {
 	};
 
 	getForm = () => {
-		fetch(`http://localhost:5000/api/form/${this.state.kode_jabatan}`, {
+		fetch(`http://localhost:5000/api/form/${this.state.level_jabatan}`, {
 			method: "GET",
 		})
 			.then((res) => res.json())
@@ -140,7 +144,7 @@ class Index extends React.Component {
 	};
 
 	getCategory = () => {
-		fetch(`http://localhost:5000/api/category/${this.state.kode_jabatan}`)
+		fetch(`http://localhost:5000/api/category/${this.state.level_jabatan}`)
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ categories: json.response });
@@ -260,7 +264,7 @@ class Index extends React.Component {
 		for (var i = 0; i < categories.length; i++) {
 			body.push([
 				nik,
-				categories[i].code_category,
+				categories[i].kode_kompetensi,
 				categories[i].bobot,
 				nilai[i],
 				skor[i],
@@ -513,7 +517,7 @@ class Index extends React.Component {
 								</CardHeader>
 								<CardBody>
 									{categories.map((category, i) => {
-										const id = category.code_category;
+										const id = category.kode_kompetensi;
 										return (
 											<Fragment key={i}>
 												<Button

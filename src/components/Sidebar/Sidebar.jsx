@@ -63,6 +63,14 @@ class Sidebar extends React.Component {
 	// creates the links that appear in the left menu / Sidebar
 	createLinks = (routes) => {
 		return routes.map((prop, key) => {
+			const role_permission = JSON.parse(localStorage.getItem("user"))[0].roles;
+			const kelas = JSON.parse(localStorage.getItem("user"))[0].kelas;
+			if (prop.permission) {
+				if (role_permission !== prop.permission) return null;
+			}
+			if (prop.class) {
+				if (kelas > 2) return null;
+			}
 			if (prop.invisible) return null;
 			return (
 				<NavItem key={key}>
