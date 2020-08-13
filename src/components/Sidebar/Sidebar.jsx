@@ -71,6 +71,9 @@ class Sidebar extends React.Component {
 			if (prop.class) {
 				if (kelas > 2) return null;
 			}
+			if (prop.name === "Report Karyawan") {
+				if (kelas > 1) return null;
+			}
 			if (prop.invisible) return null;
 			return (
 				<NavItem key={key}>

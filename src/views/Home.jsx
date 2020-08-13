@@ -35,9 +35,12 @@ import {
 	Typography,
 	MenuItem,
 	TextareaAutosize,
+	Table,
+	TableHead,
+	TableBody,
+	TableRow,
+	TableCell,
 } from "@material-ui/core";
-// import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
-// import DateFnsUtils from "@date-io/date-fns";
 
 import swal from "sweetalert";
 
@@ -153,7 +156,14 @@ class Index extends React.Component {
 
 	getNilai = () => {
 		const { isExist, nik, periode } = this.state;
-
+		this.setState({
+			nilai: [],
+			skor: [],
+			description: [],
+			jumlah: "",
+			rekap: "",
+			assignment: null,
+		});
 		if (isExist.length > 0) {
 			fetch(`http://localhost:5000/api/nilai`, {
 				method: "POST",
@@ -168,7 +178,21 @@ class Index extends React.Component {
 				.then((res) => res.json())
 				.then((json) => {
 					const nilai = json.response.map((doc) => doc.nilai);
-					this.setState({ nilai, isExist: [] });
+					const description = json.response.map((doc) => doc.keterangan);
+					const skor = json.response.map((doc) => doc.skor);
+					const reducer = (accumulator, currentValue) =>
+						accumulator + currentValue;
+					const jumlah = skor.reduce(reducer, 0).toFixed(2);
+					const rumus = (jumlah * 40) / 100;
+					const rekap = rumus.toFixed(2);
+					this.setState({
+						nilai,
+						skor,
+						rekap,
+						jumlah,
+						description,
+						isExist: [],
+					});
 				})
 				.then(() => this.getAssignment())
 				.catch((err) => console.log(err));
@@ -215,6 +239,8 @@ class Index extends React.Component {
 		this.setState({
 			periode: event.target.value,
 			nilai: [],
+			skor: [],
+			description: [],
 			jumlah: "",
 			rekap: "",
 			assignment: null,
@@ -233,14 +259,20 @@ class Index extends React.Component {
 			.then((json) => {
 				this.setState({
 					isExist: json.response,
-					jumlah: json.response[0].jumlah,
-					rekap: json.response[0].rekap,
 				});
 			})
 			.finally(() => {
 				this.getNilai();
 			})
-			.catch(() => this.setState({ jumlah: "", rekap: "", nilai: [] }));
+			.catch(() =>
+				this.setState({
+					jumlah: "",
+					rekap: "",
+					nilai: [],
+					skor: [],
+					description: [],
+				})
+			);
 	};
 
 	onSubmit = (e) => {
@@ -262,39 +294,63 @@ class Index extends React.Component {
 
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
-			body.push([
-				nik,
-				categories[i].kode_kompetensi,
-				categories[i].bobot,
-				nilai[i],
-				skor[i],
-				jumlah,
-				rekap,
-				description[i],
-				nilai_atasan,
-				skor_atasan,
-				jumlah_atasan,
-				rekap_atasan,
-				periode,
-			]);
+			if (nilai[i] === undefined) {
+				swal({
+					title: "Gagal!",
+					text: "Nilai tidak boleh kosong",
+					icon: "warning",
+					button: "OK",
+				});
+			} else {
+				body.push([
+					nik,
+					categories[i].kode_kompetensi,
+					categories[i].bobot,
+					nilai[i],
+					skor[i],
+					jumlah,
+					rekap,
+					description[i],
+					nilai_atasan,
+					skor_atasan,
+					jumlah_atasan,
+					rekap_atasan,
+					periode,
+				]);
+			}
 		}
 
-		fetch("http://localhost:5000/api/form", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				values: body,
-			}),
-		}).then(() => {
-			swal({
-				title: "Berhasil!",
-				text: "Data telah ditambahkan!",
-				icon: "success",
-				button: "OK",
-			}).then(() => window.scrollTo(0, 0));
-		});
+		if (body.length > 0) {
+			fetch("http://localhost:5000/api/form", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					values: body,
+					nik,
+					periode,
+				}),
+			})
+				.then((res) => res.json())
+				.then((json) => {
+					if (json.error) {
+						swal({
+							title: "Gagal!",
+							text: json.response,
+							icon: "warning",
+							button: "OK",
+						});
+					} else {
+						swal({
+							title: "Berhasil!",
+							text: json.response,
+							icon: "success",
+							button: "OK",
+						}).then(() => window.scrollTo(0, 0));
+					}
+				});
+		}
 	};
 
 	render() {
@@ -308,13 +364,16 @@ class Index extends React.Component {
 			jumlah,
 			rekap,
 			nilai,
+			skor,
 			categories,
+			description,
 		} = this.state;
 		const option = [
 			{ value: "periode1", label: "Periode 1 Jan-Apr" },
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
+
 		return (
 			<>
 				<Header />
@@ -346,156 +405,75 @@ class Index extends React.Component {
 													</MenuItem>
 												))}
 											</TextField>
-											{/* <MuiPickersUtilsProvider utils={DateFnsUtils}>
-												<DatePicker
-													autoOk
-													animateYearScrolling
-													views={["month", "year"]}
-													label="Periode"
-													minDate={new Date("2020-07-01")}
-													maxDate={new Date("2030-01-01")}
-													value={date}
-													onChange={(date) => this.setState({ date })}
-												/>
-											</MuiPickersUtilsProvider> */}
 										</Col>
 									</Row>
 								</CardHeader>
 								<CardBody>
 									<Row>
-										<Col md={6} xs={7}>
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="justify"
-											>
-												Kompetensi
-											</Typography>
-											{categories.map((data) => {
-												return (
-													<Typography
-														key={data.id}
-														color="textPrimary"
-														variant="subtitle1"
-														align="justify"
-													>
-														{data.nama}
-													</Typography>
-												);
-											})}
-										</Col>
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="center"
-											>
-												Bobot
-											</Typography>
-											{categories.map((data) => {
-												return (
-													<Typography
-														key={data.id}
-														color="textSecondary"
-														variant="subtitle1"
-														align="center"
-													>
-														{data.bobot}
-													</Typography>
-												);
-											})}
-										</Col>
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="center"
-											>
-												Nilai
-											</Typography>
-											{nilai.map((data, i) => {
-												return (
-													<Typography
-														key={i}
-														color="textSecondary"
-														variant="subtitle1"
-														align="center"
-													>
-														{nilai[i] ? data : 0}
-													</Typography>
-												);
-											})}
-										</Col>
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="center"
-											>
-												Skor
-											</Typography>
-											{categories.map((category, i) => {
-												return (
-													<Typography
-														key={i}
-														color="textSecondary"
-														variant="subtitle1"
-														align="center"
-													>
-														{nilai[i] ? (nilai[i] * category.bobot) / 100 : 0}
-													</Typography>
-												);
-											})}
-										</Col>
-									</Row>
-									<Divider />
-									<Row>
-										<Col md={6} xs={6}>
-											{" "}
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="justify"
-											>
-												Jumlah
-											</Typography>{" "}
-										</Col>
-										<Col />
-										<Col />
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="subtitle1"
-												align="center"
-											>
-												{jumlah}
-											</Typography>{" "}
-										</Col>
-									</Row>
-									<Row>
-										<Col md={6} xs={6}>
-											{" "}
-											<Typography
-												color="textPrimary"
-												variant="h6"
-												align="justify"
-												style={{ marginTop: 20 }}
-											>
-												Nilai Sikap (40%)
-											</Typography>{" "}
-										</Col>
-										<Col />
-										<Col />
-										<Col>
-											<Typography
-												color="textPrimary"
-												variant="subtitle1"
-												align="center"
-												style={{ marginTop: 20 }}
-											>
-												{rekap}
-											</Typography>{" "}
-										</Col>
+										<Table size="small" aria-label="a dense table">
+											<TableHead>
+												<TableRow>
+													<TableCell>
+														<b>Kompetensi</b>
+													</TableCell>
+													<TableCell>
+														<b>Bobot</b>
+													</TableCell>
+													<TableCell>
+														<b>Nilai</b>
+													</TableCell>
+													<TableCell>
+														<b>Skor</b>
+													</TableCell>
+												</TableRow>
+											</TableHead>
+											<TableBody>
+												{categories.map((data, i) => (
+													<TableRow key={i}>
+														<TableCell component="th" scope="row">
+															{" "}
+															{data.nama}{" "}
+														</TableCell>
+														<TableCell component="th" scope="row">
+															{" "}
+															{data.bobot}{" "}
+														</TableCell>
+														<TableCell component="th" scope="row">
+															<Typography
+																key={i}
+																color="textSecondary"
+																variant="subtitle1"
+																align="center"
+															>
+																{nilai[i] ? nilai[i] : 0}
+															</Typography>
+														</TableCell>
+														<TableCell component="th" scope="row">
+															<Typography
+																key={i}
+																color="textSecondary"
+																variant="subtitle1"
+																align="center"
+															>
+																{skor[i] ? skor[i] : 0}
+															</Typography>
+														</TableCell>
+													</TableRow>
+												))}
+											</TableBody>
+											<TableHead>
+												<TableRow>
+													<TableCell>
+														<b>Jumlah : {jumlah}</b>
+													</TableCell>
+													<TableCell style={{ width: 160 }}>
+														<b>Nilai (40%) : {rekap}</b>
+													</TableCell>
+													<TableCell />
+													<TableCell />
+												</TableRow>
+											</TableHead>
+										</Table>
 									</Row>
 								</CardBody>
 							</Card>
@@ -538,20 +516,45 @@ class Index extends React.Component {
 																<h2>Kamus Penilaian</h2>
 																{form.map((data, i) => {
 																	return (
-																		<Typography
+																		<Table
+																			size="small"
+																			aria-label="a dense table"
 																			key={i}
-																			color="textPrimary"
-																			variant="body1"
-																			style={{ marginBottom: 20 }}
 																		>
-																			{data.nama === category.nama
-																				? data.standard +
-																				  " | ".concat(data.kamus)
-																				: null}
-																			{data.nama === category.nama && (
-																				<Divider />
-																			)}
-																		</Typography>
+																			<TableBody>
+																				{data.nama === category.nama ? (
+																					<TableRow key={i}>
+																						<TableCell
+																							size="medium"
+																							style={{ width: 120 }}
+																						>
+																							<Typography
+																								key={i}
+																								color="textPrimary"
+																								variant="h6"
+																								align="left"
+																							>
+																								{data.nama === category.nama
+																									? data.standard
+																									: null}
+																							</Typography>
+																						</TableCell>
+																						<TableCell align="left">
+																							<Typography
+																								key={i}
+																								color="textPrimary"
+																								variant="body2"
+																								align="justify"
+																							>
+																								{data.nama === category.nama
+																									? data.kamus
+																									: null}
+																							</Typography>
+																						</TableCell>
+																					</TableRow>
+																				) : null}
+																			</TableBody>
+																		</Table>
 																	);
 																})}
 															</Col>
@@ -590,6 +593,9 @@ class Index extends React.Component {
 														<Grid item md={12} xs={12}>
 															<TextareaAutosize
 																rowsMax={3}
+																defaultValue={
+																	description.length > 0 ? description[i] : ""
+																}
 																aria-label="maximum height"
 																placeholder="Keterangan Nilai"
 																onChange={this.handeDesc(i)}

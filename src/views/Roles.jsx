@@ -25,10 +25,7 @@ import {
 	Container,
 	Row,
 	Col,
-	Modal,
 	Button,
-	Form,
-	Input,
 } from "reactstrap";
 import {
 	Divider,
@@ -95,7 +92,7 @@ class Index extends React.Component {
 	};
 
 	getKompetensi = () => {
-		fetch("http://localhost:5000/api/kompetensi", {
+		fetch("http://localhost:5000/api/kompetensi/get", {
 			method: "GET",
 		})
 			.then((res) => res.json())
@@ -166,7 +163,7 @@ class Index extends React.Component {
 			dangerMode: true,
 		}).then((willDelete) => {
 			if (willDelete) {
-				fetch("http://localhost:5000/api/kompetensi", {
+				fetch("http://localhost:5000/api/roles", {
 					method: "DELETE",
 					headers: {
 						"Content-Type": "application/json",
@@ -174,14 +171,16 @@ class Index extends React.Component {
 					body: JSON.stringify({
 						kode_kompetensi,
 					}),
-				}).then(() => {
-					swal({
-						title: "Berhasil!",
-						text: "Data deleted successfully",
-						icon: "success",
-						button: "OK",
-					}).then(() => window.location.reload());
-				});
+				})
+					.then((res) => res.json())
+					.then((json) => {
+						swal({
+							title: "Berhasil!",
+							text: json.response,
+							icon: "success",
+							button: "OK",
+						}).then(() => window.location.reload());
+					});
 			} else {
 				swal("Data berhasil diamankan");
 			}
@@ -191,25 +190,6 @@ class Index extends React.Component {
 	onSelectKompetensi = (event) => {
 		this.setState({
 			kompetensi: event.target.value,
-		});
-	};
-
-	onAddKompetensi = () => {
-		const { title, kode_kompetensi } = this.state;
-
-		const { level_jabatan, nama_jabatan } = "";
-
-		fetch("http://localhost:5000/api/addkompetensi", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				kode_kompetensi,
-				nama: title,
-				level_jabatan,
-				nama_jabatan,
-			}),
 		});
 	};
 
@@ -224,7 +204,7 @@ class Index extends React.Component {
 				button: "OK",
 			});
 		} else {
-			fetch("http://localhost:5000/api/kompetensi", {
+			fetch("http://localhost:5000/api/kompetensi/submit", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -293,100 +273,6 @@ class Index extends React.Component {
 								<CardBody>
 									<Row>
 										<Col>
-											<Button
-												className="float-left"
-												color="primary"
-												onClick={this.toggleModal}
-												style={{ marginBottom: 10 }}
-											>
-												<i className="fas fa-plus" />
-											</Button>
-											<Modal
-												className="modal-dialog-centered"
-												size="lg"
-												isOpen={this.state.modal}
-											>
-												<div className="modal-body p-0">
-													<Card className="bg-secondary shadow border-0">
-														<CardHeader className="bg-transparent pb-2">
-															<div className="text-muted text-center mt-2 ">
-																<h1 className="text-black">
-																	Tambah Kompetensi
-																</h1>
-															</div>
-														</CardHeader>
-														<CardBody className="px-lg-5 py-lg-5">
-															<Form role="form" onSubmit={this.onAddKompetensi}>
-																<div className="pl-lg-4">
-																	<Row>
-																		<Col lg="6">
-																			<FormGroup>
-																				<label
-																					className="form-control-label"
-																					htmlFor="input-nama"
-																				>
-																					Nama Kompetensi
-																				</label>
-																				<Input
-																					className="form-control-alternative"
-																					value={this.state.title}
-																					onChange={(event) =>
-																						this.setState({
-																							title: event.target.value,
-																						})
-																					}
-																					type="text"
-																				/>
-																			</FormGroup>
-																		</Col>
-																		<Col lg="6">
-																			<FormGroup>
-																				<label
-																					className="form-control-label"
-																					htmlFor="input-nama"
-																				>
-																					Kode Kompetensi
-																				</label>
-																				<Input
-																					className="form-control-alternative"
-																					value={this.state.kode_kompetensi}
-																					onChange={(event) =>
-																						this.setState({
-																							kode_kompetensi:
-																								event.target.value,
-																						})
-																					}
-																					type="text"
-																				/>
-																			</FormGroup>
-																		</Col>
-																	</Row>
-																	<Row className="mt-5">
-																		<Col className="text-center">
-																			<FormGroup>
-																				<Button
-																					color="danger"
-																					onClick={this.toggleModal}
-																				>
-																					Batal
-																				</Button>
-																			</FormGroup>
-																		</Col>
-																		<Col className="text-center">
-																			<FormGroup>
-																				<Button color="success" type="submit">
-																					Save
-																				</Button>
-																			</FormGroup>
-																		</Col>
-																	</Row>
-																</div>
-															</Form>
-														</CardBody>
-													</Card>
-												</div>
-											</Modal>
-
 											<TableContainer component={Paper}>
 												<Table size="small" aria-label="a dense table">
 													<TableHead>

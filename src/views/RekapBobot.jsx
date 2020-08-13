@@ -18,15 +18,7 @@
 import React from "react";
 
 // reactstrap components
-import {
-	Card,
-	CardHeader,
-	CardBody,
-	Container,
-	Row,
-	Col,
-	Button,
-} from "reactstrap";
+import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
 import {
 	TextField,
 	Typography,
@@ -76,7 +68,7 @@ class Index extends React.Component {
 	};
 
 	getKompetensi = () => {
-		fetch("http://localhost:5000/api/kompetensi", {
+		fetch("http://localhost:5000/api/kompetensi/get", {
 			method: "GET",
 		})
 			.then((res) => res.json())
@@ -331,6 +323,26 @@ class Index extends React.Component {
 												))}
 											</TextField>
 										</Col>
+										<Col>
+											<TextField
+												id="kompetensi"
+												select
+												label="Pilih Kompetensi"
+												value={kompetensi}
+												onChange={(event) => this.onSelectKompetensi(event)}
+												style={{ width: 200, marginBottom: 20 }}
+											>
+												{categories.map((data) => (
+													<MenuItem
+														onClick={(event) => this.handleMenu(event)}
+														key={data.id}
+														value={data.kode_kompetensi}
+													>
+														{data.nama}
+													</MenuItem>
+												))}
+											</TextField>
+										</Col>
 									</Row>
 									<Row>
 										<Col>
@@ -345,9 +357,9 @@ class Index extends React.Component {
 																<TableCell align="center">
 																	<b>Bobot</b>
 																</TableCell>
-																<TableCell>
+																{/* <TableCell>
 																	<b>Action</b>
-																</TableCell>
+																</TableCell> */}
 															</TableRow>
 														</TableHead>
 														<TableBody>
@@ -365,7 +377,7 @@ class Index extends React.Component {
 																		{" "}
 																		{data.bobot}{" "}
 																	</TableCell>
-																	<TableCell component="th" scope="row">
+																	{/* <TableCell component="th" scope="row">
 																		<Button
 																			style={{
 																				backgroundColor: "CRIMSON",
@@ -375,7 +387,7 @@ class Index extends React.Component {
 																		>
 																			<i className="fas fa-trash" />
 																		</Button>
-																	</TableCell>
+																	</TableCell> */}
 																</TableRow>
 															))}
 														</TableBody>
@@ -385,36 +397,12 @@ class Index extends React.Component {
 												<Typography
 													color="textSecondary"
 													variant="h5"
-													align="center"
+													align="left"
 												>
 													Silahkan Pilih Jabatan
 												</Typography>
 											)}
 										</Col>
-									</Row>
-									<Row classname="mt-10">
-										<Col>
-											<TextField
-												id="kompetensi"
-												select
-												label="Pilih Kompetensi"
-												value={kompetensi}
-												onChange={(event) => this.onSelectKompetensi(event)}
-												style={{ width: 200, marginBottom: 20, marginTop: 20 }}
-											>
-												{categories.map((data) => (
-													<MenuItem
-														onClick={(event) => this.handleMenu(event)}
-														key={data.id}
-														value={data.kode_kompetensi}
-													>
-														{data.nama}
-													</MenuItem>
-												))}
-											</TextField>
-										</Col>
-									</Row>
-									<Row>
 										<Col>
 											{this.state.showTable2 ? (
 												<TableContainer component={Paper}>
@@ -427,9 +415,9 @@ class Index extends React.Component {
 																<TableCell align="center">
 																	<b>Bobot</b>
 																</TableCell>
-																<TableCell>
+																{/* <TableCell>
 																	<b>Action</b>
-																</TableCell>
+																</TableCell> */}
 															</TableRow>
 														</TableHead>
 														<TableBody>
@@ -447,7 +435,7 @@ class Index extends React.Component {
 																		{" "}
 																		{data.bobot}{" "}
 																	</TableCell>
-																	<TableCell component="th" scope="row">
+																	{/* <TableCell component="th" scope="row">
 																		<Button
 																			style={{
 																				backgroundColor: "CRIMSON",
@@ -457,7 +445,7 @@ class Index extends React.Component {
 																		>
 																			<i className="fas fa-trash" />
 																		</Button>
-																	</TableCell>
+																	</TableCell> */}
 																</TableRow>
 															))}
 														</TableBody>
@@ -467,13 +455,19 @@ class Index extends React.Component {
 												<Typography
 													color="textSecondary"
 													variant="h5"
-													align="center"
+													align="left"
 												>
 													Silahkan Pilih Kompetensi
 												</Typography>
 											)}
 										</Col>
 									</Row>
+									{/* <Row classname="mt-10">
+										
+									</Row>
+									<Row>
+										
+									</Row> */}
 								</CardBody>
 							</Card>
 						</Col>

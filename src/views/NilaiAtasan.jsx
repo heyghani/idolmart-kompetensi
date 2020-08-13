@@ -26,7 +26,6 @@ import {
 	Row,
 	Col,
 	UncontrolledCollapse,
-	Table,
 } from "reactstrap";
 import {
 	Divider,
@@ -36,6 +35,11 @@ import {
 	Typography,
 	MenuItem,
 	TextareaAutosize,
+	Table,
+	TableHead,
+	TableBody,
+	TableRow,
+	TableCell,
 } from "@material-ui/core";
 
 import swal from "sweetalert";
@@ -69,6 +73,7 @@ class Index extends React.Component {
 		karyawan: [],
 		selectedAnggota: "",
 		showTable: false,
+		showKompetensi: false,
 	};
 
 	componentDidMount = () => {
@@ -155,34 +160,8 @@ class Index extends React.Component {
 					karyawan: json.response,
 					jumlah_atasan: json.response[0].jumlah_atasan,
 					rekap_atasan: json.response[0].rekap_atasan,
+					showKompetensi: true,
 				});
-			})
-			.catch(() => {
-				swal({
-					title: "Data tidak ditemukan!",
-					text: "Data pada bulan ini kosong",
-					icon: "warning",
-					button: "OK",
-				}).then(() => window.location.reload());
-			});
-	};
-
-	getSkor = () => {
-		const { selectedAnggota, periode } = this.state;
-		fetch(`http://localhost:5000/api/skor`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				nik: selectedAnggota,
-				periode,
-			}),
-		})
-			.then((res) => res.json())
-			.then((json) => {
-				const skor = json.response.map((doc) => doc.skor);
-				this.setState({ skor });
 			})
 			.catch(() => {
 				swal({
@@ -209,37 +188,21 @@ class Index extends React.Component {
 			.then((res) => res.json())
 			.then((json) => {
 				const nilai = json.response.map((doc) => doc.nilai);
+				const skor = json.response.map((doc) => doc.skor);
+				const reducer = (accumulator, currentValue) =>
+					accumulator + currentValue;
+				const jumlah = skor.reduce(reducer, 0).toFixed(2);
+				const rumus = (jumlah * 40) / 100;
+				const rekap = rumus.toFixed(2);
 				const nilai_atasan = json.response.map((doc) => doc.nilai_atasan);
 				const description = json.response.map((doc) => doc.keterangan);
-				this.setState({ nilai, nilai_atasan, description });
-			})
-			.catch(() => {
-				swal({
-					title: "Data tidak ditemukan!",
-					text: "Data pada bulan ini kosong",
-					icon: "warning",
-					button: "OK",
-				}).then(() => window.location.reload());
-			});
-	};
-
-	getRekap = () => {
-		const { selectedAnggota, periode } = this.state;
-		fetch(`http://localhost:5000/api/rekap`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				nik: selectedAnggota,
-				periode,
-			}),
-		})
-			.then((res) => res.json())
-			.then((json) => {
 				this.setState({
-					jumlah: json.response[0].jumlah,
-					rekap: json.response[0].rekap,
+					nilai,
+					skor,
+					jumlah,
+					rekap,
+					nilai_atasan,
+					description,
 				});
 			})
 			.catch(() => {
@@ -313,9 +276,7 @@ class Index extends React.Component {
 				this.getForm();
 				this.getCategory();
 				this.getDivisi();
-				this.getSkor();
 				this.getNilai();
-				this.getRekap();
 				this.getAnggota();
 			});
 	};
@@ -340,33 +301,34 @@ class Index extends React.Component {
 
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
-			body.push([
-				selectedAnggota,
-				categories[i].code_category,
-				categories[i].bobot,
-				nilai[i],
-				skor[i],
-				jumlah,
-				rekap,
-				description[i],
-				description_atasan[i],
-				nilai_atasan[i],
-				skor_atasan[i],
-				jumlah_atasan,
-				rekap_atasan,
-				periode,
-			]);
+			if (nilai_atasan.includes(0) || nilai_atasan.includes("")) {
+				swal({
+					title: "Gagal!",
+					text: `Nilai tidak boleh kosong`,
+					icon: "warning",
+					button: "OK",
+				});
+			} else {
+				body.push([
+					selectedAnggota,
+					categories[i].kode_kompetensi,
+					categories[i].bobot,
+					nilai[i],
+					skor[i],
+					jumlah,
+					rekap,
+					description[i],
+					description_atasan[i],
+					nilai_atasan[i],
+					skor_atasan[i],
+					jumlah_atasan,
+					rekap_atasan,
+					periode,
+				]);
+			}
 		}
-		fetch("http://localhost:5000/api/delete", {
-			method: "DELETE",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				nik: selectedAnggota,
-				periode,
-			}),
-		}).then(() => {
+
+		if (body.length > 0) {
 			fetch("http://localhost:5000/api/update", {
 				method: "POST",
 				headers: {
@@ -383,9 +345,9 @@ class Index extends React.Component {
 					text: "Data telah ditambahkan!",
 					icon: "success",
 					button: "OK",
-				}).then(() => this.getAnggota());
+				}).then(() => window.scrollTo(0, 0));
 			});
-		});
+		}
 	};
 
 	render() {
@@ -398,6 +360,7 @@ class Index extends React.Component {
 			description,
 			nilai,
 			nilai_atasan,
+			skor_atasan,
 			jumlah,
 			jumlah_atasan,
 			rekap,
@@ -411,7 +374,6 @@ class Index extends React.Component {
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
-
 		return (
 			<>
 				<Header />
@@ -461,283 +423,331 @@ class Index extends React.Component {
 									</Row>
 								</CardHeader>
 								<CardBody>
-									{this.state.showTable ? (
-										<Fragment>
-											<Table
-												className="align-items-center table-flush"
-												responsive
-											>
-												<thead className="thead-light">
-													<tr>
-														<th scope="col">Kompentesi</th>
-														<th scope="col">Bobot</th>
-														<th scope="col">Nilai</th>
-														<th scope="col">Skor</th>
-														<th scope="col">Nilai Atasan</th>
-														<th scope="col">Skor Atasan</th>
-													</tr>
-												</thead>
-												<tbody>
-													{karyawan.map((karyawan, index) => {
-														return (
-															<tr key={index}>
-																<th scope="row">
-																	<span className="mb-0 text-sm">
-																		{karyawan.kompetensi}
-																	</span>
-																</th>
-																<th scope="row">
-																	<h5>{karyawan.bobot}</h5>
-																</th>
-																<th scope="row">
-																	<h5>{karyawan.nilai}</h5>
-																</th>
-																<th scope="row">
-																	<h5>{karyawan.skor}</h5>
-																</th>
-																<th scope="row">
-																	<h5>{karyawan.nilai_atasan}</h5>
-																</th>
-																<th scope="row">
-																	<h5>{karyawan.skor_atasan}</h5>
-																</th>
-															</tr>
-														);
-													})}
-												</tbody>
-											</Table>
-											<Divider />
-											<Row>
-												<Col md={4} xs={4}>
-													{" "}
-													<Typography
-														color="textPrimary"
-														variant="h6"
-														align="left"
-													>
-														Jumlah
-													</Typography>{" "}
-												</Col>
-												<Col />
-												<Col>
-													<Typography
-														color="textPrimary"
-														variant="subtitle1"
-														align="center"
-													>
-														{jumlah}
-													</Typography>{" "}
-												</Col>
-												<Col />
-												<Col>
-													<Typography
-														color="textPrimary"
-														variant="subtitle1"
-														align="left"
-													>
-														{jumlah_atasan}
-													</Typography>{" "}
-												</Col>
-											</Row>
-											<Row>
-												<Col md={4} xs={4}>
-													{" "}
-													<Typography
-														color="textPrimary"
-														variant="h6"
-														align="left"
-														style={{ marginTop: 20 }}
-													>
-														Nilai Sikap (40%)
-													</Typography>{" "}
-												</Col>
-												<Col />
-												<Col>
-													<Typography
-														color="textPrimary"
-														variant="subtitle1"
-														align="center"
-														style={{ marginTop: 20 }}
-													>
-														{rekap}
-													</Typography>{" "}
-												</Col>
-												<Col />
-												<Col>
-													<Typography
-														color="textPrimary"
-														variant="subtitle1"
-														align="left"
-														style={{ marginTop: 20 }}
-													>
-														{rekap_atasan}
-													</Typography>{" "}
-												</Col>
-											</Row>
-										</Fragment>
-									) : (
-										<Typography
-											color="textSecondary"
-											variant="h5"
-											align="center"
-										>
-											Silahkan Pilih Anggota
-										</Typography>
-									)}
-								</CardBody>
-							</Card>
-						</Col>
-					</Row>
-					<Row className="mt-5">
-						<Col className="mb-5 mb-xl-0">
-							<Card className="shadow">
-								<CardHeader className="bg-transparent">
-									<Row className="align-items-center">
-										<div className="col">
-											<Typography
-												color="textPrimary"
-												variant="h5"
-												align="center"
-											>
-												Form Penilaian Sikap/Kompentesi
-											</Typography>
-										</div>
+									<Row>
+										<Col>
+											{this.state.showTable ? (
+												<Fragment>
+													<Table size="small" aria-label="a dense table">
+														<TableHead>
+															<TableRow>
+																<TableCell>
+																	<b>Kompetensi</b>
+																</TableCell>
+																<TableCell>
+																	<b>Bobot</b>
+																</TableCell>
+																<TableCell>
+																	<b>Nilai</b>
+																</TableCell>
+																<TableCell>
+																	<b>Skor</b>
+																</TableCell>
+																<TableCell>
+																	<b>Nilai Atasan</b>
+																</TableCell>
+																<TableCell>
+																	<b>Skor Atasan</b>
+																</TableCell>
+															</TableRow>
+														</TableHead>
+														<TableBody>
+															{karyawan.map((karyawan, index) => {
+																return (
+																	<TableRow key={index}>
+																		<TableCell component="th" scope="row">
+																			{karyawan.kompetensi}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{karyawan.bobot}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{karyawan.nilai}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{karyawan.skor}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{karyawan.nilai_atasan
+																				? karyawan.nilai_atasan
+																				: nilai_atasan[index]}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{karyawan.skor_atasan
+																				? karyawan.skor_atasan
+																				: skor_atasan[index]}
+																		</TableCell>
+																	</TableRow>
+																);
+															})}
+														</TableBody>
+													</Table>
+													<Divider />
+													<Row>
+														<Col md={4} xs={4}>
+															{" "}
+															<Typography
+																color="textPrimary"
+																variant="h6"
+																align="left"
+															>
+																Jumlah
+															</Typography>{" "}
+														</Col>
+														<Col />
+														<Col>
+															<Typography
+																color="textPrimary"
+																variant="subtitle1"
+																align="center"
+															>
+																{jumlah}
+															</Typography>{" "}
+														</Col>
+														<Col />
+														<Col>
+															<Typography
+																color="textPrimary"
+																variant="subtitle1"
+																align="left"
+															>
+																{jumlah_atasan}
+															</Typography>{" "}
+														</Col>
+													</Row>
+													<Row>
+														<Col md={4} xs={4}>
+															{" "}
+															<Typography
+																color="textPrimary"
+																variant="h6"
+																align="left"
+																style={{ marginTop: 20 }}
+															>
+																Nilai Sikap (40%)
+															</Typography>{" "}
+														</Col>
+														<Col />
+														<Col>
+															<Typography
+																color="textPrimary"
+																variant="subtitle1"
+																align="center"
+																style={{ marginTop: 20 }}
+															>
+																{rekap}
+															</Typography>{" "}
+														</Col>
+														<Col />
+														<Col>
+															<Typography
+																color="textPrimary"
+																variant="subtitle1"
+																align="left"
+																style={{ marginTop: 20 }}
+															>
+																{rekap_atasan}
+															</Typography>{" "}
+														</Col>
+													</Row>
+												</Fragment>
+											) : (
+												<Typography
+													color="textSecondary"
+													variant="h5"
+													align="center"
+												>
+													Silahkan Pilih Anggota
+												</Typography>
+											)}
+										</Col>
 									</Row>
-								</CardHeader>
-								<CardBody>
-									{this.state.categories.map((category, i) => {
-										const id = category.kode_kompetensi;
-										return (
-											<Fragment key={i}>
-												<Button
-													color="default"
-													size="large"
-													id={id}
-													style={{ width: "100%", margin: 10 }}
-												>
-													{category.nama}
-												</Button>
-												<UncontrolledCollapse
-													toggler={`#${id}`}
-													style={{ padding: 15 }}
-												>
-													<Grid container spacing={3}>
-														<Row>
-															<Col>
-																<h2>Kamus Penilaian</h2>
-																{this.state.form.map((data, i) => {
-																	return (
-																		<Typography
-																			key={i}
-																			color="textPrimary"
-																			variant="body1"
-																			style={{ marginBottom: 20 }}
-																		>
-																			{data.nama === category.nama
-																				? data.standard +
-																				  " | ".concat(data.kamus)
-																				: null}
-																			{data.nama === category.nama && (
-																				<Divider />
-																			)}
-																		</Typography>
-																	);
-																})}
-															</Col>
-														</Row>
-
-														<Divider style={{ borderWidth: 3 }} />
-
-														<Grid item md={12} xs={12}>
-															<TextField
-																fullWidth
-																label="Point Nilai"
-																margin="dense"
-																name="PointNilai"
-																value={nilai[i]}
-																type="number"
-																style={{ width: "25%" }}
-																InputProps={{
-																	readOnly: true,
-																}}
-															/>
-														</Grid>
-														<Grid item md={12} xs={12}>
-															<TextareaAutosize
-																rowsMax={3}
-																aria-label="maximum height"
-																placeholder="Keterangan Nilai"
-																defaultValue={description[i]}
-																style={{ width: "100%" }}
-																disabled
-															/>
-														</Grid>
-
-														<Grid item md={6} xs={12}>
-															<TextField
-																fullWidth
-																label="Point Atasan"
-																margin="dense"
-																name="PointAtasan"
-																value={
-																	nilai_atasan[i] === 0 ? "" : nilai_atasan[i]
-																}
-																onChange={this.handleChange(i, category.bobot)}
-																variant="outlined"
-																type="number"
-															/>
-														</Grid>
-														<Grid item md={6} xs={12}>
-															<TextField
-																fullWidth
-																label="Skor"
-																margin="dense"
-																name="pointAtasan"
-																required
-																value={
-																	nilai_atasan[i]
-																		? (nilai_atasan[i] * category.bobot) / 100
-																		: 0
-																}
-																InputProps={{
-																	readOnly: true,
-																}}
-															/>
-														</Grid>
-														<Grid item md={12} xs={12}>
-															<TextareaAutosize
-																rowsMax={3}
-																aria-label="maximum height"
-																placeholder="Keterangan Nilai Atasan"
-																onChange={this.handleDesc(i)}
-																style={{ width: "100%" }}
-															/>
-														</Grid>
-													</Grid>
-												</UncontrolledCollapse>
-												{i !== this.state.categories.length - 1 && <Divider />}
-											</Fragment>
-										);
-									})}
 								</CardBody>
-								<Divider />
-								<Button
-									size="large"
-									id="tj"
-									style={{
-										width: "40%",
-										margin: 10,
-										alignSelf: "center",
-										backgroundColor: "LIGHTSEAGREEN",
-										color: "white",
-									}}
-									onClick={this.onSubmit}
-								>
-									Submit
-								</Button>
 							</Card>
 						</Col>
 					</Row>
+					{this.state.showKompetensi ? (
+						<Row className="mt-5">
+							<Col className="mb-5 mb-xl-0">
+								<Card className="shadow">
+									<CardHeader className="bg-transparent">
+										<Row className="align-items-center">
+											<div className="col">
+												<Typography
+													color="textPrimary"
+													variant="h5"
+													align="center"
+												>
+													Form Penilaian Sikap/Kompentesi
+												</Typography>
+											</div>
+										</Row>
+									</CardHeader>
+									<CardBody>
+										{this.state.categories.map((category, i) => {
+											const id = category.kode_kompetensi;
+
+											return (
+												<Fragment key={i}>
+													<Button
+														color="default"
+														size="large"
+														id={id}
+														style={{ width: "100%", margin: 10 }}
+													>
+														{category.nama}
+													</Button>
+													<UncontrolledCollapse
+														toggler={`#${id}`}
+														style={{ padding: 15 }}
+													>
+														<Grid container spacing={3}>
+															<Row>
+																<Col>
+																	<h2>Kamus Penilaian</h2>
+																	{this.state.form.map((data, i) => {
+																		return (
+																			<Table
+																				size="small"
+																				aria-label="a dense table"
+																				key={i}
+																			>
+																				<TableBody>
+																					{data.nama === category.nama ? (
+																						<TableRow key={i}>
+																							<TableCell
+																								size="medium"
+																								style={{ width: 120 }}
+																							>
+																								<Typography
+																									key={i}
+																									color="textPrimary"
+																									variant="h6"
+																									align="left"
+																								>
+																									{data.nama === category.nama
+																										? data.standard
+																										: null}
+																								</Typography>
+																							</TableCell>
+																							<TableCell align="left">
+																								<Typography
+																									key={i}
+																									color="textPrimary"
+																									variant="body1"
+																									align="left"
+																								>
+																									{data.nama === category.nama
+																										? data.kamus
+																										: null}
+																								</Typography>
+																							</TableCell>
+																						</TableRow>
+																					) : null}
+																				</TableBody>
+																			</Table>
+																		);
+																	})}
+																</Col>
+															</Row>
+
+															<Divider style={{ borderWidth: 3 }} />
+
+															<Grid item md={12} xs={12}>
+																<TextField
+																	fullWidth
+																	label="Point Nilai"
+																	margin="dense"
+																	name="PointNilai"
+																	value={nilai[i]}
+																	type="number"
+																	style={{ width: "25%" }}
+																	InputProps={{
+																		readOnly: true,
+																	}}
+																/>
+															</Grid>
+															<Grid item md={12} xs={12}>
+																<TextareaAutosize
+																	rowsMax={3}
+																	aria-label="maximum height"
+																	placeholder="Keterangan Nilai"
+																	defaultValue={description[i]}
+																	style={{ width: "100%" }}
+																	disabled
+																/>
+															</Grid>
+
+															<Grid item md={6} xs={12}>
+																<TextField
+																	fullWidth
+																	label="Point Atasan"
+																	margin="dense"
+																	name="PointAtasan"
+																	value={
+																		nilai_atasan[i] === 0 ? "" : nilai_atasan[i]
+																	}
+																	onChange={this.handleChange(
+																		i,
+																		category.bobot
+																	)}
+																	variant="outlined"
+																	type="number"
+																/>
+															</Grid>
+															<Grid item md={6} xs={12}>
+																<TextField
+																	fullWidth
+																	label="Skor"
+																	margin="dense"
+																	name="pointAtasan"
+																	required
+																	value={
+																		nilai_atasan[i]
+																			? (nilai_atasan[i] * category.bobot) / 100
+																			: 0
+																	}
+																	InputProps={{
+																		readOnly: true,
+																	}}
+																/>
+															</Grid>
+															<Grid item md={12} xs={12}>
+																<TextareaAutosize
+																	rowsMax={3}
+																	aria-label="maximum height"
+																	placeholder="Keterangan Nilai Atasan"
+																	onChange={this.handleDesc(i)}
+																	style={{ width: "100%" }}
+																/>
+															</Grid>
+														</Grid>
+													</UncontrolledCollapse>
+													{i !== this.state.categories.length - 1 && (
+														<Divider />
+													)}
+												</Fragment>
+											);
+										})}
+									</CardBody>
+									<Divider />
+									<Button
+										size="large"
+										id="tj"
+										style={{
+											width: "40%",
+											margin: 10,
+											alignSelf: "center",
+											backgroundColor: "LIGHTSEAGREEN",
+											color: "white",
+										}}
+										onClick={this.onSubmit}
+									>
+										Submit
+									</Button>
+								</Card>
+							</Col>
+						</Row>
+					) : null}
 				</Container>
 			</>
 		);

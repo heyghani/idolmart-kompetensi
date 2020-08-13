@@ -1,8 +1,10 @@
 import Login from "views/Index.jsx";
 import Home from "views/Home.jsx";
 import NilaiAtasan from "views/NilaiAtasan";
+import ReportNilai from "views/ReportNilai";
 import Roles from "views/Roles";
 import Bobot from "views/RekapBobot";
+import Kompetensi from "views/Kompetensi";
 import Logout from "views/Logout";
 
 var routes = [
@@ -29,7 +31,23 @@ var routes = [
 		layout: "/app",
 		class: true,
 	},
+	{
+		path: "/report",
+		name: "Report Karyawan",
+		icon: "ni ni-archive-2 text-blue",
+		component: ReportNilai,
+		layout: "/app",
+		class: true,
+	},
 
+	{
+		path: "/kompetensi",
+		name: "Kompetensi",
+		icon: "ni ni-books text-blue",
+		component: Kompetensi,
+		layout: "/app",
+		permission: "admin",
+	},
 	{
 		path: "/bobot",
 		name: "Rekap Bobot",
