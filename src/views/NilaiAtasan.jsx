@@ -40,6 +40,7 @@ import {
 	TableBody,
 	TableRow,
 	TableCell,
+	TableContainer,
 } from "@material-ui/core";
 
 import swal from "sweetalert";
@@ -189,20 +190,27 @@ class Index extends React.Component {
 			.then((json) => {
 				const nilai = json.response.map((doc) => doc.nilai);
 				const skor = json.response.map((doc) => doc.skor);
+				const description = json.response.map((doc) => doc.keterangan);
 				const reducer = (accumulator, currentValue) =>
 					accumulator + currentValue;
 				const jumlah = skor.reduce(reducer, 0).toFixed(2);
 				const rumus = (jumlah * 40) / 100;
 				const rekap = rumus.toFixed(2);
 				const nilai_atasan = json.response.map((doc) => doc.nilai_atasan);
-				const description = json.response.map((doc) => doc.keterangan);
+				const skor_atasan = json.response.map((doc) => doc.skor_atasan);
+				const jumlah_atasan = skor_atasan.reduce(reducer, 0).toFixed(2);
+				const rumus_atasan = (jumlah_atasan * 40) / 100;
+				const rekap_atasan = rumus_atasan.toFixed(2);
 				this.setState({
 					nilai,
 					skor,
 					jumlah,
 					rekap,
-					nilai_atasan,
 					description,
+					skor_atasan,
+					nilai_atasan,
+					jumlah_atasan,
+					rekap_atasan,
 				});
 			})
 			.catch(() => {
@@ -226,14 +234,12 @@ class Index extends React.Component {
 
 	handleChange = (index, bobot) => (event) => {
 		const { nilai_atasan, skor_atasan } = this.state;
-		const newNilai = nilai_atasan.slice(0);
-		const newSkor = skor_atasan.slice(0);
 		const reducer = (accumulator, currentValue) => accumulator + currentValue;
-		newNilai[index] = event.target.value;
-		newSkor[index] = (event.target.value * bobot) / 100;
+		nilai_atasan[index] = event.target.value;
+		skor_atasan[index] = (event.target.value * bobot) / 100;
 		this.setState({
-			nilai_atasan: newNilai,
-			skor_atasan: newSkor,
+			nilai_atasan,
+			skor_atasan,
 			jumlah_atasan: skor_atasan.reduce(reducer, 0).toFixed(2),
 		});
 		this.handleNilai();
@@ -297,6 +303,7 @@ class Index extends React.Component {
 			periode,
 			jumlah_atasan,
 			rekap_atasan,
+			kelas,
 		} = this.state;
 
 		const body = [];
@@ -324,6 +331,7 @@ class Index extends React.Component {
 					jumlah_atasan,
 					rekap_atasan,
 					periode,
+					kelas,
 				]);
 			}
 		}
@@ -374,6 +382,8 @@ class Index extends React.Component {
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
+
+		console.log(jumlah_atasan, rekap_atasan);
 		return (
 			<>
 				<Header />
@@ -427,60 +437,58 @@ class Index extends React.Component {
 										<Col>
 											{this.state.showTable ? (
 												<Fragment>
-													<Table size="small" aria-label="a dense table">
-														<TableHead>
-															<TableRow>
-																<TableCell>
-																	<b>Kompetensi</b>
-																</TableCell>
-																<TableCell>
-																	<b>Bobot</b>
-																</TableCell>
-																<TableCell>
-																	<b>Nilai</b>
-																</TableCell>
-																<TableCell>
-																	<b>Skor</b>
-																</TableCell>
-																<TableCell>
-																	<b>Nilai Atasan</b>
-																</TableCell>
-																<TableCell>
-																	<b>Skor Atasan</b>
-																</TableCell>
-															</TableRow>
-														</TableHead>
-														<TableBody>
-															{karyawan.map((karyawan, index) => {
-																return (
-																	<TableRow key={index}>
-																		<TableCell component="th" scope="row">
-																			{karyawan.kompetensi}
-																		</TableCell>
-																		<TableCell component="th" scope="row">
-																			{karyawan.bobot}
-																		</TableCell>
-																		<TableCell component="th" scope="row">
-																			{karyawan.nilai}
-																		</TableCell>
-																		<TableCell component="th" scope="row">
-																			{karyawan.skor}
-																		</TableCell>
-																		<TableCell component="th" scope="row">
-																			{karyawan.nilai_atasan
-																				? karyawan.nilai_atasan
-																				: nilai_atasan[index]}
-																		</TableCell>
-																		<TableCell component="th" scope="row">
-																			{karyawan.skor_atasan
-																				? karyawan.skor_atasan
-																				: skor_atasan[index]}
-																		</TableCell>
-																	</TableRow>
-																);
-															})}
-														</TableBody>
-													</Table>
+													<TableContainer>
+														<Table size="small" aria-label="a dense table">
+															<TableHead>
+																<TableRow>
+																	<TableCell>
+																		<b>Kompetensi</b>
+																	</TableCell>
+																	<TableCell>
+																		<b>Bobot</b>
+																	</TableCell>
+																	<TableCell>
+																		<b>Nilai</b>
+																	</TableCell>
+																	<TableCell>
+																		<b>Skor</b>
+																	</TableCell>
+																	<TableCell>
+																		<b>Nilai Atasan</b>
+																	</TableCell>
+																	<TableCell>
+																		<b>Skor Atasan</b>
+																	</TableCell>
+																</TableRow>
+															</TableHead>
+															<TableBody>
+																{karyawan.map((karyawan, index) => {
+																	return (
+																		<TableRow key={index}>
+																			<TableCell component="th" scope="row">
+																				{karyawan.kompetensi}
+																			</TableCell>
+																			<TableCell component="th" scope="row">
+																				{karyawan.bobot}
+																			</TableCell>
+																			<TableCell component="th" scope="row">
+																				{karyawan.nilai}
+																			</TableCell>
+																			<TableCell component="th" scope="row">
+																				{karyawan.skor}
+																			</TableCell>
+																			<TableCell component="th" scope="row">
+																				{nilai_atasan[index]}
+																			</TableCell>
+																			<TableCell component="th" scope="row">
+																				{skor_atasan[index]}
+																			</TableCell>
+																		</TableRow>
+																	);
+																})}
+															</TableBody>
+														</Table>
+													</TableContainer>
 													<Divider />
 													<Row>
 														<Col md={4} xs={4}>

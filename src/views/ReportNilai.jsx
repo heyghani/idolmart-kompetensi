@@ -160,7 +160,26 @@ class Index extends React.Component {
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
-		console.log(categories);
+		const example = [
+			{
+				nik: "202394",
+				nama: "Ghani",
+				jabatan: "Staff",
+				kompetensi: [80, 90, 85, 90, 88, 87, 86, 80, 90, 78, 70, 75],
+			},
+			{
+				nik: "9033",
+				nama: "Ihsan",
+				jabatan: "Supervisor",
+				kompetensi: [80, 90, 85, 90, 88, 87, 86, 80, 90, 78, 70, 75],
+			},
+			{
+				nik: "10082",
+				nama: "Fitra",
+				jabatan: "Officer",
+				kompetensi: [80, 90, 85, 90, 88, 87, 86, 80, 90, 78, 70, 75],
+			},
+		];
 		return (
 			<>
 				<Header />
@@ -233,17 +252,30 @@ class Index extends React.Component {
 															</TableRow>
 														</TableHead>
 														<TableBody>
-															{karyawan.map((data, i) => {
+															{example.map((data, i) => {
 																return (
 																	<TableRow key={i}>
 																		<TableCell component="td" scope="row">
 																			{data.nik}
 																		</TableCell>
-																		<TableCell component="td" scope="row">
-																			{data.name}
+																		<TableCell
+																			component="td"
+																			scope="row"
+																			style={{ width: "100%" }}
+																		>
+																			{data.nama}
 																		</TableCell>
 																		<TableCell component="td" scope="row">
 																			{data.jabatan}
+																		</TableCell>
+																		<TableCell>
+																			<TableRow>
+																				{data.kompetensi.map((row, index) => (
+																					<TableCell align="center">
+																						{row}
+																					</TableCell>
+																				))}
+																			</TableRow>
 																		</TableCell>
 																	</TableRow>
 																);

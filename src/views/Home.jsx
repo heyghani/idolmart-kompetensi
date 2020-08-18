@@ -59,10 +59,7 @@ class Index extends React.Component {
 		jabatan: "",
 		kode_jabatan: "",
 		level_jabatan: "",
-		nilai_atasan: 0,
-		skor_atasan: 0,
-		jumlah_atasan: 0,
-		rekap_atasan: 0,
+		kelas: null,
 		description: [],
 		bobot: [],
 		form: [],
@@ -90,6 +87,7 @@ class Index extends React.Component {
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
 					level_jabatan: json.response[0].level_jabatan,
+					kelas: json.response[0].kelas,
 				});
 			})
 			.finally(() => {
@@ -113,14 +111,14 @@ class Index extends React.Component {
 		})
 			.then((res) => res.json())
 			.then((json) => {
-				this.setState({ assignment: json.response[0].nilai_atasan });
+				this.setState({ assignment: json.response[0].kelas });
 			})
 			.finally(() => {
-				if (this.state.assignment > 0) {
+				if (this.state.assignment < this.state.kelas) {
 					swal({
 						title: "Assignment Failed!",
 						text:
-							"Atasan anda telah melakukan assignment. anda tidak dapat merubah data ini lagi.",
+							"Atasan anda telah melakukan adjustment nilai. anda tidak dapat merubah data ini lagi.",
 						icon: "warning",
 						button: "OK",
 					}).then(() => window.location.reload());
@@ -196,6 +194,12 @@ class Index extends React.Component {
 				})
 				.then(() => this.getAssignment())
 				.catch((err) => console.log(err));
+		} else {
+			const nilai = [];
+			for (var i = 0; i < this.state.categories.length; i++) {
+				nilai.push(0);
+			}
+			this.setState({ nilai });
 		}
 	};
 
@@ -286,15 +290,12 @@ class Index extends React.Component {
 			jumlah,
 			rekap,
 			description,
-			nilai_atasan,
-			skor_atasan,
-			jumlah_atasan,
-			rekap_atasan,
+			kelas,
 		} = this.state;
 
 		const body = [];
 		for (var i = 0; i < categories.length; i++) {
-			if (nilai[i] === undefined) {
+			if (nilai.includes(0) || nilai.includes("")) {
 				swal({
 					title: "Gagal!",
 					text: "Nilai tidak boleh kosong",
@@ -311,11 +312,12 @@ class Index extends React.Component {
 					jumlah,
 					rekap,
 					description[i],
-					nilai_atasan,
-					skor_atasan,
-					jumlah_atasan,
-					rekap_atasan,
+					nilai[i],
+					skor[i],
+					jumlah,
+					rekap,
 					periode,
+					kelas,
 				]);
 			}
 		}
@@ -466,7 +468,7 @@ class Index extends React.Component {
 													<TableCell>
 														<b>Jumlah : {jumlah}</b>
 													</TableCell>
-													<TableCell style={{ width: 160 }}>
+													<TableCell style={{ width: 180 }}>
 														<b>Nilai (40%) : {rekap}</b>
 													</TableCell>
 													<TableCell />
