@@ -15,7 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { Fragment } from "react";
 
 // reactstrap components
 import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
@@ -41,6 +41,7 @@ class Index extends React.Component {
 		showTable: false,
 		categories: [],
 		karyawan: [],
+		nilai: [],
 		nik: "",
 		nama: "",
 		divisi: "",
@@ -126,13 +127,14 @@ class Index extends React.Component {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
+				kode_divisi: this.state.kode_divisi,
 				periode: event.target.value,
 			}),
 		})
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({
-					periode: json.response,
+					nilai: json.response,
 				});
 			})
 			.catch(() => {
@@ -154,32 +156,14 @@ class Index extends React.Component {
 			periode,
 			categories,
 			karyawan,
+			nilai,
 		} = this.state;
 		const option = [
 			{ value: "periode1", label: "Periode 1 Jan-Apr" },
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
-		const example = [
-			{
-				nik: "202394",
-				nama: "Ghani",
-				jabatan: "Staff",
-				kompetensi: [80, 90, 85, 90, 88, 87, 86, 80, 90, 78, 70, 75],
-			},
-			{
-				nik: "9033",
-				nama: "Ihsan",
-				jabatan: "Supervisor",
-				kompetensi: [80, 90, 85, 90, 88, 87, 86, 80, 90, 78, 70, 75],
-			},
-			{
-				nik: "10082",
-				nama: "Fitra",
-				jabatan: "Officer",
-				kompetensi: [80, 90, 85, 90, 88, 87, 86, 80, 90, 78, 70, 75],
-			},
-		];
+		const score = nilai.map((doc) => doc.nilai);
 		return (
 			<>
 				<Header />
@@ -236,11 +220,15 @@ class Index extends React.Component {
 																	<TableRow>
 																		{categories.map((data, i) => {
 																			return (
-																				<TableCell key={i}>
+																				<TableCell
+																					key={i}
+																					style={{ width: 120 }}
+																				>
 																					<Typography
 																						color="textSecondary"
 																						variant="caption"
-																						align="justify"
+																						align="center"
+																						style={{ width: 100 }}
 																					>
 																						{data.nama}
 																					</Typography>
@@ -252,7 +240,7 @@ class Index extends React.Component {
 															</TableRow>
 														</TableHead>
 														<TableBody>
-															{example.map((data, i) => {
+															{karyawan.map((data, i) => {
 																return (
 																	<TableRow key={i}>
 																		<TableCell component="td" scope="row">
@@ -263,18 +251,38 @@ class Index extends React.Component {
 																			scope="row"
 																			style={{ width: "100%" }}
 																		>
-																			{data.nama}
+																			{data.name}
 																		</TableCell>
 																		<TableCell component="td" scope="row">
 																			{data.jabatan}
 																		</TableCell>
 																		<TableCell>
 																			<TableRow>
-																				{data.kompetensi.map((row, index) => (
-																					<TableCell align="center">
-																						{row}
+																				{categories.map((row, index) => (
+																					<TableCell
+																						key={index}
+																						style={{ width: 120 }}
+																					>
+																						<Typography
+																							color="textPrimary"
+																							variant="caption"
+																							align="center"
+																							style={{ width: 100 }}
+																						>
+																							{score[index]}
+																						</Typography>
 																					</TableCell>
 																				))}
+																				{/* {nilai.map((row, index) => (
+																					<Fragment key={index}>
+																						{data.nik !== row.nik ? null : (
+																							
+																							<TableCell align="justify">
+																								{row.kode_kompetensi}
+																							</TableCell>
+																						)}
+																					</Fragment>
+																				))} */}
 																			</TableRow>
 																		</TableCell>
 																	</TableRow>

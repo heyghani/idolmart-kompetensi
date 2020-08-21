@@ -159,8 +159,6 @@ class Index extends React.Component {
 			.then((json) => {
 				this.setState({
 					karyawan: json.response,
-					jumlah_atasan: json.response[0].jumlah_atasan,
-					rekap_atasan: json.response[0].rekap_atasan,
 					showKompetensi: true,
 				});
 			})
@@ -237,19 +235,15 @@ class Index extends React.Component {
 		const reducer = (accumulator, currentValue) => accumulator + currentValue;
 		nilai_atasan[index] = event.target.value;
 		skor_atasan[index] = (event.target.value * bobot) / 100;
+		const jumlah_atasan = skor_atasan.reduce(reducer, 0).toFixed(2);
+		const rumus_atasan = (jumlah_atasan * 40) / 100;
+		const rekap_atasan = rumus_atasan.toFixed(2);
 		this.setState({
 			nilai_atasan,
 			skor_atasan,
-			jumlah_atasan: skor_atasan.reduce(reducer, 0).toFixed(2),
+			jumlah_atasan,
+			rekap_atasan,
 		});
-		this.handleNilai();
-	};
-
-	handleNilai = () => {
-		const { jumlah_atasan } = this.state;
-		const rumus = (jumlah_atasan * 40) / 100;
-		const rekap_atasan = rumus.toFixed(2);
-		this.setState({ rekap_atasan });
 	};
 
 	reduce = (total, num) => {
@@ -383,7 +377,7 @@ class Index extends React.Component {
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
 
-		console.log(jumlah_atasan, rekap_atasan);
+		console.log(rekap_atasan);
 		return (
 			<>
 				<Header />

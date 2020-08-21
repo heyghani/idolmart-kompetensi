@@ -196,10 +196,12 @@ class Index extends React.Component {
 				.catch((err) => console.log(err));
 		} else {
 			const nilai = [];
+			const skor = [];
 			for (var i = 0; i < this.state.categories.length; i++) {
 				nilai.push(0);
+				skor.push(0);
 			}
-			this.setState({ nilai });
+			this.setState({ nilai, skor });
 		}
 	};
 
@@ -214,24 +216,18 @@ class Index extends React.Component {
 
 	handleChange = (index, bobot) => (event) => {
 		const { nilai, skor } = this.state;
-		const newNilai = nilai.slice(0);
-		const newSkor = skor.slice(0);
 		const reducer = (accumulator, currentValue) => accumulator + currentValue;
-		newNilai[index] = event.target.value;
-		newSkor[index] = (event.target.value * bobot) / 100;
-		this.setState({
-			nilai: newNilai,
-			skor: newSkor,
-			jumlah: skor.reduce(reducer, 0).toFixed(2),
-		});
-		this.handleNilai();
-	};
-
-	handleNilai = () => {
-		const { jumlah } = this.state;
+		nilai[index] = event.target.value;
+		skor[index] = (event.target.value * bobot) / 100;
+		const jumlah = skor.reduce(reducer, 0).toFixed(2);
 		const rumus = (jumlah * 40) / 100;
 		const rekap = rumus.toFixed(2);
-		this.setState({ rekap });
+		this.setState({
+			nilai,
+			skor,
+			jumlah,
+			rekap,
+		});
 	};
 
 	reduce = (total, num) => {
