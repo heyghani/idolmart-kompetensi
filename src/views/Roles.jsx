@@ -273,8 +273,15 @@ class Index extends React.Component {
 								<CardBody>
 									<Row>
 										<Col>
-											<TableContainer component={Paper}>
-												<Table size="small" aria-label="a dense table">
+											<TableContainer
+												component={Paper}
+												style={{ maxHeight: 475 }}
+											>
+												<Table
+													stickyHeader
+													size="small"
+													aria-label="a dense table"
+												>
 													<TableHead>
 														<TableRow>
 															<TableCell>

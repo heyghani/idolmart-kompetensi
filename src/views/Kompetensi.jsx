@@ -52,6 +52,7 @@ class Index extends React.Component {
 		modal: false,
 		showEdit: false,
 		categories: [],
+		id: "",
 		nama: "",
 		kode_kompetensi: "",
 	};
@@ -71,6 +72,7 @@ class Index extends React.Component {
 	toggleEdit = (id) => {
 		this.setState({
 			showEdit: !this.state.showEdit,
+			id,
 		});
 		this.handleEdit(id);
 	};
@@ -116,7 +118,7 @@ class Index extends React.Component {
 							</div>
 						</CardHeader>
 						<CardBody className="px-lg-5 py-lg-5">
-							<Form role="form" onSubmit={this.handleEdit}>
+							<Form role="form" onSubmit={this.onEdit}>
 								<div className="pl-lg-4">
 									<Row>
 										<Col lg="6">
@@ -218,6 +220,32 @@ class Index extends React.Component {
 		});
 	};
 
+	onEdit = () => {
+		const { nama, kode_kompetensi, id } = this.state;
+
+		fetch("http://localhost:5000/api/kompetensi/update", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				kode_kompetensi,
+				nama,
+				id,
+			}),
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				swal({
+					title: "Berhasil!",
+					text: json.response,
+					icon: "success",
+					button: "OK",
+				}).then(() => window.location.reload());
+			})
+			.catch((err) => console.log(err));
+	};
+
 	onSubmit = () => {
 		const { nama, kode_kompetensi } = this.state;
 
@@ -244,8 +272,8 @@ class Index extends React.Component {
 	};
 
 	render() {
-		const { categories, nama, kode_kompetensi } = this.state;
-		console.log(this.state.showEdit);
+		const { categories, nama, kode_kompetensi, id } = this.state;
+		console.log(nama, kode_kompetensi, id);
 		return (
 			<>
 				<Header />
@@ -367,8 +395,15 @@ class Index extends React.Component {
 									</Row>
 									<Row>
 										<Col>
-											<TableContainer component={Paper}>
-												<Table size="small" aria-label="a dense table">
+											<TableContainer
+												component={Paper}
+												style={{ maxHeight: 475 }}
+											>
+												<Table
+													stickyHeader
+													size="small"
+													aria-label="a dense table"
+												>
 													<TableHead>
 														<TableRow>
 															<TableCell>
@@ -417,9 +452,9 @@ class Index extends React.Component {
 																		<i className="fas fa-trash" />
 																	</Button>
 																</TableCell>
-																{this.ModalEdit}
 															</TableRow>
 														))}
+														{this.ModalEdit()}
 													</TableBody>
 												</Table>
 											</TableContainer>

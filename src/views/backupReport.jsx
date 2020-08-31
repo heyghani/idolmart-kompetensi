@@ -15,7 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 
 // reactstrap components
 import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
@@ -23,15 +23,16 @@ import {
 	TextField,
 	Typography,
 	MenuItem,
-	TableContainer,
-	Table,
-	TableHead,
-	TableBody,
-	TableRow,
-	TableCell,
-	Paper,
+	// TableContainer,
+	// Table,
+	// TableHead,
+	// TableBody,
+	// TableRow,
+	// TableCell,
+	// Paper,
 } from "@material-ui/core";
 
+import Table from "../components/Table";
 import swal from "sweetalert";
 
 import Header from "components/Headers/Header.jsx";
@@ -73,7 +74,6 @@ class Index extends React.Component {
 					kode_divisi: json.response[0].kode_divisi,
 					level_jabatan: json.response[0].level_jabatan,
 					kelas: json.response[0].kelas,
-					showTable: false,
 				});
 			})
 			.finally(() => {
@@ -148,36 +148,36 @@ class Index extends React.Component {
 			});
 	};
 
-	// Tabel = () => {
-	// 	const columns = [
-	// 		{
-	// 			Header: "Karyawan",
-	// 			columns: [
-	// 				{
-	// 					Header: "Nik",
-	// 					accessor: "nik",
-	// 				},
-	// 				{
-	// 					Header: "Nama",
-	// 					accessor: "name",
-	// 				},
-	// 				{
-	// 					Header: "Jabatan",
-	// 					accessor: "jabatan",
-	// 				},
-	// 			],
-	// 		},
-	// 		{
-	// 			Header: "Kompetensi",
-	// 			columns: this.state.categories.map((doc, i) => ({
-	// 				Header: doc.nama,
-	// 				accessor: doc.kode_kompetensi,
-	// 			})),
-	// 		},
-	// 	];
+	Tabel = () => {
+		const columns = [
+			{
+				Header: "Karyawan",
+				columns: [
+					{
+						Header: "Nik",
+						accessor: "nik",
+					},
+					{
+						Header: "Nama",
+						accessor: "name",
+					},
+					{
+						Header: "Jabatan",
+						accessor: "jabatan",
+					},
+				],
+			},
+			{
+				Header: "Kompetensi",
+				columns: this.state.categories.map((doc, i) => ({
+					Header: doc.kode_kompetensi,
+					accessor: doc.kode_kompetensi,
+				})),
+			},
+		];
 
-	// 	return <Table columns={columns} data={this.state.nilai} />;
-	// };
+		return <Table columns={columns} data={this.state.nilai} />;
+	};
 
 	render() {
 		const {
@@ -195,8 +195,7 @@ class Index extends React.Component {
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
-		console.log(nilai);
-		// const score = nilai.map((doc, i) => doc.nilai[i].nilai);
+
 		return (
 			<>
 				<Header />
@@ -233,111 +232,7 @@ class Index extends React.Component {
 								</CardHeader>
 								<CardBody>
 									<Row>
-										<Col>
-											{this.state.showTable ? (
-												<TableContainer component={Paper}>
-													<Table stickyHeader aria-label="sticky table">
-														<TableHead>
-															<TableRow>
-																<TableCell>
-																	<b>Nik</b>
-																</TableCell>
-																<TableCell align="left">
-																	<b>Nama</b>
-																</TableCell>
-																<TableCell>
-																	<b>Jabatan</b>
-																</TableCell>
-																<TableCell align="center">
-																	<b>Kompetensi</b>
-																	<TableRow>
-																		{categories.map((data, i) => {
-																			return (
-																				<TableCell
-																					key={i}
-																					style={{ maxWidth: 140 }}
-																				>
-																					<Typography
-																						color="textSecondary"
-																						variant="caption"
-																						align="justify"
-																						// style={{ width: 120 }}
-																					>
-																						{data.nama}
-																					</Typography>
-																				</TableCell>
-																			);
-																		})}
-																	</TableRow>
-																</TableCell>
-															</TableRow>
-														</TableHead>
-														<TableBody>
-															{karyawan.map((data, i) => {
-																return (
-																	<TableRow key={i}>
-																		<TableCell component="td" scope="row">
-																			{data.nik}
-																		</TableCell>
-																		<TableCell
-																			component="td"
-																			scope="row"
-																			style={{ maxWidth: 200 }}
-																			align="left"
-																		>
-																			<Typography style={{ width: 200 }}>
-																				{data.name}
-																			</Typography>
-																		</TableCell>
-																		<TableCell component="td" scope="row">
-																			{data.jabatan}
-																		</TableCell>
-																		<TableCell>
-																			<TableRow style={{ width: 100 }}>
-																				{nilai.map((row, index) => (
-																					<Fragment key={index}>
-																						{data.nik !== row.nik ? null : (
-																							<Fragment>
-																								{categories.map(
-																									(category, i) => {
-																										return (
-																											<TableCell
-																												style={{
-																													maxWidth: 150,
-																												}}
-																											>
-																												<Typography
-																													align="left"
-																													style={{ width: 90 }}
-																												>
-																													{row.nilai[0].nilai}
-																												</Typography>
-																											</TableCell>
-																										);
-																									}
-																								)}
-																							</Fragment>
-																						)}
-																					</Fragment>
-																				))}
-																			</TableRow>
-																		</TableCell>
-																	</TableRow>
-																);
-															})}
-														</TableBody>
-													</Table>
-												</TableContainer>
-											) : (
-												<Typography
-													color="textSecondary"
-													variant="h5"
-													align="center"
-												>
-													Silahkan Pilih Periode
-												</Typography>
-											)}
-										</Col>
+										<Col>{this.Tabel()}</Col>
 									</Row>
 								</CardBody>
 							</Card>
