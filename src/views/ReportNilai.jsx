@@ -310,7 +310,11 @@ class Index extends React.Component {
 																													align="left"
 																													style={{ width: 90 }}
 																												>
-																													{row.nilai[0].nilai}
+																													{row.nilai[i]
+																														.nilai === 0
+																														? "-"
+																														: row.nilai[i]
+																																.nilai}
 																												</Typography>
 																											</TableCell>
 																										);
