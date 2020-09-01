@@ -148,37 +148,6 @@ class Index extends React.Component {
 			});
 	};
 
-	// Tabel = () => {
-	// 	const columns = [
-	// 		{
-	// 			Header: "Karyawan",
-	// 			columns: [
-	// 				{
-	// 					Header: "Nik",
-	// 					accessor: "nik",
-	// 				},
-	// 				{
-	// 					Header: "Nama",
-	// 					accessor: "name",
-	// 				},
-	// 				{
-	// 					Header: "Jabatan",
-	// 					accessor: "jabatan",
-	// 				},
-	// 			],
-	// 		},
-	// 		{
-	// 			Header: "Kompetensi",
-	// 			columns: this.state.categories.map((doc, i) => ({
-	// 				Header: doc.nama,
-	// 				accessor: doc.kode_kompetensi,
-	// 			})),
-	// 		},
-	// 	];
-
-	// 	return <Table columns={columns} data={this.state.nilai} />;
-	// };
-
 	render() {
 		const {
 			nik,
@@ -195,8 +164,7 @@ class Index extends React.Component {
 			{ value: "periode2", label: "Periode 2 May-Aug" },
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
-		console.log(nilai);
-		// const score = nilai.map((doc, i) => doc.nilai[i].nilai);
+
 		return (
 			<>
 				<Header />
@@ -255,12 +223,14 @@ class Index extends React.Component {
 																			return (
 																				<TableCell
 																					key={i}
-																					style={{ maxWidth: 140 }}
+																					style={{ maxWidth: 150 }}
+																					align="center"
+																					size="small"
 																				>
 																					<Typography
 																						color="textSecondary"
 																						variant="caption"
-																						align="justify"
+																						align="center"
 																						// style={{ width: 120 }}
 																					>
 																						{data.nama}
@@ -293,7 +263,7 @@ class Index extends React.Component {
 																			{data.jabatan}
 																		</TableCell>
 																		<TableCell>
-																			<TableRow style={{ width: 100 }}>
+																			<TableRow>
 																				{nilai.map((row, index) => (
 																					<Fragment key={index}>
 																						{data.nik !== row.nik ? null : (
@@ -305,16 +275,13 @@ class Index extends React.Component {
 																												style={{
 																													maxWidth: 150,
 																												}}
+																												align="left"
+																												size="small"
 																											>
 																												<Typography
-																													align="left"
 																													style={{ width: 90 }}
 																												>
-																													{row.nilai[i]
-																														.nilai === 0
-																														? "-"
-																														: row.nilai[i]
-																																.nilai}
+																													{row.nilai[i].nilai}
 																												</Typography>
 																											</TableCell>
 																										);
