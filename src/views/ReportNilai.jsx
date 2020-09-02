@@ -204,7 +204,7 @@ class Index extends React.Component {
 										<Col>
 											{this.state.showTable ? (
 												<TableContainer component={Paper}>
-													<Table stickyHeader aria-label="sticky table">
+													<Table>
 														<TableHead>
 															<TableRow>
 																<TableCell>
@@ -218,27 +218,27 @@ class Index extends React.Component {
 																</TableCell>
 																<TableCell align="center">
 																	<b>Kompetensi</b>
-																	<TableRow>
-																		{categories.map((data, i) => {
-																			return (
-																				<TableCell
-																					key={i}
-																					style={{ maxWidth: 150 }}
+																	{categories.map((data, i) => {
+																		return (
+																			<TableCell
+																				key={i}
+																				style={{
+																					maxWidth: 150,
+																					borderBottom: 0,
+																				}}
+																				align="center"
+																				size="small"
+																			>
+																				<Typography
+																					color="textSecondary"
+																					variant="caption"
 																					align="center"
-																					size="small"
 																				>
-																					<Typography
-																						color="textSecondary"
-																						variant="caption"
-																						align="center"
-																						// style={{ width: 120 }}
-																					>
-																						{data.nama}
-																					</Typography>
-																				</TableCell>
-																			);
-																		})}
-																	</TableRow>
+																					{data.nama}
+																				</Typography>
+																			</TableCell>
+																		);
+																	})}
 																</TableCell>
 															</TableRow>
 														</TableHead>
@@ -274,12 +274,15 @@ class Index extends React.Component {
 																											<TableCell
 																												style={{
 																													maxWidth: 150,
+																													borderBottom: 0,
 																												}}
 																												align="left"
 																												size="small"
 																											>
 																												<Typography
-																													style={{ width: 90 }}
+																													style={{
+																														width: 90,
+																													}}
 																												>
 																													{row.nilai[i].nilai}
 																												</Typography>
