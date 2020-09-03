@@ -43,6 +43,7 @@ import {
 	TableRow,
 	TableCell,
 	Paper,
+	TextareaAutosize,
 } from "@material-ui/core";
 
 import swal from "sweetalert";
@@ -331,12 +332,13 @@ class Index extends React.Component {
 																	/>
 																</TableCell>
 																<TableCell>
-																	<TextField
+																	<TextareaAutosize
+																		rowsMax={3}
+																		aria-label="maximum height"
+																		placeholder="Jabatan"
 																		value={jabatan}
-																		label="Jabatan"
-																		InputProps={{
-																			readOnly: true,
-																		}}
+																		style={{ width: "100%" }}
+																		disabled
 																	/>
 																</TableCell>
 															</TableRow>

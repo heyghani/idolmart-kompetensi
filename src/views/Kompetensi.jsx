@@ -224,7 +224,7 @@ class Index extends React.Component {
 		const { nama, kode_kompetensi, id } = this.state;
 
 		fetch("http://localhost:5000/api/kompetensi/update", {
-			method: "POST",
+			method: "PUT",
 			headers: {
 				"Content-Type": "application/json",
 			},

@@ -218,27 +218,30 @@ class Index extends React.Component {
 																</TableCell>
 																<TableCell align="center">
 																	<b>Kompetensi</b>
-																	{categories.map((data, i) => {
-																		return (
-																			<TableCell
-																				key={i}
-																				style={{
-																					maxWidth: 150,
-																					borderBottom: 0,
-																				}}
-																				align="center"
-																				size="small"
-																			>
-																				<Typography
-																					color="textSecondary"
-																					variant="caption"
+																	<TableRow style={{ maxHeight: 80 }}>
+																		{categories.map((data, i) => {
+																			return (
+																				<TableCell
+																					key={i}
+																					style={{
+																						maxWidth: "80%",
+
+																						borderBottom: 0,
+																					}}
 																					align="center"
+																					size="small"
 																				>
-																					{data.nama}
-																				</Typography>
-																			</TableCell>
-																		);
-																	})}
+																					<Typography
+																						color="textSecondary"
+																						variant="caption"
+																						align="center"
+																					>
+																						{data.nama}
+																					</Typography>
+																				</TableCell>
+																			);
+																		})}
+																	</TableRow>
 																</TableCell>
 															</TableRow>
 														</TableHead>
@@ -273,15 +276,14 @@ class Index extends React.Component {
 																										return (
 																											<TableCell
 																												style={{
-																													maxWidth: 150,
+																													maxWidth: "80%",
 																													borderBottom: 0,
 																												}}
-																												align="left"
-																												size="small"
+																												align="center"
 																											>
 																												<Typography
 																													style={{
-																														width: 90,
+																														width: 80,
 																													}}
 																												>
 																													{row.nilai[i].nilai}

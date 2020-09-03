@@ -557,7 +557,6 @@ class Index extends React.Component {
 																})}
 															</Col>
 														</Row>
-
 														<Divider style={{ borderWidth: 3 }} />
 														<Grid item md={6} xs={12}>
 															<TextField

@@ -69,7 +69,6 @@ class Login extends Component {
 						case 400:
 							this.setState({ error: json.response });
 							break;
-
 						case 500:
 							swal({
 								title: "Warning!",
@@ -80,7 +79,14 @@ class Login extends Component {
 								this.handleSignup();
 							});
 							break;
-
+						case 600:
+							swal({
+								title: "Gagal!",
+								text: json.response,
+								icon: "warning",
+								button: "OK",
+							});
+							break;
 						default:
 							break;
 					}

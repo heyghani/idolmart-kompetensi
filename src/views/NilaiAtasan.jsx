@@ -186,38 +186,47 @@ class Index extends React.Component {
 		})
 			.then((res) => res.json())
 			.then((json) => {
-				const nilai = json.response.map((doc) => doc.nilai);
-				const skor = json.response.map((doc) => doc.skor);
-				const description = json.response.map((doc) => doc.keterangan);
-				const reducer = (accumulator, currentValue) =>
-					accumulator + currentValue;
-				const jumlah = skor.reduce(reducer, 0).toFixed(2);
-				const rumus = (jumlah * 40) / 100;
-				const rekap = rumus.toFixed(2);
-				const nilai_atasan = json.response.map((doc) => doc.nilai_atasan);
-				const skor_atasan = json.response.map((doc) => doc.skor_atasan);
-				const jumlah_atasan = skor_atasan.reduce(reducer, 0).toFixed(2);
-				const rumus_atasan = (jumlah_atasan * 40) / 100;
-				const rekap_atasan = rumus_atasan.toFixed(2);
-				this.setState({
-					nilai,
-					skor,
-					jumlah,
-					rekap,
-					description,
-					skor_atasan,
-					nilai_atasan,
-					jumlah_atasan,
-					rekap_atasan,
-				});
+				if (json.error) {
+					swal({
+						title: "Data tidak ditemukan!",
+						text: "Data pada bulan ini kosong",
+						icon: "warning",
+						button: "OK",
+					}).then(() => window.location.reload());
+				} else {
+					const nilai = json.response.map((doc) => doc.nilai);
+					const skor = json.response.map((doc) => doc.skor);
+					const description = json.response.map((doc) => doc.keterangan);
+					const reducer = (accumulator, currentValue) =>
+						accumulator + currentValue;
+					const jumlah = skor.reduce(reducer, 0).toFixed(2);
+					const rumus = (jumlah * 40) / 100;
+					const rekap = rumus.toFixed(2);
+					const nilai_atasan = json.response.map((doc) => doc.nilai_atasan);
+					const skor_atasan = json.response.map((doc) => doc.skor_atasan);
+					const jumlah_atasan = skor_atasan.reduce(reducer, 0).toFixed(2);
+					const rumus_atasan = (jumlah_atasan * 40) / 100;
+					const rekap_atasan = rumus_atasan.toFixed(2);
+					this.setState({
+						nilai,
+						skor,
+						jumlah,
+						rekap,
+						description,
+						skor_atasan,
+						nilai_atasan,
+						jumlah_atasan,
+						rekap_atasan,
+						showTable: true,
+					});
+					this.getForm();
+					this.getCategory();
+					this.getDivisi();
+					this.getAnggota();
+				}
 			})
-			.catch(() => {
-				swal({
-					title: "Data tidak ditemukan!",
-					text: "Data pada bulan ini kosong",
-					icon: "warning",
-					button: "OK",
-				}).then(() => window.location.reload());
+			.catch((err) => {
+				console.log(err);
 			});
 	};
 
@@ -269,15 +278,10 @@ class Index extends React.Component {
 					kode_jabatan: json.response[0].kode_jabatan,
 					kode_divisi: json.response[0].kode_divisi,
 					level_jabatan: json.response[0].level_jabatan,
-					showTable: true,
 				});
 			})
 			.finally(() => {
-				this.getForm();
-				this.getCategory();
-				this.getDivisi();
 				this.getNilai();
-				this.getAnggota();
 			});
 	};
 
@@ -377,7 +381,6 @@ class Index extends React.Component {
 			{ value: "periode3", label: "Periode 3 Sep-Des" },
 		];
 
-		console.log(rekap_atasan);
 		return (
 			<>
 				<Header />
