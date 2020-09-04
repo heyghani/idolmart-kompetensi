@@ -334,7 +334,7 @@ class Index extends React.Component {
 											>
 												{categories.map((data) => (
 													<MenuItem
-														onClick={(event) => this.handleMenu(event)}
+														style={{ maxHeight: 200 }}
 														key={data.id}
 														value={data.kode_kompetensi}
 													>
@@ -352,44 +352,39 @@ class Index extends React.Component {
 														<TableHead>
 															<TableRow>
 																<TableCell>
+																	<b>No</b>
+																</TableCell>
+																<TableCell>
 																	<b>Kompetensi</b>
 																</TableCell>
 																<TableCell align="center">
 																	<b>Bobot</b>
 																</TableCell>
-																{/* <TableCell>
-																	<b>Action</b>
-																</TableCell> */}
 															</TableRow>
 														</TableHead>
 														<TableBody>
-															{table.map((data, i) => (
-																<TableRow key={i}>
-																	<TableCell component="th" scope="row">
-																		{" "}
-																		{data.nama}{" "}
-																	</TableCell>
-																	<TableCell
-																		component="th"
-																		scope="row"
-																		align="center"
-																	>
-																		{" "}
-																		{data.bobot}{" "}
-																	</TableCell>
-																	{/* <TableCell component="th" scope="row">
-																		<Button
-																			style={{
-																				backgroundColor: "CRIMSON",
-																				color: "white",
-																			}}
-																			onClick={() => this.handleDelete(data)}
+															{table.map((data, i) => {
+																var no = i + 1;
+																return (
+																	<TableRow key={i}>
+																		<TableCell component="th" scope="row">
+																			{no}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{" "}
+																			{data.nama}{" "}
+																		</TableCell>
+																		<TableCell
+																			component="th"
+																			scope="row"
+																			align="center"
 																		>
-																			<i className="fas fa-trash" />
-																		</Button>
-																	</TableCell> */}
-																</TableRow>
-															))}
+																			{" "}
+																			{data.bobot}{" "}
+																		</TableCell>
+																	</TableRow>
+																);
+															})}
 														</TableBody>
 													</Table>
 												</TableContainer>
@@ -410,44 +405,40 @@ class Index extends React.Component {
 														<TableHead>
 															<TableRow>
 																<TableCell>
+																	<b>No</b>
+																</TableCell>
+																<TableCell>
 																	<b>Jabatan</b>
 																</TableCell>
 																<TableCell align="center">
 																	<b>Bobot</b>
 																</TableCell>
-																{/* <TableCell>
-																	<b>Action</b>
-																</TableCell> */}
 															</TableRow>
 														</TableHead>
 														<TableBody>
-															{table2.map((data, i) => (
-																<TableRow key={i}>
-																	<TableCell component="th" scope="row">
-																		{" "}
-																		{data.nama_jabatan}{" "}
-																	</TableCell>
-																	<TableCell
-																		component="th"
-																		scope="row"
-																		align="center"
-																	>
-																		{" "}
-																		{data.bobot}{" "}
-																	</TableCell>
-																	{/* <TableCell component="th" scope="row">
-																		<Button
-																			style={{
-																				backgroundColor: "CRIMSON",
-																				color: "white",
-																			}}
-																			onClick={() => this.handleDelete(data)}
+															{table2.map((data, i) => {
+																var no = i + 1;
+																return (
+																	<TableRow key={i}>
+																		<TableCell component="th" scope="row">
+																			{" "}
+																			{no}{" "}
+																		</TableCell>
+																		<TableCell component="th" scope="row">
+																			{" "}
+																			{data.nama_jabatan}{" "}
+																		</TableCell>
+																		<TableCell
+																			component="th"
+																			scope="row"
+																			align="center"
 																		>
-																			<i className="fas fa-trash" />
-																		</Button>
-																	</TableCell> */}
-																</TableRow>
-															))}
+																			{" "}
+																			{data.bobot}{" "}
+																		</TableCell>
+																	</TableRow>
+																);
+															})}
 														</TableBody>
 													</Table>
 												</TableContainer>

@@ -173,7 +173,7 @@ class Index extends React.Component {
 	};
 
 	getNilai = () => {
-		const { selectedAnggota, periode } = this.state;
+		const { selectedAnggota, periode, kelas } = this.state;
 		fetch(`http://localhost:5000/api/nilai`, {
 			method: "POST",
 			headers: {
@@ -182,17 +182,32 @@ class Index extends React.Component {
 			body: JSON.stringify({
 				nik: selectedAnggota,
 				periode,
+				kelas,
 			}),
 		})
 			.then((res) => res.json())
 			.then((json) => {
 				if (json.error) {
-					swal({
-						title: "Data tidak ditemukan!",
-						text: "Data pada bulan ini kosong",
-						icon: "warning",
-						button: "OK",
-					}).then(() => window.location.reload());
+					switch (json.code) {
+						case 200:
+							swal({
+								title: "Warning!",
+								text: json.response,
+								icon: "warning",
+								button: "OK",
+							}).then(() => window.location.reload());
+							break;
+						case 400:
+							swal({
+								title: "Gagal!",
+								text: json.response,
+								icon: "warning",
+								button: "OK",
+							}).then(() => window.location.reload());
+							break;
+						default:
+							break;
+					}
 				} else {
 					const nilai = json.response.map((doc) => doc.nilai);
 					const skor = json.response.map((doc) => doc.skor);
