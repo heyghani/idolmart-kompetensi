@@ -367,9 +367,10 @@ class Index extends React.Component {
 			description,
 		} = this.state;
 		const option = [
-			{ value: "periode1", label: "Periode 1 Jan-Apr" },
-			{ value: "periode2", label: "Periode 2 May-Aug" },
-			{ value: "periode3", label: "Periode 3 Sep-Des" },
+			{ value: "periode1", label: "Periode 1 Jan-Mar" },
+			{ value: "periode2", label: "Periode 2 Apr-Juni" },
+			{ value: "periode3", label: "Periode 3 Juli-Sept" },
+			{ value: "periode4", label: "Periode 4 Okt-Des" },
 		];
 
 		return (
