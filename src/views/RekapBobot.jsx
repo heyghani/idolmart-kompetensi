@@ -32,39 +32,23 @@ import {
 	Paper,
 } from "@material-ui/core";
 
-import swal from "sweetalert";
-
 import Header from "components/Headers/Header.jsx";
-// import Checkbox from "components/Checkbox";
 
 class Index extends React.Component {
 	state = {
 		table: [],
-		nama_jabatan: "",
 		jabatan: "",
 		jabatans: [],
 		selectedjabatan: [],
-		kamus: [],
-		standard: [],
-		bobot: "",
 		kompetensi: "",
 		categories: [],
 		showTable: false,
 		showTable2: false,
-		title: "",
-		kode_kompetensi: "",
 	};
 
 	componentDidMount = () => {
 		this.getJabatan();
 		this.getKompetensi();
-	};
-
-	toggleModal = () => {
-		this.setState({
-			modal: !this.state.modal,
-			title: "",
-		});
 	};
 
 	getKompetensi = () => {
@@ -89,81 +73,10 @@ class Index extends React.Component {
 			.catch((err) => console.log(err));
 	};
 
-	handleChange = () => {
-		const nama = [];
-		const selected = [];
-		const checked = document.getElementsByTagName("input");
-		for (var i = 0; i < checked.length; i++) {
-			if (checked[i].checked) {
-				selected.push(checked[i].value);
-				nama.push(checked[i].name);
-			}
-			this.setState({
-				selectedjabatan: selected.join(","),
-				jabatan: nama.join(","),
-			});
-		}
-	};
-
-	// handleKamus = (i) => (event) => {
-	// 	const { kamus } = this.state;
-	// 	const newDesc = kamus.slice(0);
-	// 	newDesc[i] = event.target.value;
-	// 	this.setState({
-	// 		kamus: newDesc,
-	// 	});
-	// };
-
-	handleBobot = (event) => {
-		this.setState({
-			bobot: event.target.value,
-		});
-	};
-
-	// handleStandard = (i) => (event) => {
-	// 	const { standard } = this.state;
-	// 	const newDesc = standard.slice(0);
-	// 	newDesc[i] = event.target.value;
-	// 	this.setState({
-	// 		standard: newDesc,
-	// 	});
-	// };
-
-	handleDelete = (data) => {
-		const kode_kompetensi = data.kode_kompetensi;
-		swal({
-			title: "Apakah anda yakin?",
-			text: "tekan OK untuk menghapus data!",
-			icon: "warning",
-			buttons: true,
-			dangerMode: true,
-		}).then((willDelete) => {
-			if (willDelete) {
-				fetch("http://localhost:5000/api/kompetensi", {
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						kode_kompetensi,
-					}),
-				}).then(() => {
-					swal({
-						title: "Berhasil!",
-						text: "Data deleted successfully",
-						icon: "success",
-						button: "OK",
-					}).then(() => window.location.reload());
-				});
-			} else {
-				swal("Data berhasil diamankan");
-			}
-		});
-	};
-
 	onSelectJabatan = (event) => {
 		this.setState({
 			jabatan: event.target.value,
+			showTable: false,
 		});
 
 		const body = event.target.value;
@@ -186,6 +99,7 @@ class Index extends React.Component {
 	onSelectKompetensi = (event) => {
 		this.setState({
 			kompetensi: event.target.value,
+			showTable2: false,
 		});
 
 		const body = event.target.value;
@@ -204,71 +118,6 @@ class Index extends React.Component {
 				this.setState({ table2: json.response, showTable2: true });
 			})
 			.catch((err) => console.log(err));
-	};
-
-	onAddKompetensi = () => {
-		const { title, kode_kompetensi } = this.state;
-
-		const { level_jabatan, nama_jabatan } = "";
-
-		fetch("http://localhost:5000/api/addkompetensi", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				kode_kompetensi,
-				nama: title,
-				level_jabatan,
-				nama_jabatan,
-			}),
-		});
-	};
-
-	onSubmitKompetensi = () => {
-		const { kompetensi, bobot, selectedjabatan, jabatan } = this.state;
-
-		if (kompetensi === "" || jabatan === "" || bobot === "") {
-			swal({
-				title: "Gagal!",
-				text: "Data tidak boleh kosong",
-				icon: "warning",
-				button: "OK",
-			});
-		} else {
-			fetch("http://localhost:5000/api/kompetensi", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					kode_kompetensi: kompetensi.slice(0, 2),
-					bobot,
-					level_jabatan: selectedjabatan,
-					jabatan,
-				}),
-			})
-				.then((res) => res.json())
-				.then((json) => {
-					const message = json.response;
-					if (json.error) {
-						swal({
-							title: "Gagal!",
-							text: message,
-							icon: "warning",
-							button: "OK",
-						}).then(() => window.location.reload());
-					} else {
-						swal({
-							title: "Berhasil!",
-							text: message,
-							icon: "success",
-							button: "OK",
-						}).then(() => window.location.reload());
-					}
-				})
-				.catch((err) => console.log(err));
-		}
 	};
 
 	render() {

@@ -377,7 +377,7 @@ class Index extends React.Component {
 			<>
 				<Header />
 				{/* Page content */}
-				<Container className="mt--7" fluid>
+				<Container className="mt--8" fluid>
 					<Row>
 						<Col className="mt-5" xl="6">
 							<Card className="shadow">

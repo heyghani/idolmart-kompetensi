@@ -45,9 +45,9 @@ import {
 import swal from "sweetalert";
 
 import Header from "components/Headers/Header.jsx";
-// import Checkbox from "components/Checkbox";
+import Kamus from "./Kamus";
 
-class Index extends React.Component {
+class Kompetensi extends React.Component {
 	state = {
 		modal: false,
 		showEdit: false,
@@ -272,8 +272,8 @@ class Index extends React.Component {
 	};
 
 	render() {
-		const { categories, nama, kode_kompetensi, id } = this.state;
-		console.log(nama, kode_kompetensi, id);
+		const { categories, nama, kode_kompetensi } = this.state;
+
 		return (
 			<>
 				<Header />
@@ -460,6 +460,11 @@ class Index extends React.Component {
 											</TableContainer>
 										</Col>
 									</Row>
+									<Row className="mt-5">
+										<Col>
+											<Kamus />
+										</Col>
+									</Row>
 								</CardBody>
 							</Card>
 						</Col>
@@ -470,4 +475,4 @@ class Index extends React.Component {
 	}
 }
 
-export default Index;
+export default Kompetensi;

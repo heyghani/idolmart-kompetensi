@@ -159,7 +159,6 @@ class Index extends React.Component {
 			.then((json) => {
 				this.setState({
 					karyawan: json.response,
-					showKompetensi: true,
 				});
 			})
 			.catch(() => {
@@ -174,6 +173,7 @@ class Index extends React.Component {
 
 	getNilai = () => {
 		const { selectedAnggota, periode, kelas } = this.state;
+		this.setState({ showTable: false, showKompetensi: false });
 		fetch(`http://localhost:5000/api/nilai`, {
 			method: "POST",
 			headers: {
@@ -233,6 +233,7 @@ class Index extends React.Component {
 						jumlah_atasan,
 						rekap_atasan,
 						showTable: true,
+						showKompetensi: true,
 					});
 					this.getForm();
 					this.getCategory();
