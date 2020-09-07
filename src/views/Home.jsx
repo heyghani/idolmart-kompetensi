@@ -564,7 +564,11 @@ class Index extends React.Component {
 																label="Point Nilai"
 																margin="dense"
 																name="PointNilai"
-																value={nilai.length > 0 ? nilai[i] : ""}
+																value={
+																	nilai.length > 0 && nilai[i] !== 0
+																		? nilai[i]
+																		: ""
+																}
 																onChange={this.handleChange(i, category.bobot)}
 																required
 																variant="outlined"

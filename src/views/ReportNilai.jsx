@@ -15,23 +15,13 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { Fragment } from "react";
+import React from "react";
 
 // reactstrap components
 import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
-import {
-	TextField,
-	Typography,
-	MenuItem,
-	TableContainer,
-	Table,
-	TableHead,
-	TableBody,
-	TableRow,
-	TableCell,
-	Paper,
-} from "@material-ui/core";
+import { TextField, Typography, MenuItem } from "@material-ui/core";
 
+import Table from "../components/Table";
 import swal from "sweetalert";
 
 import Header from "components/Headers/Header.jsx";
@@ -73,7 +63,6 @@ class Index extends React.Component {
 					kode_divisi: json.response[0].kode_divisi,
 					level_jabatan: json.response[0].level_jabatan,
 					kelas: json.response[0].kelas,
-					showTable: false,
 				});
 			})
 			.finally(() => {
@@ -120,7 +109,7 @@ class Index extends React.Component {
 	};
 
 	onSelectPeriode = (event) => {
-		this.setState({ periode: event.target.value, showTable: true });
+		this.setState({ periode: event.target.value });
 		fetch(`http://localhost:5000/api/report/get`, {
 			method: "POST",
 			headers: {
@@ -134,31 +123,84 @@ class Index extends React.Component {
 		})
 			.then((res) => res.json())
 			.then((json) => {
-				this.setState({
-					nilai: json.response,
-				});
+				if (json.error) {
+					swal({
+						title: "Warning!",
+						text: json.response,
+						icon: "warning",
+						button: "OK",
+					});
+				} else {
+					this.setState({
+						nilai: json.response,
+						showTable: true,
+					});
+				}
 			})
-			.catch(() => {
-				swal({
-					title: "Data tidak ditemukan!",
-					text: "Data pada bulan ini kosong",
-					icon: "warning",
-					button: "OK",
-				}).then(() => window.location.reload());
-			});
+			.catch((err) => console.log(err));
+	};
+
+	Tabel = () => {
+		const columns = [
+			{
+				Header: "Karyawan",
+				columns: [
+					{
+						Header: (props) => <b>NIK</b>,
+						accessor: "nik",
+						Cell: (props) => (
+							<Typography align="left">{props.value}</Typography>
+						),
+					},
+					{
+						Header: (props) => <b>Nama</b>,
+						accessor: "nama",
+						Cell: (props) => (
+							<Typography align="left" style={{ width: 200 }}>
+								{" "}
+								{props.value}{" "}
+							</Typography>
+						),
+					},
+					{
+						Header: (props) => <b>Jabatan</b>,
+						accessor: "jabatan",
+					},
+					{
+						Header: (props) => <b>Jumlah</b>,
+						accessor: "jumlah",
+						Cell: (props) => <b>{props.value}</b>,
+					},
+					{
+						Header: (props) => <b>Skor</b>,
+						accessor: "skor",
+						Cell: (props) => <b>{props.value}</b>,
+					},
+				],
+			},
+			{
+				Header: "Kompetensi",
+				columns: this.state.categories.map((doc, i) => ({
+					Header: (props) => (
+						<Typography
+							color="textSecondary"
+							variant="caption"
+							align="center"
+							style={{ width: 150 }}
+						>
+							{doc.nama}
+						</Typography>
+					),
+					accessor: `nilai[${i}].nilai`,
+				})),
+			},
+		];
+
+		return <Table columns={columns} data={this.state.nilai} />;
 	};
 
 	render() {
-		const {
-			nik,
-			nama,
-			divisi,
-			jabatan,
-			periode,
-			categories,
-			karyawan,
-			nilai,
-		} = this.state;
+		const { nik, nama, divisi, jabatan, periode } = this.state;
 		const option = [
 			{ value: "periode1", label: "Periode 1 Jan-Apr" },
 			{ value: "periode2", label: "Periode 2 May-Aug" },
@@ -203,107 +245,7 @@ class Index extends React.Component {
 									<Row>
 										<Col>
 											{this.state.showTable ? (
-												<TableContainer component={Paper}>
-													<Table>
-														<TableHead>
-															<TableRow>
-																<TableCell>
-																	<b>Nik</b>
-																</TableCell>
-																<TableCell align="left">
-																	<b>Nama</b>
-																</TableCell>
-																<TableCell>
-																	<b>Jabatan</b>
-																</TableCell>
-																<TableCell align="center">
-																	<b>Kompetensi</b>
-																	<TableRow style={{ maxHeight: 80 }}>
-																		{categories.map((data, i) => {
-																			return (
-																				<TableCell
-																					key={i}
-																					style={{
-																						maxWidth: "80%",
-
-																						borderBottom: 0,
-																					}}
-																					align="center"
-																					size="small"
-																				>
-																					<Typography
-																						color="textSecondary"
-																						variant="caption"
-																						align="center"
-																					>
-																						{data.nama}
-																					</Typography>
-																				</TableCell>
-																			);
-																		})}
-																	</TableRow>
-																</TableCell>
-															</TableRow>
-														</TableHead>
-														<TableBody>
-															{karyawan.map((data, i) => {
-																return (
-																	<TableRow key={i}>
-																		<TableCell component="td" scope="row">
-																			{data.nik}
-																		</TableCell>
-																		<TableCell
-																			component="td"
-																			scope="row"
-																			style={{ maxWidth: 200 }}
-																			align="left"
-																		>
-																			<Typography style={{ width: 200 }}>
-																				{data.name}
-																			</Typography>
-																		</TableCell>
-																		<TableCell component="td" scope="row">
-																			{data.jabatan}
-																		</TableCell>
-																		<TableCell>
-																			<TableRow>
-																				{nilai.map((row, index) => (
-																					<Fragment key={index}>
-																						{data.nik !== row.nik ? null : (
-																							<Fragment>
-																								{categories.map(
-																									(category, i) => {
-																										return (
-																											<TableCell
-																												style={{
-																													maxWidth: "80%",
-																													borderBottom: 0,
-																												}}
-																												align="center"
-																											>
-																												<Typography
-																													style={{
-																														width: 80,
-																													}}
-																												>
-																													{row.nilai[i].nilai}
-																												</Typography>
-																											</TableCell>
-																										);
-																									}
-																								)}
-																							</Fragment>
-																						)}
-																					</Fragment>
-																				))}
-																			</TableRow>
-																		</TableCell>
-																	</TableRow>
-																);
-															})}
-														</TableBody>
-													</Table>
-												</TableContainer>
+												this.Tabel()
 											) : (
 												<Typography
 													color="textSecondary"

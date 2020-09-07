@@ -13,26 +13,6 @@ import AuthLayout from "layouts/Auth.jsx";
 
 const hist = createBrowserHistory();
 
-// const session = localStorage.getItem("UserLogin");
-// if (session) {
-// 	hist.push("/app/home");
-// } else {
-// 	hist.push("/auth/index");
-// }
-
-// const PrivateRoute = ({ component: Component, ...rest }) => (
-// 	<Route
-// 		{...rest}
-// 		render={(props) =>
-// 			session ? (
-// 				<Component {...props} />
-// 			) : (
-// 				<Redirect to={{ pathname: "/auth/index" }} />
-// 			)
-// 		}
-// 	/>
-// );
-
 ReactDOM.render(
 	<Router history={hist}>
 		<Switch>
