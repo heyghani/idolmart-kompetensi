@@ -72,7 +72,11 @@ class Index extends React.Component {
 		skor: [],
 		anggota: [],
 		karyawan: [],
+		lokasi: [],
+		selectedLokasi: "",
 		selectedAnggota: "",
+		isOperational: false,
+		isKepalaToko: false,
 		showTable: false,
 		showKompetensi: false,
 	};
@@ -84,6 +88,22 @@ class Index extends React.Component {
 	getUser = () => {
 		const user = JSON.parse(localStorage.getItem("user"));
 		const nik = user[0].nik;
+		const divisi = user[0].kode_divisi;
+		const jabatan = user[0].kode_jabatan;
+		const lokasi = user[0].lokasi;
+		switch (divisi) {
+			case "409":
+				if (jabatan === 507) {
+					this.setState({ isKepalaToko: true });
+				} else {
+					this.setState({ isOperational: true });
+				}
+				break;
+
+			default:
+				break;
+		}
+
 		fetch(`http://localhost:5000/api/user/${nik}`, {
 			method: "GET",
 		})
@@ -104,7 +124,24 @@ class Index extends React.Component {
 			.finally(() => {
 				this.getForm();
 				this.getCategory();
-				this.getDivisi();
+				this.getLokasi();
+
+				if (this.state.isKepalaToko) {
+					fetch(`http://localhost:5000/api/lokasi/anggota/kepala`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							lokasi: lokasi,
+							kelas: this.state.kelas,
+						}),
+					})
+						.then((res) => res.json())
+						.then((json) => {
+							this.setState({ anggota: json.response });
+						});
+				}
 			});
 	};
 
@@ -123,6 +160,22 @@ class Index extends React.Component {
 			.then((res) => res.json())
 			.then((json) => {
 				this.setState({ categories: json.response });
+			});
+	};
+
+	getLokasi = () => {
+		fetch(`http://localhost:5000/api/lokasi`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				spv: this.state.nik,
+			}),
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({ lokasi: json.response });
 			});
 	};
 
@@ -173,6 +226,9 @@ class Index extends React.Component {
 
 	getNilai = () => {
 		const { selectedAnggota, periode, kelas } = this.state;
+		const user = JSON.parse(localStorage.getItem("user"));
+		const lokasi = user[0].lokasi;
+
 		this.setState({ showTable: false, showKompetensi: false });
 		fetch(`http://localhost:5000/api/nilai`, {
 			method: "POST",
@@ -237,7 +293,22 @@ class Index extends React.Component {
 					});
 					this.getForm();
 					this.getCategory();
-					this.getDivisi();
+					if (this.state.isKepalaToko) {
+						fetch(`http://localhost:5000/api/lokasi/anggota/kepala`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								lokasi: lokasi,
+								kelas: kelas,
+							}),
+						})
+							.then((res) => res.json())
+							.then((json) => {
+								this.setState({ anggota: json.response });
+							});
+					}
 					this.getAnggota();
 				}
 			})
@@ -279,6 +350,29 @@ class Index extends React.Component {
 		this.setState({ periode: event.target.value });
 	};
 
+	onSelectLokasi = (event) => {
+		const user = JSON.parse(localStorage.getItem("user"));
+		const nik = user[0].nik;
+		this.setState({ selectedLokasi: event.target.value });
+		fetch(`http://localhost:5000/api/lokasi/anggota`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				spv: nik,
+				lokasi: event.target.value,
+			}),
+		})
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({
+					anggota: json.response,
+				});
+			})
+			.catch((err) => console.log(err));
+	};
+
 	onSelectDivisi = (event) => {
 		this.setState({ selectedAnggota: event.target.value });
 		fetch(`http://localhost:5000/api/user/${event.target.value}`, {
@@ -318,6 +412,7 @@ class Index extends React.Component {
 			jumlah_atasan,
 			rekap_atasan,
 			kelas,
+			kode_divisi,
 		} = this.state;
 
 		const body = [];
@@ -332,6 +427,7 @@ class Index extends React.Component {
 			} else {
 				body.push([
 					selectedAnggota,
+					kode_divisi,
 					categories[i].kode_kompetensi,
 					categories[i].bobot,
 					nilai[i],
@@ -390,7 +486,12 @@ class Index extends React.Component {
 			selectedAnggota,
 			anggota,
 			karyawan,
+			lokasi,
+			selectedLokasi,
+			isOperational,
+			isKepalaToko,
 		} = this.state;
+
 		const option = [
 			{ value: "periode1", label: "Periode 1 Jan-Mar" },
 			{ value: "periode2", label: "Periode 2 Apr-Juni" },
@@ -415,34 +516,130 @@ class Index extends React.Component {
 											<h5 className="mt-0">Toko/Dept : {divisi} </h5>
 										</Col>
 										<Col>
-											<TextField
-												id="periode"
-												select
-												label="Pilih Periode"
-												value={periode}
-												onChange={this.onSelectPeriode}
-												style={{ width: 190, marginLeft: 10 }}
-											>
-												{option.map((option) => (
-													<MenuItem key={option.value} value={option.value}>
-														{option.label}
-													</MenuItem>
-												))}
-											</TextField>
-											<TextField
-												id="anggota-divisi"
-												select
-												label="Pilih Anggota Divisi"
-												value={selectedAnggota}
-												onChange={this.onSelectDivisi}
-												style={{ width: 190, marginLeft: 10 }}
-											>
-												{anggota.map((anggota) => (
-													<MenuItem key={anggota.nik} value={anggota.nik}>
-														{anggota.nik} - {anggota.name}
-													</MenuItem>
-												))}
-											</TextField>
+											{isKepalaToko ? (
+												<Fragment>
+													<TextField
+														id="periode"
+														select
+														label="Pilih Periode"
+														value={periode}
+														onChange={this.onSelectPeriode}
+														style={{ width: 120 }}
+													>
+														{option.map((option) => (
+															<MenuItem key={option.value} value={option.value}>
+																{option.label}
+															</MenuItem>
+														))}
+													</TextField>
+													<TextField
+														id="anggota"
+														select
+														label="Pilih Anggota"
+														value={selectedAnggota}
+														onChange={this.onSelectDivisi}
+														style={{
+															width: 190,
+															maxHeight: 100,
+															marginLeft: 10,
+														}}
+													>
+														{anggota.map((anggota) => (
+															<MenuItem key={anggota.nik} value={anggota.nik}>
+																{anggota.nik} - {anggota.name}
+															</MenuItem>
+														))}
+													</TextField>
+												</Fragment>
+											) : isOperational ? (
+												<Fragment>
+													<TextField
+														id="periode"
+														select
+														label="Pilih Periode"
+														value={periode}
+														onChange={this.onSelectPeriode}
+														style={{ width: 120 }}
+													>
+														{option.map((option) => (
+															<MenuItem key={option.value} value={option.value}>
+																{option.label}
+															</MenuItem>
+														))}
+													</TextField>
+
+													<TextField
+														id="lokasi"
+														select
+														label="Pilih Lokasi"
+														value={selectedLokasi}
+														onChange={this.onSelectLokasi}
+														style={{ width: 120 }}
+													>
+														{lokasi.map((option, i) => (
+															<MenuItem key={i} value={option.lokasi}>
+																{option.lokasi}
+															</MenuItem>
+														))}
+													</TextField>
+
+													{selectedLokasi ? (
+														<TextField
+															id="anggota"
+															select
+															label="Pilih Anggota"
+															value={selectedAnggota}
+															onChange={this.onSelectDivisi}
+															style={{
+																width: 190,
+																maxHeight: 100,
+																marginLeft: 10,
+															}}
+														>
+															{anggota.map((anggota) => (
+																<MenuItem key={anggota.nik} value={anggota.nik}>
+																	{anggota.nik} - {anggota.name}
+																</MenuItem>
+															))}
+														</TextField>
+													) : null}
+												</Fragment>
+											) : (
+												<Fragment>
+													<TextField
+														id="periode"
+														select
+														label="Pilih Periode"
+														value={periode}
+														onChange={this.onSelectPeriode}
+														style={{ width: 120 }}
+													>
+														{option.map((option) => (
+															<MenuItem key={option.value} value={option.value}>
+																{option.label}
+															</MenuItem>
+														))}
+													</TextField>
+													<TextField
+														id="anggota"
+														select
+														label="Pilih Anggota"
+														value={selectedAnggota}
+														onChange={this.onSelectDivisi}
+														style={{
+															width: 190,
+															maxHeight: 100,
+															marginLeft: 10,
+														}}
+													>
+														{anggota.map((anggota) => (
+															<MenuItem key={anggota.nik} value={anggota.nik}>
+																{anggota.nik} - {anggota.name}
+															</MenuItem>
+														))}
+													</TextField>
+												</Fragment>
+											)}
 										</Col>
 									</Row>
 								</CardHeader>

@@ -5,6 +5,7 @@ import ReportNilai from "views/ReportNilai";
 import Roles from "views/Roles";
 import Bobot from "views/RekapBobot";
 import Kompetensi from "views/Kompetensi";
+import RekapDivisi from "views/RekapDivisi";
 import Logout from "views/Logout";
 
 var routes = [
@@ -36,6 +37,14 @@ var routes = [
 		name: "Report Karyawan",
 		icon: "ni ni-archive-2 text-blue",
 		component: ReportNilai,
+		layout: "/app",
+		class: true,
+	},
+	{
+		path: "/rekap",
+		name: "Rekap All Divisi",
+		icon: "ni ni-archive-2 text-blue",
+		component: RekapDivisi,
 		layout: "/app",
 		class: true,
 	},

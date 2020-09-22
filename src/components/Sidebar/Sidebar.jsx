@@ -64,15 +64,20 @@ class Sidebar extends React.Component {
 	createLinks = (routes) => {
 		return routes.map((prop, key) => {
 			const role_permission = JSON.parse(localStorage.getItem("user"))[0].roles;
+			const MAX = JSON.parse(localStorage.getItem("max"))[0].max;
 			const kelas = JSON.parse(localStorage.getItem("user"))[0].kelas;
+			const divisi = JSON.parse(localStorage.getItem("user"))[0].kode_divisi;
 			if (prop.permission) {
 				if (role_permission !== prop.permission) return null;
 			}
 			if (prop.class) {
-				if (kelas > 2) return null;
+				if (kelas >= MAX) return null;
 			}
 			if (prop.name === "Report Karyawan") {
-				if (kelas > 1) return null;
+				if (kelas >= MAX) return null;
+			}
+			if (prop.name === "Rekap All Divisi") {
+				if (divisi !== "404") return null;
 			}
 			if (prop.invisible) return null;
 			return (

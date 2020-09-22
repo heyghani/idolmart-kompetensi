@@ -386,7 +386,6 @@ class Index extends React.Component {
 											>
 												{categories.map((data) => (
 													<MenuItem
-														onClick={(event) => console.log(event.target)}
 														key={data.id}
 														id={data.kode_kompetensi}
 														value={data.kode_kompetensi + data.nama}

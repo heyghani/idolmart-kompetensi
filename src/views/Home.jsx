@@ -55,6 +55,7 @@ class Index extends React.Component {
 		periode: "",
 		nik: "",
 		nama: "",
+		kode_divisi: "",
 		divisi: "",
 		jabatan: "",
 		kode_jabatan: "",
@@ -83,6 +84,7 @@ class Index extends React.Component {
 				this.setState({
 					nik: json.response[0].nik,
 					nama: json.response[0].nama,
+					kode_divisi: json.response[0].kode_divisi,
 					divisi: json.response[0].divisi,
 					jabatan: json.response[0].jabatan,
 					kode_jabatan: json.response[0].kode_jabatan,
@@ -287,6 +289,7 @@ class Index extends React.Component {
 			rekap,
 			description,
 			kelas,
+			kode_divisi,
 		} = this.state;
 
 		const body = [];
@@ -301,6 +304,7 @@ class Index extends React.Component {
 			} else {
 				body.push([
 					nik,
+					kode_divisi,
 					categories[i].kode_kompetensi,
 					categories[i].bobot,
 					nilai[i],

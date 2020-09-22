@@ -29,12 +29,14 @@ import Header from "components/Headers/Header.jsx";
 class Index extends React.Component {
 	state = {
 		showTable: false,
-		categories: [],
+		department: [],
 		karyawan: [],
 		nilai: [],
+		periode: "",
 		nik: "",
 		nama: "",
 		divisi: "",
+		selectedDivisi: "",
 		jabatan: "",
 		kode_jabatan: "",
 		kode_divisi: "",
@@ -66,38 +68,10 @@ class Index extends React.Component {
 				});
 			})
 			.finally(() => {
-				this.getAnggota();
 				this.getCategory();
+				this.getDepartment();
 			})
 			.catch((err) => console.log(err));
-	};
-
-	getAnggota = () => {
-		const { kelas, kode_divisi } = this.state;
-		fetch(`http://localhost:5000/api/report/anggota`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				kode_divisi,
-				kelas,
-			}),
-		})
-			.then((res) => res.json())
-			.then((json) => {
-				this.setState({
-					karyawan: json.response,
-				});
-			})
-			.catch(() => {
-				swal({
-					title: "Data tidak ditemukan!",
-					text: "Data pada bulan ini kosong",
-					icon: "warning",
-					button: "OK",
-				}).then(() => window.location.reload());
-			});
 	};
 
 	getCategory = () => {
@@ -108,17 +82,29 @@ class Index extends React.Component {
 			});
 	};
 
+	getDepartment = () => {
+		fetch(`http://localhost:5000/api/department/get`)
+			.then((res) => res.json())
+			.then((json) => {
+				this.setState({ department: json.response });
+			});
+	};
+
 	onSelectPeriode = (event) => {
 		this.setState({ periode: event.target.value });
+	};
+
+	onSelectDepartment = (event) => {
+		this.setState({ selectedDivisi: event.target.value, showTable: false });
+
 		fetch(`http://localhost:5000/api/report/get`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				kelas: this.state.kelas,
-				kode_divisi: this.state.kode_divisi,
-				periode: event.target.value,
+				kode_divisi: event.target.value,
+				periode: this.state.periode,
 			}),
 		})
 			.then((res) => res.json())
@@ -206,7 +192,15 @@ class Index extends React.Component {
 	};
 
 	render() {
-		const { nik, nama, divisi, jabatan, periode } = this.state;
+		const {
+			nik,
+			nama,
+			divisi,
+			jabatan,
+			periode,
+			department,
+			selectedDivisi,
+		} = this.state;
 		const option = [
 			{ value: "periode1", label: "Periode 1 Jan-Mar" },
 			{ value: "periode2", label: "Periode 2 Apr-Juni" },
@@ -242,6 +236,23 @@ class Index extends React.Component {
 												{option.map((option) => (
 													<MenuItem key={option.value} value={option.value}>
 														{option.label}
+													</MenuItem>
+												))}
+											</TextField>
+											<TextField
+												id="periode"
+												select
+												label="Pilih Department"
+												value={selectedDivisi}
+												onChange={this.onSelectDepartment}
+												style={{ width: 190, marginLeft: 10 }}
+											>
+												{department.map((option) => (
+													<MenuItem
+														key={option.divisi_id}
+														value={option.kode_divisi}
+													>
+														{option.nama}
 													</MenuItem>
 												))}
 											</TextField>

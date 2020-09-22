@@ -92,6 +92,7 @@ class Login extends Component {
 					}
 				} else {
 					localStorage.setItem("user", JSON.stringify(json.response));
+					localStorage.setItem("max", JSON.stringify(json.max));
 					this.props.history.push("/app/home");
 				}
 			})
