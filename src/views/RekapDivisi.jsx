@@ -17,6 +17,9 @@
 */
 import React from "react";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 // reactstrap components
 import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
 import { TextField, Typography, MenuItem } from "@material-ui/core";
@@ -90,10 +93,6 @@ class Index extends React.Component {
 			});
 	};
 
-	onSelectPeriode = (event) => {
-		this.setState({ periode: event.target.value });
-	};
-
 	onSelectDepartment = (event) => {
 		this.setState({ selectedDivisi: event.target.value, showTable: false });
 
@@ -104,7 +103,7 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				kode_divisi: event.target.value,
-				periode: this.state.periode,
+				periode: this.state.periode.toString().slice(4, 15),
 			}),
 		})
 			.then((res) => res.json())
@@ -201,12 +200,15 @@ class Index extends React.Component {
 			department,
 			selectedDivisi,
 		} = this.state;
-		const option = [
-			{ value: "periode1", label: "Periode 1 Jan-Mar" },
-			{ value: "periode2", label: "Periode 2 Apr-Juni" },
-			{ value: "periode3", label: "Periode 3 Juli-Sept" },
-			{ value: "periode4", label: "Periode 4 Okt-Des" },
-		];
+		const Input = ({ value, placeholder, onChange, onClick }) => (
+			<TextField
+				value={value}
+				placeholder={placeholder}
+				onClick={onClick}
+				style={{ width: 120 }}
+				label="Pilih Periode"
+			/>
+		);
 
 		return (
 			<>
@@ -225,20 +227,15 @@ class Index extends React.Component {
 											<h5 className="mt-0">Toko/Dept : {divisi} </h5>
 										</Col>
 										<Col>
-											<TextField
-												id="periode"
-												select
-												label="Pilih Periode"
-												value={periode}
-												onChange={this.onSelectPeriode}
-												style={{ width: 190, marginLeft: 10 }}
-											>
-												{option.map((option) => (
-													<MenuItem key={option.value} value={option.value}>
-														{option.label}
-													</MenuItem>
-												))}
-											</TextField>
+											<DatePicker
+												customInput={<Input />}
+												selected={periode}
+												onChange={(date) => {
+													this.setState({ periode: date });
+												}}
+												dateFormat="yyyy, qqq"
+												showQuarterYearPicker
+											/>
 											<TextField
 												id="periode"
 												select

@@ -17,6 +17,9 @@
 */
 import React, { Fragment } from "react";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 // reactstrap components
 import {
 	Card,
@@ -33,7 +36,6 @@ import {
 	Button,
 	TextField,
 	Typography,
-	MenuItem,
 	TextareaAutosize,
 	Table,
 	TableHead,
@@ -52,6 +54,7 @@ class Index extends React.Component {
 		rekap: null,
 		nilai: [],
 		assignment: null,
+		year: "",
 		periode: "",
 		nik: "",
 		nama: "",
@@ -316,7 +319,7 @@ class Index extends React.Component {
 					skor[i],
 					jumlah,
 					rekap,
-					periode,
+					periode.toString().slice(4, 15),
 					kelas,
 				]);
 			}
@@ -370,12 +373,16 @@ class Index extends React.Component {
 			categories,
 			description,
 		} = this.state;
-		const option = [
-			{ value: "periode1", label: "Periode 1 Jan-Mar" },
-			{ value: "periode2", label: "Periode 2 Apr-Juni" },
-			{ value: "periode3", label: "Periode 3 Juli-Sept" },
-			{ value: "periode4", label: "Periode 4 Okt-Des" },
-		];
+
+		const Input = ({ value, placeholder, onChange, onClick }) => (
+			<TextField
+				value={value}
+				placeholder={placeholder}
+				onClick={onClick}
+				label="Pilih Periode"
+				style={{ width: 190, marginLeft: 10 }}
+			/>
+		);
 
 		return (
 			<>
@@ -393,21 +400,17 @@ class Index extends React.Component {
 											<h5 className="mt-0">Jabatan : {jabatan} </h5>
 											<h5 className="mt-0">Toko/Dept : {divisi} </h5>
 										</Col>
+
 										<Col>
-											<TextField
-												id="periode"
-												select
-												label="Pilih Periode"
-												value={periode}
-												onChange={this.onSelect}
-												style={{ width: 190, marginLeft: 10 }}
-											>
-												{option.map((option) => (
-													<MenuItem key={option.value} value={option.value}>
-														{option.label}
-													</MenuItem>
-												))}
-											</TextField>
+											<DatePicker
+												customInput={<Input />}
+												selected={periode}
+												onChange={(date) => {
+													this.setState({ periode: date });
+												}}
+												dateFormat="yyyy, qqq"
+												showQuarterYearPicker
+											/>
 										</Col>
 									</Row>
 								</CardHeader>

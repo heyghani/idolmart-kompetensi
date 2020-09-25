@@ -17,6 +17,9 @@
 */
 import React, { Fragment } from "react";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 // reactstrap components
 import {
 	Card,
@@ -141,6 +144,8 @@ class Index extends React.Component {
 						.then((json) => {
 							this.setState({ anggota: json.response });
 						});
+				} else {
+					this.getDivisi();
 				}
 			});
 	};
@@ -205,7 +210,7 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				nik: selectedAnggota,
-				periode,
+				periode: periode.toString().slice(4, 15),
 			}),
 		})
 			.then((res) => res.json())
@@ -228,7 +233,6 @@ class Index extends React.Component {
 		const { selectedAnggota, periode, kelas } = this.state;
 		const user = JSON.parse(localStorage.getItem("user"));
 		const lokasi = user[0].lokasi;
-
 		this.setState({ showTable: false, showKompetensi: false });
 		fetch(`http://localhost:5000/api/nilai`, {
 			method: "POST",
@@ -237,7 +241,7 @@ class Index extends React.Component {
 			},
 			body: JSON.stringify({
 				nik: selectedAnggota,
-				periode,
+				periode: periode.toString().slice(4, 15),
 				kelas,
 			}),
 		})
@@ -346,10 +350,6 @@ class Index extends React.Component {
 		return total + num;
 	};
 
-	onSelectPeriode = (event) => {
-		this.setState({ periode: event.target.value });
-	};
-
 	onSelectLokasi = (event) => {
 		const user = JSON.parse(localStorage.getItem("user"));
 		const nik = user[0].nik;
@@ -440,7 +440,7 @@ class Index extends React.Component {
 					skor_atasan[i],
 					jumlah_atasan,
 					rekap_atasan,
-					periode,
+					periode.toString().slice(4, 15),
 					kelas,
 				]);
 			}
@@ -455,7 +455,7 @@ class Index extends React.Component {
 				body: JSON.stringify({
 					values: body,
 					nik: selectedAnggota,
-					periode,
+					periode: periode.toString().slice(4, 15),
 				}),
 			}).then(() => {
 				swal({
@@ -492,12 +492,15 @@ class Index extends React.Component {
 			isKepalaToko,
 		} = this.state;
 
-		const option = [
-			{ value: "periode1", label: "Periode 1 Jan-Mar" },
-			{ value: "periode2", label: "Periode 2 Apr-Juni" },
-			{ value: "periode3", label: "Periode 3 Juli-Sept" },
-			{ value: "periode4", label: "Periode 4 Okt-Des" },
-		];
+		const Input = ({ value, placeholder, onChange, onClick }) => (
+			<TextField
+				value={value}
+				placeholder={placeholder}
+				onClick={onClick}
+				label="Pilih Periode"
+				style={{ width: 120 }}
+			/>
+		);
 
 		return (
 			<>
@@ -518,20 +521,15 @@ class Index extends React.Component {
 										<Col>
 											{isKepalaToko ? (
 												<Fragment>
-													<TextField
-														id="periode"
-														select
-														label="Pilih Periode"
-														value={periode}
-														onChange={this.onSelectPeriode}
-														style={{ width: 120 }}
-													>
-														{option.map((option) => (
-															<MenuItem key={option.value} value={option.value}>
-																{option.label}
-															</MenuItem>
-														))}
-													</TextField>
+													<DatePicker
+														customInput={<Input />}
+														selected={periode}
+														onChange={(date) => {
+															this.setState({ periode: date });
+														}}
+														dateFormat="yyyy, qqq"
+														showQuarterYearPicker
+													/>
 													<TextField
 														id="anggota"
 														select
@@ -553,28 +551,23 @@ class Index extends React.Component {
 												</Fragment>
 											) : isOperational ? (
 												<Fragment>
-													<TextField
-														id="periode"
-														select
-														label="Pilih Periode"
-														value={periode}
-														onChange={this.onSelectPeriode}
-														style={{ width: 120 }}
-													>
-														{option.map((option) => (
-															<MenuItem key={option.value} value={option.value}>
-																{option.label}
-															</MenuItem>
-														))}
-													</TextField>
-
+													<DatePicker
+														customInput={<Input />}
+														selected={periode}
+														onChange={(date) => {
+															this.setState({ periode: date });
+														}}
+														dateFormat="yyyy, qqq"
+														showQuarterYearPicker
+													/>
+													.nav
 													<TextField
 														id="lokasi"
 														select
 														label="Pilih Lokasi"
 														value={selectedLokasi}
 														onChange={this.onSelectLokasi}
-														style={{ width: 120 }}
+														style={{ width: 120, marginLeft: 10 }}
 													>
 														{lokasi.map((option, i) => (
 															<MenuItem key={i} value={option.lokasi}>
@@ -582,7 +575,6 @@ class Index extends React.Component {
 															</MenuItem>
 														))}
 													</TextField>
-
 													{selectedLokasi ? (
 														<TextField
 															id="anggota"
@@ -606,20 +598,15 @@ class Index extends React.Component {
 												</Fragment>
 											) : (
 												<Fragment>
-													<TextField
-														id="periode"
-														select
-														label="Pilih Periode"
-														value={periode}
-														onChange={this.onSelectPeriode}
-														style={{ width: 120 }}
-													>
-														{option.map((option) => (
-															<MenuItem key={option.value} value={option.value}>
-																{option.label}
-															</MenuItem>
-														))}
-													</TextField>
+													<DatePicker
+														customInput={<Input />}
+														selected={periode}
+														onChange={(date) => {
+															this.setState({ periode: date });
+														}}
+														dateFormat="yyyy, qqq"
+														showQuarterYearPicker
+													/>
 													<TextField
 														id="anggota"
 														select
